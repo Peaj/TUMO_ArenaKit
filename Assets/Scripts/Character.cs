@@ -18,5 +18,13 @@ public class Character : MonoBehaviour
         {
             this.transform.localScale = new Vector3(1.2f, 1.2f, 1.2f);
         }
+
+        Animator animator = GetComponent<Animator>();
+        animator.SetFloat("Speed", Mathf.Abs(horizontal));
+        
+        // 1. Get Input GetButtonDown("Jump")
+        // 2. Add force
+        // 3. Play jump animation
+        // (4). Check ground
     }
 }
