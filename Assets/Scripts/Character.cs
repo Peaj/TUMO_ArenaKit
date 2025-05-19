@@ -2,8 +2,11 @@ using UnityEngine;
 
 public class Character : MonoBehaviour
 {
+    public float Speed = 1f;
+    
     void Update()
     {
-        this.transform.position = this.transform.position + new Vector3(0.1f, 0f, 0f);
+        float horizontal = Input.GetAxis("Horizontal");
+        this.transform.position += new Vector3(this.Speed * horizontal * Time.deltaTime, 0f, 0f);
     }
 }
