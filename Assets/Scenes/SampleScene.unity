@@ -132,6 +132,10 @@ PrefabInstance:
       value: hero
       objectReference: {fileID: 0}
     - target: {fileID: 400020, guid: 6aa187bc6339843479c03fdfd71404a3, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 1.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 400020, guid: 6aa187bc6339843479c03fdfd71404a3, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
       objectReference: {fileID: 0}
@@ -170,6 +174,10 @@ PrefabInstance:
     - target: {fileID: 400020, guid: 6aa187bc6339843479c03fdfd71404a3, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5000000, guid: 6aa187bc6339843479c03fdfd71404a3, type: 3}
+      propertyPath: m_LinearDamping
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -417,7 +425,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9930912e80b2abb41908b0b1a0073afb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Speed: 1000
+  Speed: 2000
 --- !u!1001 &1574546710
 PrefabInstance:
   m_ObjectHideFlags: 0
