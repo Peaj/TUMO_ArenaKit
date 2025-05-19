@@ -4,6 +4,9 @@ public class Character : MonoBehaviour
 {
     public float Speed = 1f;
     public float JumpForce = 10f;
+    public LayerMask GroundLayer;
+
+    private bool grounded = false;
     
     void Update()
     {
@@ -23,15 +26,18 @@ public class Character : MonoBehaviour
         Animator animator = GetComponent<Animator>();
         animator.SetFloat("Speed", Mathf.Abs(horizontal));
         
+        // (4). Check ground
+        this.grounded = Physics2D.Raycast(this.transform.position, Vector2.down, 1f, this.GroundLayer);
+        Debug.DrawRay(this.transform.position, Vector2.down, Color.red);
+        
         // 1. Get Input GetButtonDown("Jump")
         bool jump = Input.GetButtonDown("Jump");
-        if (jump)
+        if (jump && this.grounded)
         {
             // 2. Add force
             rigidbody2D.AddForce(new Vector2(0f, this.JumpForce));
             // 3. Play jump animation
             animator.SetTrigger("Jump");
         }
-        // (4). Check ground
     }
 }
