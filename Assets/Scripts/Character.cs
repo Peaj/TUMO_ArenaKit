@@ -7,6 +7,7 @@ public class Character : MonoBehaviour
     void Update()
     {
         float horizontal = Input.GetAxis("Horizontal");
-        this.transform.position += new Vector3(this.Speed * horizontal * Time.deltaTime, 0f, 0f);
+        Rigidbody2D rigidbody2D = GetComponent<Rigidbody2D>();
+        rigidbody2D.AddForce(new Vector2(this.Speed * horizontal * Time.deltaTime, 0f));
     }
 }
