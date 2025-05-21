@@ -4,6 +4,7 @@ using UnityEngine.Serialization;
 
 public class Character : MonoBehaviour
 {
+    public float Health = 100f;
     public float MoveForce = 1f;
     public float MaxSpeed = 10f;
     public float JumpForce = 10f;
@@ -36,7 +37,7 @@ public class Character : MonoBehaviour
     void OnJump()
     {
         // Ground check
-        this.grounded = Physics2D.Raycast(this.transform.position, Vector2.down, 1f, ~this.CharacterLayer);
+        this.grounded = Physics2D.Raycast(this.transform.position, Vector2.down, 1.2f, ~this.CharacterLayer);
         Debug.DrawRay(this.transform.position, Vector2.down, Color.red);
         
         if (this.grounded)
@@ -82,5 +83,20 @@ public class Character : MonoBehaviour
         
         this.rigidbody2D.AddForce(new Vector2(this.MoveForce * this.horizontal * Time.deltaTime * ratio, 0f));
         this.animator.SetFloat("Speed", Mathf.Abs(this.horizontal));
+    }
+
+    public void TakeDamage(float damage)
+    {
+        this.Health -= damage;
+        if (this.Health <= 0f)
+        {
+            this.Health = 0f;
+            Die();
+        }
+    }
+
+    public void Die()
+    {
+        Debug.Log("Character died!");
     }
 }
