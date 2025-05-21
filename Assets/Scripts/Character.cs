@@ -8,37 +8,55 @@ public class Character : MonoBehaviour
     public LayerMask CharacterLayer;
 
     private bool grounded = false;
+    private float horizontal;
+    
+    private new Rigidbody2D rigidbody2D; //Override existing obsolete rigidbody2D
+    private Animator animator;
+
+    void Awake()
+    {
+        this.rigidbody2D = GetComponent<Rigidbody2D>();
+        this.animator = GetComponent<Animator>();
+    }
     
     void Update()
     {
-        float horizontal = Input.GetAxis("Horizontal");
-        Rigidbody2D rigidbody2D = GetComponent<Rigidbody2D>();
-        rigidbody2D.AddForce(new Vector2(this.Speed * horizontal * Time.deltaTime, 0f));
+        this.horizontal = Input.GetAxis("Horizontal");
 
-        if (horizontal < 0f)
+        Run();
+        FlipCharacterInMoveDirection();
+        Jump();
+    }
+
+    private void FlipCharacterInMoveDirection()
+    {
+        if (this.horizontal < 0f)
         {
             this.transform.localScale = new Vector3(-1.2f, 1.2f, 1.2f);
         }
-        else if (horizontal > 0f)
+        else if (this.horizontal > 0f)
         {
             this.transform.localScale = new Vector3(1.2f, 1.2f, 1.2f);
         }
-        
-        Animator animator = GetComponent<Animator>();
-        animator.SetFloat("Speed", Mathf.Abs(horizontal));
-        
-        // (4). Check ground
+    }
+
+    void Run()
+    {
+        this.rigidbody2D.AddForce(new Vector2(this.Speed * this.horizontal * Time.deltaTime, 0f));
+        this.animator.SetFloat("Speed", Mathf.Abs(this.horizontal));
+    }
+
+    void Jump()
+    {
+        // Ground check
         this.grounded = Physics2D.Raycast(this.transform.position, Vector2.down, 1f, ~this.CharacterLayer);
         Debug.DrawRay(this.transform.position, Vector2.down, Color.red);
         
-        // 1. Get Input GetButtonDown("Jump")
         bool jump = Input.GetButtonDown("Jump");
         if (jump && this.grounded)
         {
-            // 2. Add force
-            rigidbody2D.AddForce(new Vector2(0f, this.JumpForce));
-            // 3. Play jump animation
-            animator.SetTrigger("Jump");
+            this.rigidbody2D.AddForce(new Vector2(0f, this.JumpForce));
+            this.animator.SetTrigger("Jump");
         }
     }
 }
