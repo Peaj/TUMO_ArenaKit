@@ -46,6 +46,15 @@ public class Character : MonoBehaviour
         }
     }
 
+    void OnAttack()
+    {
+        Weapon weapon = GetComponentInChildren<Weapon>();
+        if (weapon != null)
+        {
+            weapon.Fire();
+        }
+    }
+
     private void FlipCharacterInMoveDirection()
     {
         if (this.horizontal < 0f)
