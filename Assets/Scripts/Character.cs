@@ -98,5 +98,9 @@ public class Character : MonoBehaviour
     public void Die()
     {
         Debug.Log("Character died!");
+        this.animator.SetTrigger("Die");
+        GetComponent<BoxCollider2D>().enabled = false;
+        GetComponent<CircleCollider2D>().enabled = false;
+        this.enabled = false;
     }
 }
