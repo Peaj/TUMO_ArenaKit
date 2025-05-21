@@ -4,7 +4,8 @@ using UnityEngine.Serialization;
 
 public class Character : MonoBehaviour
 {
-    public float Speed = 1f;
+    public float MoveForce = 1f;
+    public float MaxSpeed = 10f;
     public float JumpForce = 10f;
     public LayerMask CharacterLayer;
 
@@ -22,7 +23,8 @@ public class Character : MonoBehaviour
     
     void Update()
     {
-        Run();
+        // Run();
+        RunAdvanced();
         FlipCharacterInMoveDirection();
     }
 
@@ -58,7 +60,18 @@ public class Character : MonoBehaviour
 
     void Run()
     {
-        this.rigidbody2D.AddForce(new Vector2(this.Speed * this.horizontal * Time.deltaTime, 0f));
+        this.rigidbody2D.AddForce(new Vector2(this.MoveForce * this.horizontal * Time.deltaTime, 0f));
+        this.animator.SetFloat("Speed", Mathf.Abs(this.horizontal));
+    }
+
+    void RunAdvanced()
+    {
+        float velocity = Mathf.Abs(this.rigidbody2D.linearVelocityX);
+        float ratio = 1f - Mathf.Clamp01(velocity / this.MaxSpeed);
+
+        if (this.horizontal * this.rigidbody2D.linearVelocityX < 0f) ratio = 1f;
+        
+        this.rigidbody2D.AddForce(new Vector2(this.MoveForce * this.horizontal * Time.deltaTime * ratio, 0f));
         this.animator.SetFloat("Speed", Mathf.Abs(this.horizontal));
     }
 }
