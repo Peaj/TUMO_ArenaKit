@@ -1,10 +1,11 @@
 using UnityEngine;
+using UnityEngine.Serialization;
 
 public class Character : MonoBehaviour
 {
     public float Speed = 1f;
     public float JumpForce = 10f;
-    public LayerMask GroundLayer;
+    public LayerMask CharacterLayer;
 
     private bool grounded = false;
     
@@ -27,7 +28,7 @@ public class Character : MonoBehaviour
         animator.SetFloat("Speed", Mathf.Abs(horizontal));
         
         // (4). Check ground
-        this.grounded = Physics2D.Raycast(this.transform.position, Vector2.down, 1f, this.GroundLayer);
+        this.grounded = Physics2D.Raycast(this.transform.position, Vector2.down, 1f, ~this.CharacterLayer);
         Debug.DrawRay(this.transform.position, Vector2.down, Color.red);
         
         // 1. Get Input GetButtonDown("Jump")
