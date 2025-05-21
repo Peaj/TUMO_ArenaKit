@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
 
 public class Character : MonoBehaviour
@@ -21,11 +22,26 @@ public class Character : MonoBehaviour
     
     void Update()
     {
-        this.horizontal = Input.GetAxis("Horizontal");
-
         Run();
         FlipCharacterInMoveDirection();
-        Jump();
+    }
+
+    void OnMove(InputValue value)
+    {
+        this.horizontal = value.Get<Vector2>().x;
+    }
+
+    void OnJump()
+    {
+        // Ground check
+        this.grounded = Physics2D.Raycast(this.transform.position, Vector2.down, 1f, ~this.CharacterLayer);
+        Debug.DrawRay(this.transform.position, Vector2.down, Color.red);
+        
+        if (this.grounded)
+        {
+            this.rigidbody2D.AddForce(new Vector2(0f, this.JumpForce));
+            this.animator.SetTrigger("Jump");
+        }
     }
 
     private void FlipCharacterInMoveDirection()
@@ -44,19 +60,5 @@ public class Character : MonoBehaviour
     {
         this.rigidbody2D.AddForce(new Vector2(this.Speed * this.horizontal * Time.deltaTime, 0f));
         this.animator.SetFloat("Speed", Mathf.Abs(this.horizontal));
-    }
-
-    void Jump()
-    {
-        // Ground check
-        this.grounded = Physics2D.Raycast(this.transform.position, Vector2.down, 1f, ~this.CharacterLayer);
-        Debug.DrawRay(this.transform.position, Vector2.down, Color.red);
-        
-        bool jump = Input.GetButtonDown("Jump");
-        if (jump && this.grounded)
-        {
-            this.rigidbody2D.AddForce(new Vector2(0f, this.JumpForce));
-            this.animator.SetTrigger("Jump");
-        }
     }
 }
