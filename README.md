@@ -1,0 +1,148 @@
+# TUMO Arena Kit
+
+A Duck-Game-style local multiplayer arena kit for the TUMO game development holiday workshop.
+Students don't program a game from scratch. They get a working 2D arena shooter and build their own level and game mode from building blocks (tiles, prefabs and UnityEvents).
+At the end, all levels are merged into one "arcade" project that plays one level after another.
+
+- Unity **6000.3.25f1** (6.3 LTS), URP 2D, new Input System
+- Based on `Games-Academy/BirdGame_GD1_25` (bean man character, bazooka, force-based movement)
+- Tiles and props: [Kenney New Platformer Pack](https://kenney.nl/assets/new-platformer-pack) (CC0)
+
+Student material in German: [Docs/Spickzettel.md](Docs/Spickzettel.md)
+
+## Quick start
+
+1. Open the project with Unity 6000.3.25f1 (the first import takes a few minutes).
+2. Open `Assets/Levels/Demo_Arena/Demo_Arena.unity` and press Play.
+3. After every round the next level of the build list loads (Demo_Arena → Demo_RocketVolleyball → ...).
+
+| | Move | Jump | Fire | Drop through a platform |
+|---|---|---|---|---|
+| Player 1 (keyboard left) | A / D | W | Left Shift (or F) | S + W |
+| Player 2 (keyboard right) | ← / → | ↑ | Right Option/Alt (or Right Shift, Enter) | ↓ + ↑ |
+| Gamepads (players 3-4) | Stick / D-pad | A | X, RT or RB | Down + A |
+
+Teacher keys during play: **H** help and key test, **N** next level, **R** restart level, **K** number of keyboard players (2 / 1 / 0), **0** reset scores.
+
+## Workshop workflow
+
+### Students
+
+1. `TUMO > Neues Level erstellen...` asks for a first name and a level name. It creates:
+   - `Assets/Levels/<Name>/<Name>.unity`, a copy of the template arena
+   - `Assets/Levels/<Name>/<Name>Player.prefab`, a player variant to tune speed, jump, health...
+   - The student's name in `Level Rules > Built By`, which is shown when the level starts
+   - A build list containing only this scene, so after each round it simply restarts
+2. Build:
+   - Paint with the Tile Palette (`Window > 2D > Tile Palette`). There are 4 palettes (Ground, Platforms, Hazards, Decoration) for the 5 tilemaps in the scene.
+   - Drag in prefabs from `Assets/Kit/Prefabs`.
+   - Change values on the objects in the scene.
+   - Connect things with the events in the Inspector.
+3. `TUMO > Level exportieren` saves `<Name>.unitypackage` to the desktop. Before that it checks:
+   - that a name is set
+   - whether kit files were changed (those changes would not be exported)
+   - whether files outside the student's folder are used
+   - whether their own script names start with the student name
+
+Rules for students (they make the merge work):
+- Only work inside your own folder `Assets/Levels/<Name>`.
+- Don't change the originals in `Assets/Kit`. Change the objects in your scene instead, or make a prefab variant in your own folder.
+- Your own scripts start with your name (`LenaTrampolin.cs`), otherwise two students' classes clash.
+
+### Teacher: the arcade finale
+
+1. Collect all `.unitypackage` files in one folder (USB stick or network share).
+2. In the teacher project: `TUMO > Lehrer > Level-Pakete importieren...` and choose the folder.
+3. `TUMO > Lehrer > Arcade vorbereiten` puts all level scenes into the build list (demos optional) and opens the first one. Press Play.
+4. **N** skips a broken level. **K** switches to 0 keyboard players, so 4 gamepads = 4 players.
+
+Try the export and import once with two test levels before the workshop.
+
+## Distributing the project to the Macs
+
+- Copy the project **without** the `Library` folder to every Mac and open it once before day 1 (first import takes a few minutes).
+- Alternatively, set up one Mac completely and copy that project folder including `Library` to the other Macs. `Library` can be reused on the same OS and Unity version.
+- Every Mac needs Unity 6000.3.25f1 with the same packages. The kit checksum (`ProjectSettings/ArenaKitManifest.txt`) belongs to the project and must be copied too.
+
+## Keyboards and gamepads on the Macs
+
+- **Keyboard ghosting.** Apple Magic Keyboards report about 6 keys at once, and some combinations can ghost.
+  - Both fire keys are modifier keys (Shift, Option). Modifiers are sent separately from the 6 normal keys, so two players each holding run + jump + fire is 4 normal keys + 2 modifiers.
+  - **Test this on site:** press **H** during play. The help screen lists every key that is pressed at that moment. Let two students hold all their keys at the same time.
+  - If a combination fails, use the alternative keys or change the bindings in `Assets/Kit/Input/ArenaControls.inputactions`.
+- **Keys to avoid on macOS:**
+  - Cmd+W, Cmd+Q and Cmd+P are editor shortcuts. Tell students not to touch Cmd while playing.
+  - Ctrl + arrow keys switch desktops (Mission Control). The kit does not use Ctrl on the Mac side.
+- **Xbox Wireless Controllers:**
+  - The Series X|S controllers and the Xbox One S controller with Bluetooth (model 1708) pair through the macOS Bluetooth settings.
+  - Unity detects them automatically (`XboxGamepadMacOSWireless`). Older Xbox One controllers without Bluetooth do not work on a Mac.
+  - Every connected gamepad adds a player (max. 4). Keyboard players come first.
+
+## Building blocks
+
+All scripts are in the `ArenaKit` namespace (`Assets/Kit/Scripts`). Everything a student sets up has English field names, tooltips and events. The in-game text is German.
+
+| Prefab (Assets/Kit/Prefabs) | Component | What it does |
+|---|---|---|
+| Rules/LevelRules | `LevelRules` | Level name, builder name, win rules (last player standing, points to win, kills give points, time limit), respawn, player prefab and health, gravity. Methods for events: `AddPoint(int)`, `RemovePoint(int)`, `WinRound(int)`, `Draw()` |
+| Rules/SpawnPoint | `SpawnPoint` | Start point for player 1-4, optional start weapon |
+| Rules/FinishFlag | `FinishFlag` | First player to touch it wins the round, or gets points (race / parkour) |
+| Rules/ScoreZone | `ScoreZone` | King of the hill: one point per second while alone inside |
+| Rules/Coin, Gem | `Collectible` | Points for collecting, optional respawn |
+| Rules/Goal + Rules/Ball | `Goal`, `Ball` | Ball games: the ball in a goal gives a point to a fixed player or to whoever touched it last |
+| Rules/KillZone | `Hazard` | Kills everything below the level |
+| Rules/NameSign | `NameSign` | Sign with the builder's name |
+| Blocks/TriggerZone | `TriggerZone` | Invisible zone with `OnEnter(int player)` / `OnExit(int player)` for players, projectiles, balls or anything |
+| Blocks/Lever, Button | `Switch` | Flipped by touching or shooting it. `OnTurnedOn` / `OnTurnedOff` |
+| Blocks/Door, LockBlock | `Door` | Blocks the way. `Open()`, `Close()`, `Toggle()` |
+| Blocks/Key | `Collectible` | 0 points. Connect `OnCollected` to `LockBlock.Open` |
+| Blocks/MovingPlatform, Elevator | `Mover` | Moves back and forth (or only on command) between start and start + Offset. Players ride along |
+| Blocks/JumpPad | `JumpPad` | Launches players and objects along its up direction |
+| Blocks/TeleporterPair | `Teleporter` | Two linked portals, speed is kept |
+| Blocks/Mine, TNTBlock | `Explosive` | Explodes when touched, shot or hit by another explosion (chain reactions) |
+| Blocks/Crate, WeaponCrate, BrickWall | `Breakable` | Breaks after enough damage. The weapon crate drops a random weapon |
+| Blocks/Spikes, Saw | `Hazard` (+ `Mover`) | Kills or hurts on touch |
+| Blocks/RisingLava | `Hazard`, `Mover`, `Timer` | Sudden death: the lava starts rising after 30 s |
+| Blocks/Spawner | `Spawner` | Spawns prefabs on an interval or on command |
+| Blocks/Timer, Counter | `Timer`, `Counter` | "After X seconds" / "after N times" events |
+| Weapons/* | `Weapon` | Bazooka, Pistol, Shotgun, GrenadeLauncher, Minigun. Projectile, speed, projectiles per shot, spread, aim angle, fire delay, automatic, recoil, ammo (the weapon drops when empty) |
+| Projectiles/* | `Projectile` | Damage, explosion radius, push force, gravity, lifetime, explode on impact or bounce |
+| Pickups/* | `WeaponPickup` | A weapon lying in the level (a fixed weapon or a random one), respawns |
+
+Tilemaps in every level:
+- **Back Decoration** and **Front Decoration**: no collision
+- **Ground**: solid
+- **Platforms**: one-way, you can jump through from below and drop through with down + jump
+- **Hazards**: deadly, e.g. lava and spikes
+
+Players always start without a weapon. Use a `SpawnPoint > Start Weapon` to hand one out right away.
+
+## Development
+
+- **Kit builder:** `TUMO > Lehrer > Kit neu bauen` (`Assets/Kit/Editor/KitBuilder.cs`) rebuilds everything from the art:
+  - tiles, palettes, prefabs, weapons and the player
+  - the template scene and the two demo levels
+  - the build list and the kit checksum
+
+  Student levels are not touched. Batch mode:
+  `Unity -batchmode -quit -projectPath . -executeMethod ArenaKit.EditorTools.KitBuilder.BuildAll`
+- **Kit checksum:** after changing kit files by hand, run `TUMO > Lehrer > Kit-Prüfsumme speichern` so the export check doesn't warn students about your changes.
+- **Tests:** `Window > General > Test Runner > PlayMode`, 11 tests. They cover:
+  - spawning, both keyboard halves, jumping
+  - pickups, bazooka kill and round end, empty weapons dropping
+  - jump pad, explosion with crate drop
+  - level rotation, volleyball goal
+
+  Batch mode:
+  `Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ArenaKit.Tests`
+  Set `ARENA_PREVIEW_DIR` to also save camera screenshots.
+- **Movement:** this is the BirdGame force-based movement (`MoveForce`, `MaxSpeed`, `JumpForce`). The kit adds:
+  - FixedUpdate physics
+  - wall-stick prevention
+  - coyote time and jump buffering
+  - optional extra jumps and air control
+
+## Credits
+
+- Tiles, props, backgrounds, sounds: Kenney, New Platformer Pack 1.1 (CC0)
+- Bean man, bazooka, rocket, explosion, player sounds, font: Unity's 2D Platformer sample project, as used in the Games Academy course. It is fine for the workshop. Check the Asset Store license before publishing builds publicly.
