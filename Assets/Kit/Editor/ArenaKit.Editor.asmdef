@@ -1,0 +1,25 @@
+{
+    "name": "ArenaKit.Editor",
+    "rootNamespace": "ArenaKit.EditorTools",
+    "references": [
+        "ArenaKit",
+        "Unity.InputSystem",
+        "UnityEngine.UI",
+        "Unity.2D.Tilemap.Extras",
+        "Unity.2D.Tilemap.Editor",
+        "Unity.RenderPipelines.Universal.Runtime",
+        "Unity.RenderPipelines.Universal.2D.Runtime",
+        "Unity.RenderPipelines.Core.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
