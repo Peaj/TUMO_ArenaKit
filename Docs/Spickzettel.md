@@ -91,6 +91,19 @@ Ziehe Prefabs aus **Assets/Kit/Prefabs** in deine Szene. Die Einstellungen ände
 | **Ball + Goal** | Ballspiele: Ball im Tor gibt einen Punkt |
 | **NameSign** | Schild mit deinem Namen |
 
+## Die Kamera
+
+Die Kamera zeigt immer alle Spieler und zoomt automatisch rein und raus. **Dein Level darf größer sein als der Bildschirm**: Male einfach weiter, die Kamera erkennt die Größe an den Tiles auf *Ground* und *Platforms*.
+
+Einstellungen findest du im Objekt **CameraRig**:
+
+| Einstellung | Bedeutung |
+|---|---|
+| **Min Size** | So nah zoomt die Kamera höchstens heran |
+| **Max Size** | So weit zoomt sie höchstens heraus |
+| **Framing** | Wie viel Platz um die Spieler bleibt |
+| **Shake Strength** | Wie stark Explosionen wackeln (0 = gar nicht) |
+
 ## 4. Die Spielregeln (Level Rules)
 
 Klicke in der Hierarchy auf **Level Rules**:

@@ -265,7 +265,99 @@ namespace ArenaKit.Tests
             Assert.IsFalse(rules.IsRoundOver, "Volleyball needs 5 points");
         }
 
+        [UnityTest]
+        public IEnumerator Camera_FollowsLivingPlayers()
+        {
+            yield return LoadLevel(TemplateScene);
+            ArenaCamera arenaCamera = ArenaCamera.Current;
+            Assert.IsNotNull(arenaCamera, "The level has a camera rig");
+            Character left = Player(1);
+            Character right = Player(2);
+
+            Assert.GreaterOrEqual(arenaCamera.TargetGroup.FindMember(left.transform), 0, "Player 1 is a camera target");
+            Assert.GreaterOrEqual(arenaCamera.TargetGroup.FindMember(right.transform), 0, "Player 2 is a camera target");
+            Assert.Less(arenaCamera.TargetGroup.FindMember(arenaCamera.LevelCenter), 0, "The level overview is off while players live");
+
+            yield return new WaitForSeconds(2f);
+            AssertOnScreen(left, "Player 1");
+            AssertOnScreen(right, "Player 2");
+            float bothSize = Camera.main.orthographicSize;
+
+            right.TakeDamage(1000f, 1);
+            Assert.Less(arenaCamera.TargetGroup.FindMember(right.transform), 0, "Dead players are no camera targets");
+
+            yield return new WaitForSeconds(2.5f);
+            AssertOnScreen(left, "Player 1");
+            Assert.Less(Camera.main.orthographicSize, bothSize - 0.5f, "The camera zooms in on the winner");
+        }
+
+        [UnityTest]
+        public IEnumerator Camera_StaysInsideLevelOnEveryScreenShape()
+        {
+            yield return LoadLevel(ArenaScene);
+            ArenaCamera arenaCamera = ArenaCamera.Current;
+            Camera camera = Camera.main;
+            Character left = Player(1);
+            Character right = Player(2);
+
+            // Far apart: the camera has to zoom out as far as the level allows.
+            left.Teleport(new Vector2(-13f, 6f));
+            right.Teleport(new Vector2(13f, -6f));
+
+            var shapes = new[] { (16f / 9f, "16x9"), (16f / 10f, "16x10"), (4f / 3f, "4x3"), (21f / 9f, "21x9") };
+            try
+            {
+                foreach ((float aspect, string name) in shapes)
+                {
+                    camera.aspect = aspect;
+                    yield return new WaitForSeconds(2.5f);
+
+                    Rect level = LevelRect(arenaCamera);
+                    float height = camera.orthographicSize * 2f;
+                    var view = new Rect((Vector2)camera.transform.position - new Vector2(height * aspect, height) * 0.5f, new Vector2(height * aspect, height));
+                    AssertInsideOrCentered(view.xMin, view.xMax, level.xMin, level.xMax, name + " horizontally");
+                    AssertInsideOrCentered(view.yMin, view.yMax, level.yMin, level.yMax, name + " vertically");
+                    AssertOnScreen(left, name + ": player 1");
+                    AssertOnScreen(right, name + ": player 2");
+                    Capture("Camera_" + name, aspect);
+                }
+            }
+            finally
+            {
+                camera.ResetAspect();
+            }
+        }
+
         // ---------------------------------------------------------------
+
+        static void AssertOnScreen(Character character, string label)
+        {
+            Vector3 viewport = Camera.main.WorldToViewportPoint(character.transform.position);
+            Assert.That(viewport.x, Is.InRange(0.02f, 0.98f), label + " is on screen (x)");
+            Assert.That(viewport.y, Is.InRange(0.02f, 0.98f), label + " is on screen (y)");
+        }
+
+        /// <summary>The view stays inside the level, or (if the level is smaller than the view) the level sits in its middle.</summary>
+        static void AssertInsideOrCentered(float viewMin, float viewMax, float levelMin, float levelMax, string label)
+        {
+            const float tolerance = 0.1f;
+            if (viewMax - viewMin <= levelMax - levelMin + tolerance)
+            {
+                Assert.GreaterOrEqual(viewMin, levelMin - tolerance, label + ": nothing outside the level");
+                Assert.LessOrEqual(viewMax, levelMax + tolerance, label + ": nothing outside the level");
+            }
+            else
+            {
+                Assert.AreEqual((levelMin + levelMax) * 0.5f, (viewMin + viewMax) * 0.5f, 0.5f, label + ": level centered");
+            }
+        }
+
+        static Rect LevelRect(ArenaCamera arenaCamera)
+        {
+            BoxCollider2D box = arenaCamera.Bounds;
+            Vector2 center = box.transform.TransformPoint(box.offset);
+            return new Rect(center - box.size * 0.5f, box.size);
+        }
 
         static Character Player(int number)
         {
@@ -302,15 +394,15 @@ namespace ArenaKit.Tests
         }
 
         /// <summary>Saves what the camera sees, if ARENA_PREVIEW_DIR is set.</summary>
-        static void Capture(string name)
+        static void Capture(string name, float aspect = 16f / 9f)
         {
             string folder = System.Environment.GetEnvironmentVariable("ARENA_PREVIEW_DIR");
             Camera camera = Camera.main;
             if (string.IsNullOrEmpty(folder) || camera == null)
                 return;
 
-            const int width = 1600;
             const int height = 900;
+            int width = Mathf.RoundToInt(height * aspect);
             var target = new RenderTexture(width, height, 24);
             camera.targetTexture = target;
             camera.Render();

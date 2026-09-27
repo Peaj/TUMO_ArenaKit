@@ -344,6 +344,8 @@ namespace ArenaKit
             if (spawn != null && spawn.StartWeapon != null)
                 character.Equip(spawn.StartWeapon);
 
+            ArenaCamera.Follow(character.transform);
+
             this.players.RemoveAll(p => p == null || p.PlayerNumber == playerNumber);
             this.players.Add(character);
             this.players.Sort((a, b) => a.PlayerNumber.CompareTo(b.PlayerNumber));

@@ -55,6 +55,7 @@ namespace ArenaKit
             }
 
             GameManager.PlaySound(sound);
+            ArenaCamera.Shake(radius / EffectReferenceRadius);
         }
     }
 }

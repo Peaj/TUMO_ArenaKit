@@ -5,6 +5,7 @@
         "ArenaKit",
         "Unity.InputSystem",
         "Unity.InputSystem.TestFramework",
+        "Unity.Cinemachine",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

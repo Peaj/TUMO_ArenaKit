@@ -12,6 +12,8 @@ namespace ArenaKit
     {
         [Tooltip("Maximum speed of the ball")]
         public float MaxSpeed = 25f;
+        [Tooltip("The camera keeps the ball on screen")]
+        public bool CameraFollows = true;
         [Tooltip("Seconds the ball floats in the air after a reset")]
         [Min(0f)] public float ResetDelay = 1f;
         public AudioClip BounceSound;
@@ -34,8 +36,16 @@ namespace ArenaKit
 
         void Start()
         {
+            if (CameraFollows)
+                ArenaCamera.Follow(transform, 0.8f, 1.5f);
+
             // Float until the round starts, then fall.
             StartCoroutine(Hold(ResetDelay));
+        }
+
+        void OnDestroy()
+        {
+            ArenaCamera.Unfollow(transform);
         }
 
         void FixedUpdate()

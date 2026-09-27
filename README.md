@@ -4,7 +4,7 @@ A Duck-Game-style local multiplayer arena kit for the TUMO game development holi
 Students don't program a game from scratch. They get a working 2D arena shooter and build their own level and game mode from building blocks (tiles, prefabs and UnityEvents).
 At the end, all levels are merged into one "arcade" project that plays one level after another.
 
-- Unity **6000.3.25f1** (6.3 LTS), URP 2D, new Input System
+- Unity **6000.3.25f1** (6.3 LTS), URP 2D, new Input System, Cinemachine 3.1
 - Based on `Games-Academy/BirdGame_GD1_25` (bean man character, bazooka, force-based movement)
 - Tiles and props: [Kenney New Platformer Pack](https://kenney.nl/assets/new-platformer-pack) (CC0)
 
@@ -78,6 +78,33 @@ Try the export and import once with two test levels before the workshop.
   - Unity detects them automatically (`XboxGamepadMacOSWireless`). Older Xbox One controllers without Bluetooth do not work on a Mac.
   - Every connected gamepad adds a player (max. 4). Keyboard players come first.
 
+## Camera
+
+Every level contains the **CameraRig** prefab (`Assets/Kit/Prefabs/Rules/CameraRig.prefab`). Like in Duck Game, it:
+- always keeps all living players on screen and zooms in and out to fit them
+- zooms in on the winner at the end of a round
+- works on every screen shape (16:9, 16:10, 4:3, 21:9, ...)
+
+How it works:
+- **Following:** players are added to a Cinemachine Target Group when they spawn and removed when they die. Balls are followed too.
+- **Nobody alive:** the camera shows the whole level.
+- **Framing:** Position Composer + Group Framing (zoom only) + Confiner2D, all on one Cinemachine camera.
+- **Level bounds:** with *Auto Bounds*, the bounds are recalculated from the painted **Ground** and **Platforms** tiles (plus padding), in the editor as well. Students can build levels of any size and never have to set up the camera.
+- **Zoom limit:** the camera zooms out at most until the whole level is visible. If the screen shape doesn't match the level, a bit of background shows above/below or left/right. Players never leave the screen.
+- **Background:** it always fills the screen (`CameraBackground`).
+- **Shake:** explosions shake the camera (Cinemachine Impulse). *Shake Strength* 0 turns it off.
+
+Settings on the CameraRig (`ArenaCamera`):
+
+| Setting | Meaning |
+|---|---|
+| Min Size / Max Size | Closest and widest zoom (half the visible height, in tiles) |
+| Framing | How much of the screen the players fill |
+| Smoothing | Camera damping |
+| Auto Bounds / Bounds Padding | Automatic level bounds from the tiles |
+| Bounds | Manual bounds box, used when *Auto Bounds* is off |
+| Shake Strength | Explosion shake |
+
 ## Building blocks
 
 All scripts are in the `ArenaKit` namespace (`Assets/Kit/Scripts`). Everything a student sets up has English field names, tooltips and events. The in-game text is German.
@@ -92,6 +119,7 @@ All scripts are in the `ArenaKit` namespace (`Assets/Kit/Scripts`). Everything a
 | Rules/Goal + Rules/Ball | `Goal`, `Ball` | Ball games: the ball in a goal gives a point to a fixed player or to whoever touched it last |
 | Rules/KillZone | `Hazard` | Kills everything below the level |
 | Rules/NameSign | `NameSign` | Sign with the builder's name |
+| Rules/CameraRig | `ArenaCamera` | Duck Game camera, see [Camera](#camera) |
 | Blocks/TriggerZone | `TriggerZone` | Invisible zone with `OnEnter(int player)` / `OnExit(int player)` for players, projectiles, balls or anything |
 | Blocks/Lever, Button | `Switch` | Flipped by touching or shooting it. `OnTurnedOn` / `OnTurnedOff` |
 | Blocks/Door, LockBlock | `Door` | Blocks the way. `Open()`, `Close()`, `Toggle()` |
@@ -127,11 +155,12 @@ Players always start without a weapon. Use a `SpawnPoint > Start Weapon` to hand
   Student levels are not touched. Batch mode:
   `Unity -batchmode -quit -projectPath . -executeMethod ArenaKit.EditorTools.KitBuilder.BuildAll`
 - **Kit checksum:** after changing kit files by hand, run `TUMO > Lehrer > Kit-Prüfsumme speichern` so the export check doesn't warn students about your changes.
-- **Tests:** `Window > General > Test Runner > PlayMode`, 11 tests. They cover:
+- **Tests:** `Window > General > Test Runner > PlayMode`, 13 tests. They cover:
   - spawning, both keyboard halves, jumping
   - pickups, bazooka kill and round end, empty weapons dropping
   - jump pad, explosion with crate drop
   - level rotation, volleyball goal
+  - camera: follows living players, drops dead ones, zooms in on the winner, stays inside the level at 16:9, 16:10, 4:3 and 21:9
 
   Batch mode:
   `Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ArenaKit.Tests`

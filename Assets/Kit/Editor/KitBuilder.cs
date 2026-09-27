@@ -945,6 +945,8 @@ namespace ArenaKit.EditorTools
                 PrefabLookup["NameSign"] = SavePrefab(root, $"{rules}/NameSign.prefab");
             }
 
+            PrefabLookup["CameraRig"] = SavePrefab(CameraRig(), $"{rules}/CameraRig.prefab");
+
             // --- Logic ---
             {
                 var root = new GameObject("TriggerZone");
@@ -1169,6 +1171,103 @@ namespace ArenaKit.EditorTools
             }
         }
 
+        /// <summary>
+        /// Main camera + Cinemachine camera that frames all players (Duck Game style),
+        /// stays inside the level bounds and shakes on explosions.
+        /// </summary>
+        static GameObject CameraRig()
+        {
+            var root = new GameObject("CameraRig");
+
+            var cameraObject = new GameObject("Main Camera", typeof(Camera), typeof(AudioListener));
+            cameraObject.transform.SetParent(root.transform, false);
+            cameraObject.tag = "MainCamera";
+            cameraObject.transform.localPosition = new Vector3(0f, 0f, -10f);
+            var camera = cameraObject.GetComponent<Camera>();
+            camera.orthographic = true;
+            camera.orthographicSize = 9f;
+            camera.clearFlags = CameraClearFlags.SolidColor;
+            camera.backgroundColor = new Color(0.55f, 0.8f, 0.95f);
+            camera.nearClipPlane = 0.3f;
+            camera.farClipPlane = 100f;
+            cameraObject.AddComponent<UniversalAdditionalCameraData>();
+            var brain = cameraObject.AddComponent<Unity.Cinemachine.CinemachineBrain>();
+            brain.DefaultBlend = new Unity.Cinemachine.CinemachineBlendDefinition(Unity.Cinemachine.CinemachineBlendDefinition.Styles.Cut, 0f);
+
+            var levelCenter = new GameObject("Level Center");
+            levelCenter.transform.SetParent(root.transform, false);
+
+            var boundsObject = new GameObject("Level Bounds");
+            boundsObject.transform.SetParent(root.transform, false);
+            var bounds = boundsObject.AddComponent<BoxCollider2D>();
+            bounds.isTrigger = true;
+            bounds.size = new Vector2(34f, 20f);
+
+            var groupObject = new GameObject("Target Group");
+            groupObject.transform.SetParent(root.transform, false);
+            var group = groupObject.AddComponent<Unity.Cinemachine.CinemachineTargetGroup>();
+            group.PositionMode = Unity.Cinemachine.CinemachineTargetGroup.PositionModes.GroupCenter;
+            group.RotationMode = Unity.Cinemachine.CinemachineTargetGroup.RotationModes.Manual;
+            group.Targets.Clear();
+            group.AddMember(levelCenter.transform, 1f, 17f);
+
+            var virtualObject = new GameObject("Virtual Camera");
+            virtualObject.transform.SetParent(root.transform, false);
+            virtualObject.transform.localPosition = new Vector3(0f, 0f, -10f);
+            var virtualCamera = virtualObject.AddComponent<Unity.Cinemachine.CinemachineCamera>();
+            var lens = Unity.Cinemachine.LensSettings.Default;
+            lens.OrthographicSize = 9f;
+            lens.NearClipPlane = 0.3f;
+            lens.FarClipPlane = 100f;
+            virtualCamera.Lens = lens;
+            virtualCamera.Follow = group.transform;
+
+            var composer = virtualObject.AddComponent<Unity.Cinemachine.CinemachinePositionComposer>();
+            composer.CameraDistance = 10f;
+            composer.CenterOnActivate = true;
+
+            // Order matters: frame the group first, then keep the result inside the level.
+            var framing = virtualObject.AddComponent<Unity.Cinemachine.CinemachineGroupFraming>();
+            var confiner = virtualObject.AddComponent<Unity.Cinemachine.CinemachineConfiner2D>();
+            confiner.BoundingShape2D = bounds;
+            confiner.Damping = 0f;
+
+            var listener = virtualObject.AddComponent<Unity.Cinemachine.CinemachineImpulseListener>();
+            listener.Gain = 1f;
+            listener.ChannelMask = 1;
+            listener.Use2DDistance = true;
+
+            var impulse = root.AddComponent<Unity.Cinemachine.CinemachineImpulseSource>();
+            impulse.ImpulseDefinition.ImpulseChannel = 1;
+            impulse.ImpulseDefinition.ImpulseType = Unity.Cinemachine.CinemachineImpulseDefinition.ImpulseTypes.Uniform;
+            impulse.ImpulseDefinition.ImpulseShape = Unity.Cinemachine.CinemachineImpulseDefinition.ImpulseShapes.Explosion;
+            impulse.ImpulseDefinition.ImpulseDuration = 0.3f;
+            impulse.DefaultVelocity = new Vector3(0.15f, -0.25f, 0f);
+
+            var background = new GameObject("Background");
+            background.transform.SetParent(root.transform, false);
+            background.transform.localPosition = new Vector3(0f, 0f, 10f);
+            SpriteRenderer backgroundRenderer = AddSprite(background, AssetDatabase.LoadAssetAtPath<Sprite>($"{KenneyBackgrounds}/background_color_hills.png"), OrderBackground);
+            backgroundRenderer.drawMode = SpriteDrawMode.Tiled;
+            background.AddComponent<CameraBackground>().TargetCamera = camera;
+
+            var arena = root.AddComponent<ArenaCamera>();
+            arena.OutputCamera = camera;
+            arena.VirtualCamera = virtualCamera;
+            arena.TargetGroup = group;
+            arena.Composer = composer;
+            arena.GroupFraming = framing;
+            arena.Confiner = confiner;
+            arena.Impulse = impulse;
+            arena.Bounds = bounds;
+            arena.LevelCenter = levelCenter.transform;
+            arena.MinSize = 6f;
+            arena.MaxSize = 14f;
+            arena.Framing = 0.6f;
+            arena.Smoothing = 1f;
+            return root;
+        }
+
         static GameObject SwitchObject(string name, string offSprite, string onSprite, float autoReset)
         {
             var root = new GameObject(name);
@@ -1259,17 +1358,9 @@ namespace ArenaKit.EditorTools
         {
             var level = new LevelScene { Scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single) };
 
-            var cameraObject = new GameObject("Main Camera", typeof(Camera), typeof(AudioListener));
-            cameraObject.tag = "MainCamera";
-            cameraObject.transform.position = new Vector3(0f, 0f, -10f);
-            var camera = cameraObject.GetComponent<Camera>();
-            camera.orthographic = true;
-            camera.orthographicSize = 9f;
-            camera.clearFlags = CameraClearFlags.SolidColor;
-            camera.backgroundColor = new Color(0.55f, 0.8f, 0.95f);
-            camera.nearClipPlane = 0.3f;
-            camera.farClipPlane = 100f;
-            cameraObject.AddComponent<UniversalAdditionalCameraData>();
+            GameObject cameraRig = Place("CameraRig", Vector3.zero);
+            level.Background = cameraRig.transform.Find("Background").GetComponent<SpriteRenderer>();
+            level.Background.sprite = AssetDatabase.LoadAssetAtPath<Sprite>($"{KenneyBackgrounds}/{backgroundSprite}.png");
 
             var lightObject = new GameObject("Global Light 2D");
             var light = lightObject.AddComponent<Light2D>();
@@ -1277,12 +1368,6 @@ namespace ArenaKit.EditorTools
             light.intensity = 1f;
             light.color = Color.white;
             light.targetSortingLayers = SortingLayer.layers.Select(layer => layer.id).ToArray();
-
-            var background = new GameObject("Background");
-            background.transform.localScale = new Vector3(4.5f, 4.5f, 1f);
-            level.Background = AddSprite(background, AssetDatabase.LoadAssetAtPath<Sprite>($"{KenneyBackgrounds}/{backgroundSprite}.png"), OrderBackground);
-            level.Background.drawMode = SpriteDrawMode.Tiled;
-            level.Background.size = new Vector2(8f, 4f);
 
             var grid = new GameObject("Grid", typeof(Grid));
             level.BackDecoration = CreateTilemap(grid, "Back Decoration", OrderBackDecoration, 0);

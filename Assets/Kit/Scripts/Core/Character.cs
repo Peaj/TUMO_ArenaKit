@@ -411,6 +411,7 @@ namespace ArenaKit
                 : (Time.time - this.lastAttackTime < KillCreditTime ? this.lastAttacker : 0);
 
             DropWeapon();
+            ArenaCamera.Unfollow(transform);
             SetAnimatorTrigger("Die");
             foreach (Collider2D own in this.colliders)
                 own.enabled = false;
@@ -427,6 +428,11 @@ namespace ArenaKit
                 this.rules.NotifyPlayerDied(this, killer);
 
             Destroy(gameObject, 3f);
+        }
+
+        void OnDestroy()
+        {
+            ArenaCamera.Unfollow(transform);
         }
 
         /// <summary>Moves the player somewhere else and keeps the speed.</summary>

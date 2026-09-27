@@ -170,6 +170,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ArenaKit::ArenaKit.Ball
   MaxSpeed: 22
+  CameraFollows: 1
   ResetDelay: 1
   BounceSound: {fileID: 8300000, guid: bfbf0dc8da6bbd24fb79b60d76364c07, type: 3}
   OnReset:
