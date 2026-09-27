@@ -328,6 +328,35 @@ namespace ArenaKit.Tests
             }
         }
 
+        [UnityTest]
+        public IEnumerator Levels_AllSolidTilesHaveCollision([Values(TemplateScene, ArenaScene, VolleyballScene)] string scene)
+        {
+            yield return LoadLevel(scene);
+            yield return new WaitForFixedUpdate();
+            Physics2D.SyncTransforms();
+
+            int checkedTiles = 0;
+            foreach (var tilemapCollider in Object.FindObjectsByType<UnityEngine.Tilemaps.TilemapCollider2D>(FindObjectsSortMode.None))
+            {
+                if (tilemapCollider.isTrigger)
+                    continue;
+
+                var tilemap = tilemapCollider.GetComponent<UnityEngine.Tilemaps.Tilemap>();
+                var composite = tilemapCollider.GetComponent<CompositeCollider2D>();
+                Collider2D solid = composite != null ? composite : tilemapCollider;
+                foreach (Vector3Int cell in tilemap.cellBounds.allPositionsWithin)
+                {
+                    if (!tilemap.HasTile(cell) || tilemap.GetColliderType(cell) != UnityEngine.Tilemaps.Tile.ColliderType.Grid)
+                        continue;
+                    checkedTiles++;
+                    Vector3 center = tilemap.GetCellCenterWorld(cell);
+                    Assert.IsTrue(solid.OverlapPoint(center), $"{tilemap.name} tile at {cell} has collision");
+                }
+            }
+
+            Assert.Greater(checkedTiles, 20, "The level has solid tiles");
+        }
+
         // ---------------------------------------------------------------
 
         static void AssertOnScreen(Character character, string label)

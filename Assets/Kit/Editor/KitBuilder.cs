@@ -104,6 +104,15 @@ namespace ArenaKit.EditorTools
 
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
+
+            foreach (string scene in new[]
+                     {
+                         $"{Scenes}/Template.unity",
+                         $"{Levels}/Demo_Arena/Demo_Arena.unity",
+                         $"{Levels}/Demo_RocketVolleyball/Demo_RocketVolleyball.unity",
+                     })
+                RebuildTileColliders(scene);
+
             KitManifest.Write();
             Debug.Log("[ArenaKit] Kit built.");
         }
@@ -1460,6 +1469,59 @@ namespace ArenaKit.EditorTools
 
             EditorSceneManager.MarkSceneDirty(level.Scene);
             EditorSceneManager.SaveScene(level.Scene, path);
+        }
+
+        /// <summary>
+        /// Tile colliders built in the same editor frame as the tiles are saved incomplete.
+        /// So: open the saved scene again, rebuild the colliders, save, reload and check that
+        /// every solid tile really has collision.
+        /// </summary>
+        static void RebuildTileColliders(string scenePath)
+        {
+            Scene scene = EditorSceneManager.OpenScene(scenePath);
+            foreach (TilemapCollider2D tilemapCollider in Object.FindObjectsByType<TilemapCollider2D>(FindObjectsSortMode.None))
+            {
+                tilemapCollider.enabled = false;
+                tilemapCollider.enabled = true;
+                tilemapCollider.ProcessTilemapChanges();
+            }
+            foreach (CompositeCollider2D composite in Object.FindObjectsByType<CompositeCollider2D>(FindObjectsSortMode.None))
+                composite.GenerateGeometry();
+
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene);
+
+            EditorSceneManager.OpenScene(scenePath);
+            int missing = CountTilesWithoutCollision();
+            if (missing > 0)
+                Debug.LogError($"[ArenaKit] {scenePath}: {missing} solid tiles have no collision.");
+            else
+                Debug.Log($"[ArenaKit] {scenePath}: tile collision complete.");
+        }
+
+        /// <summary>Solid tiles (Ground, Platforms) whose cell center is not covered by the tilemap's collider.</summary>
+        public static int CountTilesWithoutCollision()
+        {
+            Physics2D.SyncTransforms();
+            int missing = 0;
+            foreach (TilemapCollider2D tilemapCollider in Object.FindObjectsByType<TilemapCollider2D>(FindObjectsSortMode.None))
+            {
+                if (tilemapCollider.isTrigger)
+                    continue;
+
+                var tilemap = tilemapCollider.GetComponent<Tilemap>();
+                var composite = tilemapCollider.GetComponent<CompositeCollider2D>();
+                Collider2D solid = composite != null ? composite : tilemapCollider;
+                foreach (Vector3Int cell in tilemap.cellBounds.allPositionsWithin)
+                {
+                    var tile = tilemap.GetTile(cell);
+                    if (tile == null || tilemap.GetColliderType(cell) != Tile.ColliderType.Grid)
+                        continue;
+                    if (!solid.OverlapPoint(tilemap.GetCellCenterWorld(cell)))
+                        missing++;
+                }
+            }
+            return missing;
         }
 
         /// <summary>The starting point of every student level: a small grass arena.</summary>

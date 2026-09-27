@@ -77,29 +77,26 @@ namespace ArenaKit
             Physics2D.gravity = DefaultGravity * Gravity;
             GameManager.Ensure();
             RemovePlacedPlayers();
-            RebuildEmptyTileColliders();
+            RebuildTileColliders();
         }
 
-        /// <summary>Safety net: a tilemap with tiles but without collision shapes would let everybody fall through.</summary>
-        static void RebuildEmptyTileColliders()
+        /// <summary>
+        /// Safety net: the saved collision shapes of a tilemap can be incomplete (walls you can fly through).
+        /// Rebuilding them from the painted tiles at the start of every level is cheap and always correct.
+        /// </summary>
+        static void RebuildTileColliders()
         {
             foreach (var tilemapCollider in FindObjectsByType<UnityEngine.Tilemaps.TilemapCollider2D>(FindObjectsSortMode.None))
             {
-                var tilemap = tilemapCollider.GetComponent<UnityEngine.Tilemaps.Tilemap>();
-                if (tilemap == null || tilemap.GetUsedTilesCount() == 0)
-                    continue;
-
-                var composite = tilemapCollider.GetComponent<CompositeCollider2D>();
-                bool empty = composite != null && tilemapCollider.compositeOperation != Collider2D.CompositeOperation.None
-                    ? composite.pathCount == 0
-                    : tilemapCollider.shapeCount == 0;
-                if (!empty)
+                if (!tilemapCollider.enabled)
                     continue;
 
                 tilemapCollider.enabled = false;
                 tilemapCollider.enabled = true;
                 tilemapCollider.ProcessTilemapChanges();
-                if (composite != null)
+
+                var composite = tilemapCollider.GetComponent<CompositeCollider2D>();
+                if (composite != null && tilemapCollider.compositeOperation != Collider2D.CompositeOperation.None)
                     composite.GenerateGeometry();
             }
         }
