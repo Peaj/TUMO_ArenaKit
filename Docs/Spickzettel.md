@@ -170,7 +170,8 @@ Die Zahl bei Events ist die **Spielernummer**. Wählst du eine Funktion unter **
 1. Rechtsklick auf eine Waffe in *Assets/Kit/Prefabs/Weapons* > **Create > Prefab Variant**.
 2. Die Variante in **deinen Ordner** schieben und umbenennen.
 3. Werte ändern: *Projectiles Per Shot*, *Spread*, *Fire Delay*, *Recoil*, *Ammo* (-1 = unendlich) ...
-4. Zum Benutzen: ein Pickup (z.B. *Pickup_Bazooka*) ins Level ziehen und bei *Weapon* deine Waffe eintragen, oder deine Waffe beim *SpawnPoint* als *Start Weapon* eintragen.
+4. Neues Aussehen: Zieh ein Bild aus **Assets/Kit/Art/Weapons** (z.B. *Blaster*, *WaterGun*, *HandCannon*) in das Feld *Sprite* des *Sprite Renderer*. Dann schiebst du das Kind-Objekt **Muzzle** an die Mündung, denn dort kommen die Schüsse raus. Bilder für passende Geschosse (Laser, Wassertropfen, Kanonenkugel) liegen in *Weapons/Projectiles*. Setz eines in eine Prefab-Variante von *Bullet* ein und trag sie bei *Projectile* ein.
+5. Zum Benutzen: ein Pickup (z.B. *Pickup_Bazooka*) ins Level ziehen und bei *Weapon* deine Waffe eintragen, oder deine Waffe beim *SpawnPoint* als *Start Weapon* eintragen.
 
 **🏃 Eigener Spieler**
 - Öffne *DeinNamePlayer* in deinem Ordner und ändere:

@@ -133,6 +133,7 @@ All scripts are in the `ArenaKit` namespace (`Assets/Kit/Scripts`). Everything a
 | Blocks/RisingLava | `Hazard`, `Mover`, `Timer` | Sudden death: the lava starts rising after 30 s |
 | Blocks/Spawner | `Spawner` | Spawns prefabs on an interval or on command |
 | Blocks/Timer, Counter | `Timer`, `Counter` | "After X seconds" / "after N times" events |
+| Art/Weapons/* | sprites | 12 weapon sprites (the 4 kit weapons plus Revolver, Blaster, LaserRifle, SMG, SniperRifle, WaterGun, Flamethrower, HandCannon) and 3 projectiles. The pivot is the grip, so swapping the sprite of a weapon variant keeps it in the hand. Drawn by `Tools/weapon_sprites.py` |
 | Weapons/* | `Weapon` | Bazooka, Pistol, Shotgun, GrenadeLauncher, Minigun. Projectile, speed, projectiles per shot, spread, aim angle, fire delay, automatic, recoil, ammo (the weapon drops when empty) |
 | Projectiles/* | `Projectile` | Damage, explosion radius, push force, gravity, lifetime, explode on impact or bounce |
 | Pickups/* | `WeaponPickup` | A weapon lying in the level (a fixed weapon or a random one), respawns |
@@ -180,4 +181,5 @@ Players always start without a weapon. Use a `SpawnPoint > Start Weapon` to hand
 ## Credits
 
 - Tiles, props, backgrounds, sounds: Kenney, New Platformer Pack 1.1 (CC0)
+- Weapon sprites (except the bazooka): drawn for this kit with `Tools/weapon_sprites.py` (`pip install pymupdf`, then `python Tools/weapon_sprites.py`). The grip and muzzle positions are written to `Assets/Kit/Art/Weapons/weapons.json`, and the kit builder uses them.
 - Bean man, bazooka, rocket, explosion, player sounds, font: Unity's 2D Platformer sample project, as used in the Games Academy course. It is fine for the workshop. Check the Asset Store license before publishing builds publicly.

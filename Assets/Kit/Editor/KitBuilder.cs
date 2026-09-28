@@ -27,6 +27,9 @@ namespace ArenaKit.EditorTools
         const string KenneySounds = Art + "/Kenney/Sounds";
         const string Platformer = Art + "/Platformer";
         const string Generated = Art + "/Generated";
+        const string WeaponArt = Art + "/Weapons";
+        /// <summary>The weapon sprites are drawn at 2x (see Tools/weapon_sprites.py) and shown a bit bigger than the bazooka art.</summary>
+        const int WeaponPixelsPerUnit = 160;
         const string Physics = Kit + "/Physics";
         const string Prefabs = Kit + "/Prefabs";
         const string PlayerFolder = Kit + "/Resources/ArenaKit";
@@ -81,6 +84,7 @@ namespace ArenaKit.EditorTools
             ConfigureProject();
             GenerateTextures();
             ConfigureTextureImport();
+            ConfigureWeaponSpriteImport();
             BuildPhysicsMaterials();
 
             BuildTiles();
@@ -262,6 +266,77 @@ namespace ArenaKit.EditorTools
                 importer.userData = ImportMarker;
                 importer.SaveAndReimport();
             }
+        }
+
+        [System.Serializable]
+        class WeaponSpriteInfo
+        {
+            public string name;
+            public float[] size;
+            public float[] grip;
+            public float[] muzzle;
+        }
+
+        [System.Serializable]
+        class WeaponSpriteList
+        {
+            public WeaponSpriteInfo[] weapons;
+        }
+
+        static readonly Dictionary<string, WeaponSpriteInfo> WeaponSprites = new Dictionary<string, WeaponSpriteInfo>();
+
+        /// <summary>Weapon sprites get their pivot at the grip, so swapping the sprite of a weapon keeps it in the hand.</summary>
+        static void ConfigureWeaponSpriteImport()
+        {
+            WeaponSprites.Clear();
+            string jsonPath = WeaponArt + "/weapons.json";
+            if (File.Exists(jsonPath))
+                foreach (WeaponSpriteInfo info in JsonUtility.FromJson<WeaponSpriteList>(File.ReadAllText(jsonPath)).weapons)
+                    WeaponSprites[info.name] = info;
+
+            foreach (string path in AssetDatabase.FindAssets("t:Texture2D", new[] { WeaponArt }).Select(AssetDatabase.GUIDToAssetPath))
+            {
+                var importer = (TextureImporter)AssetImporter.GetAtPath(path);
+                if (importer == null)
+                    continue;
+
+                Vector2 pivot = new Vector2(0.5f, 0.5f);
+                if (WeaponSprites.TryGetValue(Path.GetFileNameWithoutExtension(path), out WeaponSpriteInfo info) && info.grip != null && info.grip.Length == 2)
+                    pivot = new Vector2(info.grip[0] / info.size[0], 1f - info.grip[1] / info.size[1]);
+
+                var settings = new TextureImporterSettings();
+                importer.ReadTextureSettings(settings);
+                bool upToDate = importer.textureType == TextureImporterType.Sprite && importer.spritePixelsPerUnit == WeaponPixelsPerUnit
+                    && settings.spriteAlignment == (int)SpriteAlignment.Custom && (settings.spritePivot - pivot).sqrMagnitude < 0.000001f;
+                if (upToDate)
+                    continue;
+
+                importer.textureType = TextureImporterType.Sprite;
+                importer.spriteImportMode = SpriteImportMode.Single;
+                importer.spritePixelsPerUnit = WeaponPixelsPerUnit;
+                importer.mipmapEnabled = false;
+                importer.alphaIsTransparency = true;
+                importer.filterMode = FilterMode.Bilinear;
+                importer.textureCompression = TextureImporterCompression.Uncompressed;
+                importer.ReadTextureSettings(settings);
+                settings.spriteAlignment = (int)SpriteAlignment.Custom;
+                settings.spritePivot = pivot;
+                importer.SetTextureSettings(settings);
+                importer.SaveAndReimport();
+            }
+        }
+
+        static Sprite WeaponSprite(string name)
+        {
+            return AssetDatabase.LoadAssetAtPath<Sprite>($"{WeaponArt}/{name}.png");
+        }
+
+        /// <summary>Muzzle position relative to the grip, in units.</summary>
+        static Vector3 WeaponMuzzle(string name)
+        {
+            if (!WeaponSprites.TryGetValue(name, out WeaponSpriteInfo info) || info.muzzle == null || info.grip == null)
+                return Vector3.right;
+            return new Vector3(info.muzzle[0] - info.grip[0], info.grip[1] - info.muzzle[1], 0f) / WeaponPixelsPerUnit;
         }
 
         static Sprite Kenney(string name)
@@ -652,20 +727,22 @@ namespace ArenaKit.EditorTools
         // Taken from the original hero prefab: bazooka sprite and the muzzle position relative to it.
         static Sprite bazookaSprite;
         static Vector3 muzzleOffset = new Vector3(1.82f, 0.18f, 0f);
+        /// <summary>Where the front hand is, relative to the weapon mount. Hand weapons are held there by their grip.</summary>
+        static Vector3 handOffset = new Vector3(0.81f, -0.45f, 0f);
 
         static void BuildWeapons()
         {
             ReadHeroWeaponData();
 
-            MakeWeapon("Bazooka", Color.white, Vector3.one, "Rocket", speed: 14f, delay: 0.8f, ammo: 4, recoil: 6f,
+            MakeWeapon("Bazooka", null, "Rocket", speed: 14f, delay: 0.8f, ammo: 4, recoil: 6f,
                 sound: PlatformerSound("FX/bazooka.wav"));
-            MakeWeapon("Pistol", new Color(0.75f, 0.82f, 0.95f), new Vector3(0.55f, 0.55f, 1f), "Bullet", speed: 26f, delay: 0.3f, ammo: 9, recoil: 1.5f,
+            MakeWeapon("Pistol", "Pistol", "Bullet", speed: 26f, delay: 0.3f, ammo: 9, recoil: 1.5f,
                 sound: KenneySound("sfx_throw"));
-            MakeWeapon("Shotgun", new Color(0.9f, 0.62f, 0.4f), new Vector3(0.85f, 0.7f, 1f), "Pellet", speed: 22f, delay: 0.9f, ammo: 3, recoil: 9f,
+            MakeWeapon("Shotgun", "Shotgun", "Pellet", speed: 22f, delay: 0.9f, ammo: 3, recoil: 9f,
                 sound: PlatformerSound("FX/bazooka.wav"), projectiles: 6, spread: 20f);
-            MakeWeapon("GrenadeLauncher", new Color(0.55f, 0.9f, 0.5f), new Vector3(0.8f, 0.85f, 1f), "Grenade", speed: 11f, delay: 1f, ammo: 4, recoil: 3f,
+            MakeWeapon("GrenadeLauncher", "GrenadeLauncher", "Grenade", speed: 11f, delay: 1f, ammo: 4, recoil: 3f,
                 sound: KenneySound("sfx_throw"), aimAngle: 25f);
-            MakeWeapon("Minigun", new Color(0.45f, 0.45f, 0.52f), new Vector3(0.9f, 0.6f, 1f), "Bullet", speed: 24f, delay: 0.08f, ammo: 40, recoil: 0.7f,
+            MakeWeapon("Minigun", "Minigun", "Bullet", speed: 24f, delay: 0.08f, ammo: 40, recoil: 0.7f,
                 sound: KenneySound("sfx_throw"), spread: 8f, automatic: true, volume: 0.3f);
         }
 
@@ -682,6 +759,9 @@ namespace ArenaKit.EditorTools
                     bazookaSprite = spriteRenderer.sprite;
                 if (gun != null)
                     muzzleOffset = bazooka.InverseTransformPoint(gun.position);
+                Transform hand = root.transform.Find("leftHand");
+                if (hand != null)
+                    handOffset = bazooka.InverseTransformPoint(hand.position);
             }
             PrefabUtility.UnloadPrefabContents(root);
 
@@ -689,16 +769,26 @@ namespace ArenaKit.EditorTools
                 bazookaSprite = AssetDatabase.LoadAllAssetsAtPath($"{Platformer}/Sprites/_Character/char_hero_beanMan.png").OfType<Sprite>().FirstOrDefault(s => s.name.ToLower().Contains("bazooka"));
         }
 
-        static void MakeWeapon(string name, Color tint, Vector3 scale, string projectile, float speed, float delay, int ammo, float recoil,
+        /// <param name="spriteName">Sprite from Assets/Kit/Art/Weapons, held by its grip. null = the original bazooka on the shoulder.</param>
+        static void MakeWeapon(string name, string spriteName, string projectile, float speed, float delay, int ammo, float recoil,
             AudioClip sound, int projectiles = 1, float spread = 0f, float aimAngle = 0f, bool automatic = false, float volume = 0.7f)
         {
             var root = new GameObject(name);
-            root.transform.localScale = scale;
-            AddSprite(root, bazookaSprite, OrderPlayer, tint);
+            Sprite sprite = spriteName != null ? WeaponSprite(spriteName) : null;
+            AddSprite(root, sprite != null ? sprite : bazookaSprite, OrderPlayer);
 
             var muzzle = new GameObject("Muzzle");
             muzzle.transform.SetParent(root.transform, false);
-            muzzle.transform.localPosition = new Vector3(muzzleOffset.x, muzzleOffset.y, 0f);
+            if (sprite != null)
+            {
+                // Held in the front hand by its grip (the sprite pivot).
+                root.transform.localPosition = new Vector3(handOffset.x, handOffset.y, 0f);
+                muzzle.transform.localPosition = WeaponMuzzle(spriteName);
+            }
+            else
+            {
+                muzzle.transform.localPosition = new Vector3(muzzleOffset.x, muzzleOffset.y, 0f);
+            }
 
             var weapon = root.AddComponent<Weapon>();
             weapon.Projectile = PrefabLookup[projectile].GetComponent<Projectile>();

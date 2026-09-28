@@ -32,15 +32,13 @@ namespace ArenaKit
 
         bool available = true;
         float respawnAt;
-        Vector3 iconStart;
+        Vector3 iconCenter;
 
         void Awake()
         {
             GetComponent<Collider2D>().isTrigger = true;
             PickRandomWeapon();
             UpdateIcon();
-            if (Icon != null)
-                this.iconStart = Icon.transform.localPosition;
         }
 
         void Update()
@@ -49,7 +47,7 @@ namespace ArenaKit
                 SetAvailable(true);
 
             if (Icon != null)
-                Icon.transform.localPosition = this.iconStart + Vector3.up * (Mathf.Sin(Time.time * 3f) * 0.08f);
+                Icon.transform.localPosition = this.iconCenter + Vector3.up * (Mathf.Sin(Time.time * 3f) * 0.08f);
         }
 
         void OnTriggerEnter2D(Collider2D other)
@@ -131,6 +129,11 @@ namespace ArenaKit
             Icon.sprite = weaponRenderer != null ? weaponRenderer.sprite : null;
             Icon.color = weaponRenderer != null ? weaponRenderer.color : Color.white;
             Icon.transform.localScale = Weapon != null ? Weapon.transform.localScale * HandScale : Vector3.one * HandScale;
+
+            // Weapon sprites have their pivot at the grip: move the icon so the weapon is centered on the pickup.
+            this.iconCenter = Icon.sprite != null ? -Vector3.Scale(Icon.sprite.bounds.center, Icon.transform.localScale) : Vector3.zero;
+            if (!Application.isPlaying)
+                Icon.transform.localPosition = this.iconCenter;
         }
     }
 }

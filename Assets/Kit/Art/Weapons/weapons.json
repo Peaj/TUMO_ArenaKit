@@ -1,0 +1,184 @@
+{
+  "weapons": [
+    {
+      "name": "Pistol",
+      "size": [
+        314,
+        228
+      ],
+      "grip": [
+        106,
+        110
+      ],
+      "muzzle": [
+        280,
+        68
+      ]
+    },
+    {
+      "name": "Shotgun",
+      "size": [
+        740,
+        192
+      ],
+      "grip": [
+        274,
+        102
+      ],
+      "muzzle": [
+        706,
+        64
+      ]
+    },
+    {
+      "name": "GrenadeLauncher",
+      "size": [
+        608,
+        256
+      ],
+      "grip": [
+        198,
+        146
+      ],
+      "muzzle": [
+        574,
+        88
+      ]
+    },
+    {
+      "name": "Minigun",
+      "size": [
+        684,
+        292
+      ],
+      "grip": [
+        198,
+        194
+      ],
+      "muzzle": [
+        650,
+        122
+      ]
+    },
+    {
+      "name": "Revolver",
+      "size": [
+        324,
+        236
+      ],
+      "grip": [
+        82,
+        110
+      ],
+      "muzzle": [
+        290,
+        68
+      ]
+    },
+    {
+      "name": "Blaster",
+      "size": [
+        368,
+        244
+      ],
+      "grip": [
+        110,
+        118
+      ],
+      "muzzle": [
+        334,
+        78
+      ]
+    },
+    {
+      "name": "LaserRifle",
+      "size": [
+        714,
+        248
+      ],
+      "grip": [
+        298,
+        146
+      ],
+      "muzzle": [
+        678,
+        102
+      ]
+    },
+    {
+      "name": "SMG",
+      "size": [
+        448,
+        256
+      ],
+      "grip": [
+        138,
+        106
+      ],
+      "muzzle": [
+        414,
+        68
+      ]
+    },
+    {
+      "name": "SniperRifle",
+      "size": [
+        908,
+        244
+      ],
+      "grip": [
+        358,
+        142
+      ],
+      "muzzle": [
+        874,
+        106
+      ]
+    },
+    {
+      "name": "WaterGun",
+      "size": [
+        432,
+        292
+      ],
+      "grip": [
+        126,
+        166
+      ],
+      "muzzle": [
+        398,
+        130
+      ]
+    },
+    {
+      "name": "Flamethrower",
+      "size": [
+        670,
+        256
+      ],
+      "grip": [
+        298,
+        122
+      ],
+      "muzzle": [
+        634,
+        70
+      ]
+    },
+    {
+      "name": "HandCannon",
+      "size": [
+        508,
+        260
+      ],
+      "grip": [
+        186,
+        162
+      ],
+      "muzzle": [
+        474,
+        102
+      ]
+    }
+  ]
+}

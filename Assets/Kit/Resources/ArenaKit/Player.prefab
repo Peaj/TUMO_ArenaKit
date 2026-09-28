@@ -746,9 +746,13 @@ MonoBehaviour:
   Health: 100
   MoveForce: 10000
   MaxSpeed: 10
-  JumpForce: 500
-  ExtraJumps: 0
+  Braking: 50
   AirControl: 1
+  JumpHeight: 4.5
+  MinJumpHeight: 1.5
+  FallGravity: 2
+  MaxFallSpeed: 20
+  ExtraJumps: 0
   WeaponMount: {fileID: 400026}
   ColoredParts:
   - {fileID: 21200022}
