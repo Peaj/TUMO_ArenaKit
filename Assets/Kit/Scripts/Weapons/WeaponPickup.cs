@@ -129,9 +129,12 @@ namespace ArenaKit
             Icon.sprite = weaponRenderer != null ? weaponRenderer.sprite : null;
             Icon.color = weaponRenderer != null ? weaponRenderer.color : Color.white;
             Icon.transform.localScale = Weapon != null ? Weapon.transform.localScale * HandScale : Vector3.one * HandScale;
+            Icon.transform.localRotation = Weapon != null ? Weapon.transform.localRotation : Quaternion.identity;
 
             // Weapon sprites have their pivot at the grip: move the icon so the weapon is centered on the pickup.
-            this.iconCenter = Icon.sprite != null ? -Vector3.Scale(Icon.sprite.bounds.center, Icon.transform.localScale) : Vector3.zero;
+            this.iconCenter = Icon.sprite != null
+                ? -(Icon.transform.localRotation * Vector3.Scale(Icon.sprite.bounds.center, Icon.transform.localScale))
+                : Vector3.zero;
             if (!Application.isPlaying)
                 Icon.transform.localPosition = this.iconCenter;
         }

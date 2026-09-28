@@ -26,7 +26,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4185229928890031013}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0.21643962, w: 0.976296}
   m_LocalPosition: {x: 0.8077848, y: -0.45032978, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -109,7 +109,6 @@ MonoBehaviour:
   ProjectileSpeed: 11
   ProjectilesPerShot: 1
   Spread: 0
-  AimAngle: 25
   FireDelay: 1
   Automatic: 0
   Recoil: 3

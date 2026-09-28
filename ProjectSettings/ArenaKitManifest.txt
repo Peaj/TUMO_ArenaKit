@@ -482,13 +482,13 @@ Assets/Kit/Art/Weapons/WaterGun.png	B0496299582A1993FB5E8AE2DD750366
 Assets/Kit/Art/Weapons/weapons.json	2E60920DCA4D929E25ADEB7F811DC7E5
 Assets/Kit/Editor/ArenaKit.Editor.asmdef	2640CEED8D9DC8E34C31C58FCBEC2F5C
 Assets/Kit/Editor/ArenaMenu.cs	5847256ABE23F5EB3FE0B2D99BA4D56F
-Assets/Kit/Editor/KitBuilder.cs	57CAE98C1EC4BD8B27B258726B0D2EA5
+Assets/Kit/Editor/KitBuilder.cs	261525995337DF0FFF9C3E7980A0F1FF
 Assets/Kit/Editor/KitManifest.cs	ABBC74D93B9BD38DD904E80BD2B21251
 Assets/Kit/Input/ArenaControls.inputactions	6A43B5119E79F87D679A37E504AFE402
-Assets/Kit/Palettes/1 Ground.prefab	8115B02CEACAD632738343103E182351
-Assets/Kit/Palettes/2 Platforms.prefab	0786E9AD36704646FEA38161B57DF401
-Assets/Kit/Palettes/3 Hazards.prefab	446CEAECB5DCED91E3D8B0D1F5132F35
-Assets/Kit/Palettes/4 Decoration.prefab	E0C0833CD632BF856B4700EE9AD3408D
+Assets/Kit/Palettes/1 Ground.prefab	4D0D18B09BC3E984B2B67F50481F0ED2
+Assets/Kit/Palettes/2 Platforms.prefab	124204B06895E8DD5852162CFD5A2E0E
+Assets/Kit/Palettes/3 Hazards.prefab	47A58F1D3056594CE7F1B641FD0BC94C
+Assets/Kit/Palettes/4 Decoration.prefab	1E701D116C4BA286C2D604E6CCCC9D6A
 Assets/Kit/Physics/Bouncy.physicsMaterial2D	C8F7ABFEF5E533736722A3E70860F776
 Assets/Kit/Physics/Crate.physicsMaterial2D	A2DC9BEF66415A951197914784254565
 Assets/Kit/Physics/Grenade.physicsMaterial2D	112ABB565B0C8C337E70CC4D4B209DAB
@@ -508,7 +508,7 @@ Assets/Kit/Prefabs/Blocks/RisingLava.prefab	87049C65D55CD36CBA967777643F5262
 Assets/Kit/Prefabs/Blocks/Saw.prefab	52EE940715222B6EDE18338EEA0F1BD4
 Assets/Kit/Prefabs/Blocks/Spawner.prefab	A0B2DAA3B47A7EFCF7A0719C17CBE46E
 Assets/Kit/Prefabs/Blocks/Spikes.prefab	887D895BB4A4AD50A7EDF971D09B31B7
-Assets/Kit/Prefabs/Blocks/TeleporterPair.prefab	8C8862A01B1008D084E28FFADD0C5413
+Assets/Kit/Prefabs/Blocks/TeleporterPair.prefab	3BE1562933E0945EA6266FC33D1D8A91
 Assets/Kit/Prefabs/Blocks/Timer.prefab	CF92B7EE4E0C8579AF00CA48A33B8870
 Assets/Kit/Prefabs/Blocks/TNTBlock.prefab	169AEA21F6DBA2957FF8383A8883121C
 Assets/Kit/Prefabs/Blocks/TriggerZone.prefab	9CADB0AA54B37CE25F25EF92D86249F3
@@ -517,7 +517,7 @@ Assets/Kit/Prefabs/Effects/Explosion.prefab	FFEF02A9C3C8BFA62602719F661D4374
 Assets/Kit/Prefabs/Effects/Impact.prefab	9FC13C170FB5B00D438200F088F51C13
 Assets/Kit/Prefabs/Pickups/Drop_Random.prefab	682B652B87D716B29D96867CA24FA7D8
 Assets/Kit/Prefabs/Pickups/Pickup_Bazooka.prefab	D8F994D864C77685B9915EB8F20BB2B2
-Assets/Kit/Prefabs/Pickups/Pickup_GrenadeLauncher.prefab	36305A6D97D7B8BE59ADBBD17E6D907A
+Assets/Kit/Prefabs/Pickups/Pickup_GrenadeLauncher.prefab	EE7BB905F5A51319D94D26C7585D800B
 Assets/Kit/Prefabs/Pickups/Pickup_Minigun.prefab	7707E6B6297F64EE896BEFDF50EE0EFD
 Assets/Kit/Prefabs/Pickups/Pickup_Pistol.prefab	B0C8CDDD081C0F0ECDDCEDEE4D7E6511
 Assets/Kit/Prefabs/Pickups/Pickup_Random.prefab	3AF234B118C335192A1DE8A079E67859
@@ -537,14 +537,14 @@ Assets/Kit/Prefabs/Rules/LevelRules.prefab	5D9A7D9E339147529F3D8804ECF3DF83
 Assets/Kit/Prefabs/Rules/NameSign.prefab	A46DA209BA756F415EE9ED274C64E2C6
 Assets/Kit/Prefabs/Rules/ScoreZone.prefab	6914D2AE7721DDFA6F04426860AB95EE
 Assets/Kit/Prefabs/Rules/SpawnPoint.prefab	BEEBD495E2EB354B9FB8242071DBAB3D
-Assets/Kit/Prefabs/Weapons/Bazooka.prefab	E078CFB83531AE61248AF6AA530407AC
-Assets/Kit/Prefabs/Weapons/GrenadeLauncher.prefab	53CDAA365F379DA1A371B5E33DAA08A8
-Assets/Kit/Prefabs/Weapons/Minigun.prefab	863294DA1E95AC9626FFD5A559F102DA
-Assets/Kit/Prefabs/Weapons/Pistol.prefab	44495908E476E66AD036078303374625
-Assets/Kit/Prefabs/Weapons/Shotgun.prefab	50A713412A4347357316E5D66B7E2F0F
+Assets/Kit/Prefabs/Weapons/Bazooka.prefab	556C9D1E30BFA3C75BA985AECE179093
+Assets/Kit/Prefabs/Weapons/GrenadeLauncher.prefab	B2B8CAF54CEBDB5F0AD70E0B6081D63E
+Assets/Kit/Prefabs/Weapons/Minigun.prefab	AA57407A7050BF4EA63317D19388145A
+Assets/Kit/Prefabs/Weapons/Pistol.prefab	941D486BE4977794C1E9223B6BD94BE0
+Assets/Kit/Prefabs/Weapons/Shotgun.prefab	455EE355AA42727769194986EB1CB2B2
 Assets/Kit/Resources/ArenaKit/ArenaFont.ttf	3B80D074AEC847722AAD8EC5A5DBA52A
 Assets/Kit/Resources/ArenaKit/Player.prefab	892CE95F8AC70244C62AE42CB3E1F043
-Assets/Kit/Scenes/Template.unity	C225CDC218EB64EC288ADADC3828041E
+Assets/Kit/Scenes/Template.unity	1A79D1AEBA04A93953B974C0E6F2B172
 Assets/Kit/Scripts/ArenaKit.asmdef	D858B1D211C706AE6671EED7D958DC92
 Assets/Kit/Scripts/Blocks/Ball.cs	9BD1688DCB4C9ACDD562CC53CA495E82
 Assets/Kit/Scripts/Blocks/Breakable.cs	0533B233A2765A0287E7BB4865F28480
@@ -578,14 +578,14 @@ Assets/Kit/Scripts/Util/FadeAndDestroy.cs	9892379553E44E3CD7E92EA865FDC42E
 Assets/Kit/Scripts/Util/Gizmos2D.cs	68769E23325F21A02F28928021FE07EF
 Assets/Kit/Scripts/Weapons/Explosion.cs	31040BC3E5D51B1CD39719CD1EBB2FAA
 Assets/Kit/Scripts/Weapons/Projectile.cs	942C68AE3E136991066DA88F45ECEC97
-Assets/Kit/Scripts/Weapons/Weapon.cs	5800E9138106304BFDAC787ABF4D5AA2
-Assets/Kit/Scripts/Weapons/WeaponPickup.cs	441A4927698AF7DB564CC44D866F0614
+Assets/Kit/Scripts/Weapons/Weapon.cs	5C1C58747A4CB7B9CF64CB1F6A6E64D2
+Assets/Kit/Scripts/Weapons/WeaponPickup.cs	90FB49EB2945F9367A9A04ED3D107799
 Assets/Kit/Settings/DefaultVolumeProfile.asset	86D257C79703D3CC9D273AB9F4B871C0
 Assets/Kit/Settings/Renderer2D.asset	907A9314D7EFC8660029C633B6CCDF3D
 Assets/Kit/Settings/UniversalRenderPipelineGlobalSettings.asset	078FA467100B2E1BBF317A6448196D37
 Assets/Kit/Settings/UniversalRP.asset	225E0C34C91DE5E002EF3BD1BB05EFC3
 Assets/Kit/Tests/ArenaKit.Tests.asmdef	2CD49AC5CBA3C90DE42087E62EDC61F5
-Assets/Kit/Tests/ArenaPlayModeTests.cs	31A69BF7899A862080442B9A1B54B699
+Assets/Kit/Tests/ArenaPlayModeTests.cs	FD911E2B3404C0A1F77BC1461884DA15
 Assets/Kit/Tiles/Decoration/BackWallDirt.asset	CB3E35DD6A4BA35903ADEFF013B2C0FA
 Assets/Kit/Tiles/Decoration/BackWallGrass.asset	56DF2DDAB3DFD18271AABACFD3E89CE7
 Assets/Kit/Tiles/Decoration/BackWallPurple.asset	3679D21FB8AC1CC5FB1F3D87E25AB698

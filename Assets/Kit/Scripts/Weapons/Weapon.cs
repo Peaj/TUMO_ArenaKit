@@ -5,6 +5,8 @@ namespace ArenaKit
 {
     /// <summary>
     /// A weapon a player can hold. Make your own weapon as a prefab variant and change the values.
+    /// It shoots in the direction the Muzzle points (the yellow arrow in the Scene view):
+    /// rotate the weapon (or the Muzzle) to shoot upwards, like the grenade launcher.
     /// When the ammo is used up the weapon drops to the ground.
     /// </summary>
     public class Weapon : MonoBehaviour
@@ -18,8 +20,6 @@ namespace ArenaKit
         [Min(1)] public int ProjectilesPerShot = 1;
         [Tooltip("Random spread in degrees")]
         [Range(0f, 90f)] public float Spread = 0f;
-        [Tooltip("Aim upwards in degrees (grenade launcher: 20)")]
-        [Range(-45f, 80f)] public float AimAngle = 0f;
 
         [Header("Firing")]
         [Tooltip("Seconds between two shots")]
@@ -32,7 +32,7 @@ namespace ArenaKit
         public int Ammo = 10;
 
         [Header("Parts")]
-        [Tooltip("Where the projectiles come out")]
+        [Tooltip("Where the projectiles come out. They fly in the direction of its red (x) arrow")]
         public Transform Muzzle;
         public AudioClip FireSound;
         [Range(0f, 1f)] public float FireVolume = 0.7f;
@@ -63,14 +63,12 @@ namespace ArenaKit
 
             this.lastFired = Time.time;
 
-            float facing = Owner.Facing;
             Vector3 origin = Muzzle != null ? Muzzle.position : transform.position;
-            Vector2 aim = Direction(AimAngle, facing);
+            Vector2 aim = AimDirection();
 
             for (int i = 0; i < ProjectilesPerShot; i++)
             {
-                float angle = AimAngle + Random.Range(-0.5f, 0.5f) * Spread;
-                Vector2 direction = Direction(angle, facing);
+                Vector2 direction = Quaternion.Euler(0f, 0f, Random.Range(-0.5f, 0.5f) * Spread) * aim;
                 // Only turn around the z axis (FromToRotation would flip left shots around a random axis).
                 var rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg);
                 Projectile projectile = Instantiate(Projectile, origin, rotation);
@@ -96,10 +94,24 @@ namespace ArenaKit
             return true;
         }
 
-        static Vector2 Direction(float angle, float facing)
+        /// <summary>Where the muzzle points in the world. Also correct when the player looks to the left (mirrored).</summary>
+        public Vector2 AimDirection()
         {
-            float radians = angle * Mathf.Deg2Rad;
-            return new Vector2(Mathf.Cos(radians) * facing, Mathf.Sin(radians));
+            Transform from = Muzzle != null ? Muzzle : transform;
+            Vector2 direction = from.TransformVector(Vector3.right);
+            return direction.sqrMagnitude > 0.000001f ? direction.normalized : Vector2.right;
+        }
+
+        void OnDrawGizmosSelected()
+        {
+            Transform from = Muzzle != null ? Muzzle : transform;
+            Vector3 start = from.position;
+            Vector3 end = start + (Vector3)AimDirection() * 1.2f;
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawLine(start, end);
+            Vector3 side = Quaternion.Euler(0f, 0f, 90f) * (end - start).normalized * 0.15f;
+            Gizmos.DrawLine(end, end - (end - start).normalized * 0.3f + side);
+            Gizmos.DrawLine(end, end - (end - start).normalized * 0.3f - side);
         }
     }
 }

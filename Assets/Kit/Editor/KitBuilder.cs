@@ -741,7 +741,7 @@ namespace ArenaKit.EditorTools
             MakeWeapon("Shotgun", "Shotgun", "Pellet", speed: 22f, delay: 0.9f, ammo: 3, recoil: 9f,
                 sound: PlatformerSound("FX/bazooka.wav"), projectiles: 6, spread: 20f);
             MakeWeapon("GrenadeLauncher", "GrenadeLauncher", "Grenade", speed: 11f, delay: 1f, ammo: 4, recoil: 3f,
-                sound: KenneySound("sfx_throw"), aimAngle: 25f);
+                sound: KenneySound("sfx_throw"), aimAngle: 25f); // rotated upwards, the muzzle turns with it
             MakeWeapon("Minigun", "Minigun", "Bullet", speed: 24f, delay: 0.08f, ammo: 40, recoil: 0.7f,
                 sound: KenneySound("sfx_throw"), spread: 8f, automatic: true, volume: 0.3f);
         }
@@ -779,6 +779,8 @@ namespace ArenaKit.EditorTools
 
             var muzzle = new GameObject("Muzzle");
             muzzle.transform.SetParent(root.transform, false);
+            // The weapon shoots where the muzzle points, so an upward angle is just a rotation of the whole weapon.
+            root.transform.localRotation = Quaternion.Euler(0f, 0f, aimAngle);
             if (sprite != null)
             {
                 // Held in the front hand by its grip (the sprite pivot).
@@ -795,7 +797,6 @@ namespace ArenaKit.EditorTools
             weapon.ProjectileSpeed = speed;
             weapon.ProjectilesPerShot = projectiles;
             weapon.Spread = spread;
-            weapon.AimAngle = aimAngle;
             weapon.FireDelay = delay;
             weapon.Automatic = automatic;
             weapon.Recoil = recoil;

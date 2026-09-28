@@ -134,7 +134,7 @@ All scripts are in the `ArenaKit` namespace (`Assets/Kit/Scripts`). Everything a
 | Blocks/Spawner | `Spawner` | Spawns prefabs on an interval or on command |
 | Blocks/Timer, Counter | `Timer`, `Counter` | "After X seconds" / "after N times" events |
 | Art/Weapons/* | sprites | 12 weapon sprites (the 4 kit weapons plus Revolver, Blaster, LaserRifle, SMG, SniperRifle, WaterGun, Flamethrower, HandCannon) and 3 projectiles. The pivot is the grip, so swapping the sprite of a weapon variant keeps it in the hand. Drawn by `Tools/weapon_sprites.py` |
-| Weapons/* | `Weapon` | Bazooka, Pistol, Shotgun, GrenadeLauncher, Minigun. Projectile, speed, projectiles per shot, spread, aim angle, fire delay, automatic, recoil, ammo (the weapon drops when empty) |
+| Weapons/* | `Weapon` | Bazooka, Pistol, Shotgun, GrenadeLauncher, Minigun. Projectile, speed, projectiles per shot, spread, fire delay, automatic, recoil, ammo (the weapon drops when empty). It shoots where its `Muzzle` points, so rotating the weapon aims it (the GrenadeLauncher is rotated 25° up) |
 | Projectiles/* | `Projectile` | Damage, explosion radius, push force, gravity, lifetime, explode on impact or bounce |
 | Pickups/* | `WeaponPickup` | A weapon lying in the level (a fixed weapon or a random one), respawns |
 

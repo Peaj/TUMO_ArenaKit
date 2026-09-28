@@ -109,7 +109,6 @@ MonoBehaviour:
   ProjectileSpeed: 14
   ProjectilesPerShot: 1
   Spread: 0
-  AimAngle: 0
   FireDelay: 0.8
   Automatic: 0
   Recoil: 6

@@ -255,6 +255,36 @@ namespace ArenaKit.Tests
         }
 
         [UnityTest]
+        public IEnumerator Template_GrenadeLauncherShootsWhereTheMuzzlePoints([Values(false, true)] bool facingLeft)
+        {
+            yield return LoadLevel(TemplateScene);
+            Character left = Player(1);
+            yield return new WaitForSeconds(0.3f);
+
+            if (facingLeft)
+            {
+                Press(this.keyboard.aKey);
+                yield return new WaitForSeconds(0.1f);
+                Release(this.keyboard.aKey);
+            }
+
+            left.Equip(LoadWeapon("GrenadeLauncher"));
+            yield return new WaitForSeconds(0.4f);
+            Weapon weapon = left.CurrentWeapon;
+            Vector2 aim = weapon.AimDirection();
+            float expectedAngle = facingLeft ? 155f : 25f;
+            Assert.AreEqual(expectedAngle, Mathf.Atan2(aim.y, aim.x) * Mathf.Rad2Deg, 1f, "The muzzle points 25 degrees up");
+
+            Press(this.keyboard.leftShiftKey);
+            yield return null;
+            Release(this.keyboard.leftShiftKey);
+            yield return new WaitForFixedUpdate();
+
+            Vector2 velocity = Object.FindAnyObjectByType<Projectile>().GetComponent<Rigidbody2D>().linearVelocity;
+            Assert.AreEqual(expectedAngle, Mathf.Atan2(velocity.y, velocity.x) * Mathf.Rad2Deg, 3f, "The grenade flies where the muzzle points");
+        }
+
+        [UnityTest]
         public IEnumerator Template_EmptyWeaponDrops()
         {
             yield return LoadLevel(TemplateScene);
