@@ -71,7 +71,9 @@ namespace ArenaKit
             {
                 float angle = AimAngle + Random.Range(-0.5f, 0.5f) * Spread;
                 Vector2 direction = Direction(angle, facing);
-                Projectile projectile = Instantiate(Projectile, origin, Quaternion.FromToRotation(Vector3.right, direction));
+                // Only turn around the z axis (FromToRotation would flip left shots around a random axis).
+                var rotation = Quaternion.Euler(0f, 0f, Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg);
+                Projectile projectile = Instantiate(Projectile, origin, rotation);
                 projectile.Launch(Owner, direction * ProjectileSpeed);
             }
 

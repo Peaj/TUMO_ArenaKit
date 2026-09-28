@@ -466,7 +466,7 @@ Assets/Kit/Art/Platformer/Sprites/_UI/numeric-0.png	48276635DC8686EE177849BA6195
 Assets/Kit/Art/Platformer/Sprites/_UI/numeric-1.png	9754336C88D4D4AF041D2F1104F26273
 Assets/Kit/Editor/ArenaKit.Editor.asmdef	2640CEED8D9DC8E34C31C58FCBEC2F5C
 Assets/Kit/Editor/ArenaMenu.cs	5847256ABE23F5EB3FE0B2D99BA4D56F
-Assets/Kit/Editor/KitBuilder.cs	F0CE5EED7DACBDB480D9B3C9BFD13EB0
+Assets/Kit/Editor/KitBuilder.cs	65E7C30CC3BFC33B25662BC503CF148F
 Assets/Kit/Editor/KitManifest.cs	ABBC74D93B9BD38DD904E80BD2B21251
 Assets/Kit/Input/ArenaControls.inputactions	6A43B5119E79F87D679A37E504AFE402
 Assets/Kit/Palettes/1 Ground.prefab	F392A60FED7F1BEB71C5B43C5C111207
@@ -509,7 +509,7 @@ Assets/Kit/Prefabs/Pickups/Pickup_Shotgun.prefab	76A8F727BB14D5D30968F56AABD260F
 Assets/Kit/Prefabs/Projectiles/Bullet.prefab	C6987427FBB4DD29C27CC07502EC7D5B
 Assets/Kit/Prefabs/Projectiles/Grenade.prefab	BC00732933BA3C6DD391649CB197C24B
 Assets/Kit/Prefabs/Projectiles/Pellet.prefab	97E934270A420891D176729C5F7386DD
-Assets/Kit/Prefabs/Projectiles/Rocket.prefab	40A52BF3951FD093D93C721CEEEECFE1
+Assets/Kit/Prefabs/Projectiles/Rocket.prefab	07E3D2F80ADC7632657D83990181B6BD
 Assets/Kit/Prefabs/Rules/Ball.prefab	04DEEAA70A34C4534D6F139367F5A8F7
 Assets/Kit/Prefabs/Rules/CameraRig.prefab	0BCA56BFCA4F91967A871FB470166AEE
 Assets/Kit/Prefabs/Rules/Coin.prefab	89B8515D94D768EC795A22B09DBF6B46
@@ -562,14 +562,14 @@ Assets/Kit/Scripts/Util/FadeAndDestroy.cs	9892379553E44E3CD7E92EA865FDC42E
 Assets/Kit/Scripts/Util/Gizmos2D.cs	68769E23325F21A02F28928021FE07EF
 Assets/Kit/Scripts/Weapons/Explosion.cs	31040BC3E5D51B1CD39719CD1EBB2FAA
 Assets/Kit/Scripts/Weapons/Projectile.cs	942C68AE3E136991066DA88F45ECEC97
-Assets/Kit/Scripts/Weapons/Weapon.cs	3B5ECDB96BE72EB3394FA8A3A1209A42
+Assets/Kit/Scripts/Weapons/Weapon.cs	5800E9138106304BFDAC787ABF4D5AA2
 Assets/Kit/Scripts/Weapons/WeaponPickup.cs	D36DEEBEB89D191B67A4C986A3F5A416
 Assets/Kit/Settings/DefaultVolumeProfile.asset	86D257C79703D3CC9D273AB9F4B871C0
 Assets/Kit/Settings/Renderer2D.asset	907A9314D7EFC8660029C633B6CCDF3D
 Assets/Kit/Settings/UniversalRenderPipelineGlobalSettings.asset	078FA467100B2E1BBF317A6448196D37
 Assets/Kit/Settings/UniversalRP.asset	225E0C34C91DE5E002EF3BD1BB05EFC3
 Assets/Kit/Tests/ArenaKit.Tests.asmdef	2CD49AC5CBA3C90DE42087E62EDC61F5
-Assets/Kit/Tests/ArenaPlayModeTests.cs	25C644F020F04695622614AA1836BFFE
+Assets/Kit/Tests/ArenaPlayModeTests.cs	31A69BF7899A862080442B9A1B54B699
 Assets/Kit/Tiles/Decoration/BackWallDirt.asset	CB3E35DD6A4BA35903ADEFF013B2C0FA
 Assets/Kit/Tiles/Decoration/BackWallGrass.asset	56DF2DDAB3DFD18271AABACFD3E89CE7
 Assets/Kit/Tiles/Decoration/BackWallPurple.asset	3679D21FB8AC1CC5FB1F3D87E25AB698

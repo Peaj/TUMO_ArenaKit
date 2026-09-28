@@ -565,7 +565,8 @@ namespace ArenaKit.EditorTools
                 ConfigureProjectileBody(root.GetComponent<Rigidbody2D>());
                 foreach (Renderer renderer in root.GetComponentsInChildren<Renderer>())
                     renderer.sortingOrder = renderer is SpriteRenderer ? OrderProjectiles : OrderProjectiles - 1;
-                root.transform.localScale = Vector3.one;
+                // Original scale of the platformer rocket: as big as the bazooka muzzle.
+                root.transform.localScale = Vector3.one * 2f;
             });
             PrefabLookup["Rocket"] = AssetDatabase.LoadAssetAtPath<GameObject>(rocketPath);
 

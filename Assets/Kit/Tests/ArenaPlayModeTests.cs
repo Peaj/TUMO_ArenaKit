@@ -225,6 +225,36 @@ namespace ArenaKit.Tests
         }
 
         [UnityTest]
+        public IEnumerator Template_RocketFlyingLeftOnlyTurnsAroundZ()
+        {
+            yield return LoadLevel(TemplateScene);
+            Character right = Player(2);
+            yield return new WaitForSeconds(0.3f);
+
+            // Face left, then fire.
+            Press(this.keyboard.leftArrowKey);
+            yield return new WaitForSeconds(0.1f);
+            Release(this.keyboard.leftArrowKey);
+            right.Equip(LoadWeapon("Bazooka"));
+            yield return new WaitForSeconds(0.4f);
+
+            Press(this.keyboard.rightAltKey);
+            yield return null;
+            Release(this.keyboard.rightAltKey);
+            yield return new WaitForSeconds(0.05f);
+
+            Projectile rocket = Object.FindAnyObjectByType<Projectile>();
+            Assert.IsNotNull(rocket, "A rocket was fired");
+            Assert.Less(rocket.GetComponent<Rigidbody2D>().linearVelocity.x, 0f, "The rocket flies left");
+            Vector3 euler = rocket.transform.eulerAngles;
+            Assert.AreEqual(0f, Mathf.DeltaAngle(0f, euler.x), 0.5f, "No rotation around x");
+            Assert.AreEqual(0f, Mathf.DeltaAngle(0f, euler.y), 0.5f, "No rotation around y");
+            Assert.AreEqual(180f, Mathf.Abs(Mathf.DeltaAngle(0f, euler.z)), 1f, "Turned 180 degrees around z");
+            Assert.AreEqual(2f, rocket.transform.localScale.x, 0.01f, "Rocket has its original size");
+            Capture("Rocket_Left");
+        }
+
+        [UnityTest]
         public IEnumerator Template_EmptyWeaponDrops()
         {
             yield return LoadLevel(TemplateScene);
