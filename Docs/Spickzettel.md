@@ -173,7 +173,17 @@ Die Zahl bei Events ist die **Spielernummer**. Wählst du eine Funktion unter **
 4. Zum Benutzen: ein Pickup (z.B. *Pickup_Bazooka*) ins Level ziehen und bei *Weapon* deine Waffe eintragen, oder deine Waffe beim *SpawnPoint* als *Start Weapon* eintragen.
 
 **🏃 Eigener Spieler**
-- Öffne *DeinNamePlayer* in deinem Ordner und ändere *Max Speed*, *Jump Force*, *Extra Jumps* (1 = Doppelsprung) oder *Health*.
+- Öffne *DeinNamePlayer* in deinem Ordner und ändere:
+
+| Einstellung | Bedeutung |
+|---|---|
+| **Max Speed** | Wie schnell der Spieler läuft |
+| **Braking** | Wie schnell er stehen bleibt (0 = rutscht wie auf Eis) |
+| **Jump Height** | Sprunghöhe in Tiles, wenn man Springen gedrückt hält |
+| **Min Jump Height** | Sprunghöhe, wenn man nur kurz tippt |
+| **Fall Gravity** | Wie schnell er nach dem Sprung wieder runterfällt (2 = doppelt so schnell, wie bei Mario) |
+| **Extra Jumps** | Sprünge in der Luft (1 = Doppelsprung) |
+| **Health** | Wie viel er aushält |
 
 ## 7. Abgeben
 

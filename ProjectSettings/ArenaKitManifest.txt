@@ -424,7 +424,7 @@ Assets/Kit/Art/Platformer/Materials/part_star.mat	C8770B722BAED01D6837B5BB91CF47
 Assets/Kit/Art/Platformer/Materials/Smoke.mat	3B5BB1A6911F1FCDA742FBB4BD991EC7
 Assets/Kit/Art/Platformer/Physics Materials/Platform.physicsMaterial2D	4B2921B0C53D6483FFA7F193E7E5C4D4
 Assets/Kit/Art/Platformer/Physics Materials/PlatformEnd.physicsMaterial2D	A260F87DAF0E34F27E38BDEE20F2733B
-Assets/Kit/Art/Platformer/Physics Materials/Player.physicsMaterial2D	8A6E2ED809B89A60E645A18DD649BB53
+Assets/Kit/Art/Platformer/Physics Materials/Player.physicsMaterial2D	14F44ADC72496AC8E994E4471F34E5CD
 Assets/Kit/Art/Platformer/Sprites/_Character/char_enemy_alienShip.png	7514F8C97A6CCB38B60CA7943EB0620A
 Assets/Kit/Art/Platformer/Sprites/_Character/char_enemy_alienShip-damaged.png	D709069DB737976848746E8BE43CB16B
 Assets/Kit/Art/Platformer/Sprites/_Character/char_enemy_alienShip-dead.png	BE1F0B32E804A0E2F7234161491E1536
@@ -466,7 +466,7 @@ Assets/Kit/Art/Platformer/Sprites/_UI/numeric-0.png	48276635DC8686EE177849BA6195
 Assets/Kit/Art/Platformer/Sprites/_UI/numeric-1.png	9754336C88D4D4AF041D2F1104F26273
 Assets/Kit/Editor/ArenaKit.Editor.asmdef	2640CEED8D9DC8E34C31C58FCBEC2F5C
 Assets/Kit/Editor/ArenaMenu.cs	5847256ABE23F5EB3FE0B2D99BA4D56F
-Assets/Kit/Editor/KitBuilder.cs	C1BA63C3830BFE186CEF104E5C108A64
+Assets/Kit/Editor/KitBuilder.cs	F0CE5EED7DACBDB480D9B3C9BFD13EB0
 Assets/Kit/Editor/KitManifest.cs	ABBC74D93B9BD38DD904E80BD2B21251
 Assets/Kit/Input/ArenaControls.inputactions	6A43B5119E79F87D679A37E504AFE402
 Assets/Kit/Palettes/1 Ground.prefab	F392A60FED7F1BEB71C5B43C5C111207
@@ -482,7 +482,7 @@ Assets/Kit/Prefabs/Blocks/Counter.prefab	0F06317E174713D1C474BF2D61E1D7D7
 Assets/Kit/Prefabs/Blocks/Crate.prefab	088C3A8D24561D3FF55AFD5C92F91098
 Assets/Kit/Prefabs/Blocks/Door.prefab	41ADB8D345126446CFB7A5BC27135711
 Assets/Kit/Prefabs/Blocks/Elevator.prefab	592FC32D129A2D43E9CB8BB38A3BED2F
-Assets/Kit/Prefabs/Blocks/JumpPad.prefab	ECB77D3C8AF14E2EDC9271AE6A6831F0
+Assets/Kit/Prefabs/Blocks/JumpPad.prefab	CBE7FF812FF1E0E18CD5F0129B3F7AE6
 Assets/Kit/Prefabs/Blocks/Key.prefab	78A883137456910B2322FF1C07F80E2C
 Assets/Kit/Prefabs/Blocks/Lever.prefab	C76A940E54EC17E2671307E6831F18CC
 Assets/Kit/Prefabs/Blocks/LockBlock.prefab	FB3023AC8083A414868EC4BE1C404D9D
@@ -527,7 +527,7 @@ Assets/Kit/Prefabs/Weapons/Minigun.prefab	A1DA209391FC213A8FAC3CCF28E04B11
 Assets/Kit/Prefabs/Weapons/Pistol.prefab	9C6B03AB131F3E2DF111162418349891
 Assets/Kit/Prefabs/Weapons/Shotgun.prefab	EE0C50EFEC50CA6A27E1A1672D0E8757
 Assets/Kit/Resources/ArenaKit/ArenaFont.ttf	3B80D074AEC847722AAD8EC5A5DBA52A
-Assets/Kit/Resources/ArenaKit/Player.prefab	8243F1766079004C4E4C54B607F920B5
+Assets/Kit/Resources/ArenaKit/Player.prefab	F19F8C6A1EAC667D7311E28B764F6566
 Assets/Kit/Scenes/Template.unity	B182A1FDB6C32B5C6944682C18CF86E3
 Assets/Kit/Scripts/ArenaKit.asmdef	D858B1D211C706AE6671EED7D958DC92
 Assets/Kit/Scripts/Blocks/Ball.cs	9BD1688DCB4C9ACDD562CC53CA495E82
@@ -539,7 +539,7 @@ Assets/Kit/Scripts/Blocks/Explosive.cs	E2BC7659DC652D4E84549E991A52C7BE
 Assets/Kit/Scripts/Blocks/FinishFlag.cs	0DB451C436A4413DF23BB5FB5C81CCAD
 Assets/Kit/Scripts/Blocks/Goal.cs	3CA69D83C83EF8C4D69C33C14EF42CEB
 Assets/Kit/Scripts/Blocks/Hazard.cs	462B513366FDFEA2C1D4DF968BA23E5A
-Assets/Kit/Scripts/Blocks/JumpPad.cs	8AAA468DFA36D70B6B4AF19A774177E2
+Assets/Kit/Scripts/Blocks/JumpPad.cs	5F2FF91CCB62C158B0DF461348906EE6
 Assets/Kit/Scripts/Blocks/Mover.cs	A24C6B7731760F6C3E645963D2A0FB00
 Assets/Kit/Scripts/Blocks/NameSign.cs	C8356D8D3F5955F9A3433114C5718785
 Assets/Kit/Scripts/Blocks/ScoreZone.cs	2E694ABB286322DEB2C42FC98BFA6C1B
@@ -550,7 +550,7 @@ Assets/Kit/Scripts/Blocks/Timer.cs	6E039035B4A15746202C3D879D6C68F3
 Assets/Kit/Scripts/Blocks/TriggerZone.cs	F53FEFFF3AABCC2B16C7F6256E62F58B
 Assets/Kit/Scripts/Core/ArenaCamera.cs	6385E8A309EBA106EBD6DBAD083A1F95
 Assets/Kit/Scripts/Core/CameraBackground.cs	97B3CAD2C3053BD10D11C457653B9394
-Assets/Kit/Scripts/Core/Character.cs	32E24ACC2931833C77073E9C59933A0B
+Assets/Kit/Scripts/Core/Character.cs	F9AC2A8BBD89C797EFFB1920D63F43FB
 Assets/Kit/Scripts/Core/GameManager.cs	23645CDAF07C765BDAA15EC383D5441B
 Assets/Kit/Scripts/Core/Interfaces.cs	457C47B49E82DB94F059E6FE678FE060
 Assets/Kit/Scripts/Core/LevelRules.cs	8DC1CB4C11419DC62EF15DA507E8CE14
@@ -569,7 +569,7 @@ Assets/Kit/Settings/Renderer2D.asset	907A9314D7EFC8660029C633B6CCDF3D
 Assets/Kit/Settings/UniversalRenderPipelineGlobalSettings.asset	078FA467100B2E1BBF317A6448196D37
 Assets/Kit/Settings/UniversalRP.asset	225E0C34C91DE5E002EF3BD1BB05EFC3
 Assets/Kit/Tests/ArenaKit.Tests.asmdef	2CD49AC5CBA3C90DE42087E62EDC61F5
-Assets/Kit/Tests/ArenaPlayModeTests.cs	B9D40ADAFB10D2FAB34048153662287F
+Assets/Kit/Tests/ArenaPlayModeTests.cs	25C644F020F04695622614AA1836BFFE
 Assets/Kit/Tiles/Decoration/BackWallDirt.asset	CB3E35DD6A4BA35903ADEFF013B2C0FA
 Assets/Kit/Tiles/Decoration/BackWallGrass.asset	56DF2DDAB3DFD18271AABACFD3E89CE7
 Assets/Kit/Tiles/Decoration/BackWallPurple.asset	3679D21FB8AC1CC5FB1F3D87E25AB698

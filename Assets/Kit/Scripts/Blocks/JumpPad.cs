@@ -12,7 +12,7 @@ namespace ArenaKit
     public class JumpPad : MonoBehaviour
     {
         [Tooltip("How fast things get launched")]
-        public float LaunchSpeed = 18f;
+        public float LaunchSpeed = 13f;
         [Tooltip("Also launch balls, crates and projectiles")]
         public bool LaunchObjects = true;
 

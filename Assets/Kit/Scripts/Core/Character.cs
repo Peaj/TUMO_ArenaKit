@@ -22,12 +22,22 @@ namespace ArenaKit
         public float MoveForce = 10000f;
         [Tooltip("Maximum running speed")]
         public float MaxSpeed = 10f;
-        [Tooltip("How strongly the player jumps")]
-        public float JumpForce = 500f;
-        [Tooltip("Extra jumps in the air (1 = double jump)")]
-        [Min(0)] public int ExtraJumps = 0;
+        [Tooltip("How quickly the player stops on the ground when no direction is pressed. 0 = slides like on ice")]
+        [Min(0f)] public float Braking = 50f;
         [Tooltip("How well the player can steer in the air (0 = not at all, 1 = like on the ground)")]
         [Range(0f, 1f)] public float AirControl = 1f;
+
+        [Header("Jumping")]
+        [Tooltip("Jump height in tiles when the jump button is held down")]
+        [Min(0.5f)] public float JumpHeight = 4.5f;
+        [Tooltip("Jump height in tiles when the jump button is only tapped")]
+        [Min(0.25f)] public float MinJumpHeight = 1.5f;
+        [Tooltip("Gravity while falling down. 1 = same as going up, 2 = falls down twice as fast (like Mario)")]
+        [Min(0.1f)] public float FallGravity = 2f;
+        [Tooltip("Fastest falling speed")]
+        [Min(1f)] public float MaxFallSpeed = 20f;
+        [Tooltip("Extra jumps in the air (1 = double jump)")]
+        [Min(0)] public int ExtraJumps = 0;
 
         [Header("Weapon")]
         [Tooltip("The weapon gets attached to this object (it moves with the arm animation)")]
@@ -68,6 +78,13 @@ namespace ArenaKit
         const float DropThroughTime = 0.35f;
         const float StickDeadZone = 0.2f;
 
+        /// <summary>Jump heights are measured with normal gravity, so on a moon level jumps get higher.</summary>
+        const float StandardGravity = 9.81f;
+        /// <summary>Sideways air resistance. The rigidbody itself has no damping, so jumps and falls stay exact.</summary>
+        const float SidewaysDrag = 1f;
+        /// <summary>Speed from explosions (faster than running) only brakes gently, so players still slide.</summary>
+        const float KnockbackBraking = 0.2f;
+
         Rigidbody2D body;
         Animator animator;
         PlayerInput playerInput;
@@ -83,6 +100,9 @@ namespace ArenaKit
         Vector3 baseScale;
         Vector2 moveInput;
         float jumpPressedTime = -1f;
+        bool jumpHeld;
+        bool jumping;
+        float baseGravityScale = 1f;
         float lastGroundedTime = -1f;
         int extraJumpsLeft;
         float spawnTime;
@@ -106,6 +126,8 @@ namespace ArenaKit
             this.renderers = GetComponentsInChildren<SpriteRenderer>(true);
             this.baseScale = new Vector3(Mathf.Abs(transform.localScale.x), transform.localScale.y, transform.localScale.z);
             this.body.sleepMode = RigidbodySleepMode2D.NeverSleep;
+            this.body.linearDamping = 0f;
+            this.baseGravityScale = this.body.gravityScale;
             CurrentHealth = Health;
             this.spawnTime = Time.time;
             RememberColors();
@@ -150,6 +172,7 @@ namespace ArenaKit
             if (!InputEnabled || this.moveAction == null)
             {
                 this.moveInput = Vector2.zero;
+                this.jumpHeld = false;
                 SetAnimatorSpeed(0f);
                 return;
             }
@@ -160,6 +183,7 @@ namespace ArenaKit
 
             if (this.jumpAction != null && this.jumpAction.WasPressedThisFrame())
                 this.jumpPressedTime = Time.time;
+            this.jumpHeld = this.jumpAction != null && this.jumpAction.IsPressed();
 
             if (CurrentWeapon != null && this.fireAction != null)
             {
@@ -190,6 +214,7 @@ namespace ArenaKit
 
             Run(grounded);
             Jump(grounded);
+            ApplyGravity();
 
             // The collision callbacks of the next physics step fill these again.
             this.touchingGround = false;
@@ -207,7 +232,19 @@ namespace ArenaKit
             if ((horizontal < 0f && this.touchingWallLeft) || (horizontal > 0f && this.touchingWallRight))
                 horizontal = 0f;
 
-            float velocity = Mathf.Abs(this.body.linearVelocity.x);
+            // Air resistance to the side (like the old rigidbody damping, but without slowing down jumps and falls).
+            Vector2 current = this.body.linearVelocity;
+            current.x *= 1f / (1f + Time.fixedDeltaTime * SidewaysDrag);
+
+            // No direction pressed on the ground: stop quickly, like Mario.
+            if (grounded && horizontal == 0f && Braking > 0f)
+            {
+                float braking = Mathf.Abs(current.x) > MaxSpeed + 0.5f ? Braking * KnockbackBraking : Braking;
+                current.x = Mathf.MoveTowards(current.x, 0f, braking * Time.fixedDeltaTime);
+            }
+            this.body.linearVelocity = current;
+
+            float velocity = Mathf.Abs(current.x);
             float factor = 1f - Mathf.Clamp01(velocity / MaxSpeed);
 
             // Changing direction always gets the full force.
@@ -246,14 +283,40 @@ namespace ArenaKit
             this.jumpPressedTime = -1f;
             this.lastGroundedTime = -1f;
 
-            Vector2 velocity = this.body.linearVelocity;
-            if (velocity.y < 0f)
-                this.body.linearVelocity = new Vector2(velocity.x, 0f);
+            // The start speed that reaches exactly JumpHeight (while the button is held).
+            float jumpSpeed = Mathf.Sqrt(2f * StandardGravity * this.baseGravityScale * JumpHeight);
+            this.body.linearVelocity = new Vector2(this.body.linearVelocity.x, jumpSpeed);
+            this.jumping = true;
 
-            this.body.AddForce(new Vector2(0f, JumpForce));
             SetAnimatorTrigger("Jump");
             PlayRandom(JumpSounds, 0.5f);
             OnJumped.Invoke();
+        }
+
+        /// <summary>
+        /// Mario gravity: letting go of jump early makes gravity stronger (short hop),
+        /// and after the highest point the player falls down faster.
+        /// </summary>
+        void ApplyGravity()
+        {
+            Vector2 velocity = this.body.linearVelocity;
+            float multiplier = 1f;
+
+            if (velocity.y < 0f)
+            {
+                multiplier = FallGravity;
+                this.jumping = false;
+            }
+            else if (this.jumping && !this.jumpHeld)
+            {
+                // Short hop: with this gravity a tap reaches exactly MinJumpHeight.
+                multiplier = Mathf.Max(1f, JumpHeight / Mathf.Max(0.25f, MinJumpHeight));
+            }
+
+            this.body.gravityScale = this.baseGravityScale * multiplier;
+
+            if (velocity.y < -MaxFallSpeed)
+                this.body.linearVelocity = new Vector2(velocity.x, -MaxFallSpeed);
         }
 
         void OnCollisionEnter2D(Collision2D collision)
@@ -412,6 +475,7 @@ namespace ArenaKit
 
             DropWeapon();
             ArenaCamera.Unfollow(transform);
+            this.body.gravityScale = this.baseGravityScale;
             SetAnimatorTrigger("Die");
             foreach (Collider2D own in this.colliders)
                 own.enabled = false;

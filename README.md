@@ -165,7 +165,13 @@ Players always start without a weapon. Use a `SpawnPoint > Start Weapon` to hand
   Batch mode:
   `Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ArenaKit.Tests`
   Set `ARENA_PREVIEW_DIR` to also save camera screenshots.
-- **Movement:** this is the BirdGame force-based movement (`MoveForce`, `MaxSpeed`, `JumpForce`). The kit adds:
+- **Movement:** this is the BirdGame force-based running (`MoveForce`, `MaxSpeed`) with Mario-style jumping:
+  - `Braking`: stops quickly on the ground when no direction is pressed (knockback from explosions only brakes gently)
+  - `JumpHeight` / `MinJumpHeight` in tiles: holding jump jumps higher, a tap makes a short hop (stronger gravity after letting go)
+  - `FallGravity`: faster falling after the highest point, capped by `MaxFallSpeed`
+  - The rigidbody has no linear damping, so jump heights are exact. Sideways drag is applied by hand instead.
+
+  The kit also adds:
   - FixedUpdate physics
   - wall-stick prevention
   - coyote time and jump buffering

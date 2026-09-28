@@ -103,10 +103,85 @@ namespace ArenaKit.Tests
             yield return new WaitForSeconds(0.1f);
             Release(this.keyboard.wKey);
             Release(this.keyboard.upArrowKey);
-            yield return new WaitForSeconds(0.25f);
 
-            Assert.Greater(left.transform.position.y, leftStart + 1.5f, "Player 1 should jump with W");
-            Assert.Greater(right.transform.position.y, rightStart + 1.5f, "Player 2 should jump with the up arrow");
+            float leftTop = leftStart;
+            float rightTop = rightStart;
+            for (float end = Time.time + 0.6f; Time.time < end;)
+            {
+                leftTop = Mathf.Max(leftTop, left.transform.position.y);
+                rightTop = Mathf.Max(rightTop, right.transform.position.y);
+                yield return null;
+            }
+
+            Assert.Greater(leftTop, leftStart + 1f, "Player 1 should jump with W");
+            Assert.Greater(rightTop, rightStart + 1f, "Player 2 should jump with the up arrow");
+        }
+
+        [UnityTest]
+        public IEnumerator Template_PlayerStopsQuicklyWithoutInput()
+        {
+            yield return LoadLevel(TemplateScene);
+            Character left = Player(1);
+            yield return new WaitForSeconds(0.3f);
+
+            Press(this.keyboard.dKey);
+            yield return new WaitForSeconds(0.6f);
+            Assert.Greater(left.Body.linearVelocity.x, 7f, "Player 1 runs");
+            Release(this.keyboard.dKey);
+
+            yield return new WaitForSeconds(0.3f);
+            Assert.Less(Mathf.Abs(left.Body.linearVelocity.x), 0.3f, "Player 1 stops quickly when D is released");
+        }
+
+        [UnityTest]
+        public IEnumerator Template_HoldingJumpJumpsHigher_FallingIsFaster()
+        {
+            yield return LoadLevel(TemplateScene);
+            Character tapper = Player(1);
+            Character holder = Player(2);
+            yield return new WaitForSeconds(0.6f);
+            float tapStart = tapper.transform.position.y;
+            float holdStart = holder.transform.position.y;
+
+            // Player 1 taps jump, player 2 holds it down.
+            Press(this.keyboard.wKey);
+            Press(this.keyboard.upArrowKey);
+            float jumpTime = Time.time;
+            yield return null;
+            Release(this.keyboard.wKey);
+
+            float tapTop = tapStart;
+            float holdTop = holdStart;
+            float holdTopTime = 0f;
+            float holdLandTime = 0f;
+            while (Time.time - jumpTime < 2f)
+            {
+                if (Time.time - jumpTime > 0.8f && this.keyboard.upArrowKey.isPressed)
+                    Release(this.keyboard.upArrowKey);
+
+                tapTop = Mathf.Max(tapTop, tapper.transform.position.y);
+                float y = holder.transform.position.y;
+                if (y > holdTop)
+                {
+                    holdTop = y;
+                    holdTopTime = Time.time;
+                }
+                else if (holdLandTime == 0f && holdTopTime > 0f && y <= holdStart + 0.05f)
+                {
+                    holdLandTime = Time.time;
+                }
+                yield return null;
+            }
+
+            float tapHeight = tapTop - tapStart;
+            float holdHeight = holdTop - holdStart;
+            Assert.That(tapHeight, Is.InRange(tapper.MinJumpHeight - 0.4f, tapper.MinJumpHeight + 0.6f), "A tap makes a short hop");
+            Assert.That(holdHeight, Is.InRange(holder.JumpHeight - 0.5f, holder.JumpHeight + 0.3f), "Holding jump reaches the full jump height");
+
+            float rise = holdTopTime - jumpTime;
+            float fall = holdLandTime - holdTopTime;
+            Assert.Greater(holdLandTime, 0f, "Player 2 lands again");
+            Assert.Less(fall, rise * 0.85f, "Falling down is faster than going up");
         }
 
         [UnityTest]

@@ -771,12 +771,17 @@ namespace ArenaKit.EditorTools
                 body.interpolation = RigidbodyInterpolation2D.Interpolate;
                 body.collisionDetectionMode = CollisionDetectionMode2D.Continuous;
                 body.constraints = RigidbodyConstraints2D.FreezeRotation;
+                body.linearDamping = 0f;
 
                 var character = root.GetComponent<Character>();
                 character.Health = 100f;
                 character.MoveForce = 10000f;
                 character.MaxSpeed = 10f;
-                character.JumpForce = 500f;
+                character.Braking = 50f;
+                character.JumpHeight = 4.5f;
+                character.MinJumpHeight = 1.5f;
+                character.FallGravity = 2f;
+                character.MaxFallSpeed = 20f;
                 character.ExtraJumps = 0;
                 character.AirControl = 1f;
                 character.WeaponMount = mount;
@@ -1037,7 +1042,7 @@ namespace ArenaKit.EditorTools
                 box.size = new Vector2(0.8f, 0.6f);
                 box.offset = new Vector2(0f, -0.15f);
                 var pad = root.AddComponent<JumpPad>();
-                pad.LaunchSpeed = 18f;
+                pad.LaunchSpeed = 13f;
                 pad.Renderer = spriteRenderer;
                 pad.IdleSprite = Kenney("spring");
                 pad.LaunchSprite = Kenney("spring_out");

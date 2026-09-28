@@ -151,7 +151,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01880a2878035884d82e21e39a170481, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArenaKit::ArenaKit.JumpPad
-  LaunchSpeed: 18
+  LaunchSpeed: 13
   LaunchObjects: 1
   Renderer: {fileID: 394842197794484163}
   IdleSprite: {fileID: 21300000, guid: 8c577c713c6d6a84896224f971d84603, type: 3}
