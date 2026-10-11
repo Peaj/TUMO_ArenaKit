@@ -8,7 +8,10 @@ At the end, all levels are merged into one "arcade" project that plays one level
 - Based on `Games-Academy/BirdGame_GD1_25` (bean man character, bazooka, force-based movement)
 - Tiles and props: [Kenney New Platformer Pack](https://kenney.nl/assets/new-platformer-pack) (CC0)
 
-Student material in German: [Docs/Spickzettel.md](Docs/Spickzettel.md)
+Workshop material in German, with screenshots and kit sprites, printable on A4 (open in a browser; print with background graphics on):
+- [Docs/Spickzettel.html](Docs/Spickzettel.html): cheat sheet for students (also as [Markdown](Docs/Spickzettel.md))
+- [Docs/Workshop.html](Docs/Workshop.html): 3-day time plan, arcade finale, material and preparation checklists
+- [Docs/Karten.html](Docs/Karten.html): print templates: feedback cards, game idea sheet, challenge cards, remix dice
 
 ## Quick start
 

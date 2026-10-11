@@ -1,0 +1,336 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Workshop-Plan Arena-Baukasten</title>
+<link rel="stylesheet" href="arena.css">
+<style>
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 14px; }
+  .fact { background: var(--card); border: 2.5px solid var(--ink); border-radius: 12px; padding: 8px 12px; }
+  .fact b { display: block; font-family: var(--heading); font-size: 1.35rem; line-height: 1.1; }
+  .fact span { font-size: 0.85rem; color: var(--ink-soft); font-weight: 700; }
+
+  .days { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .day-card { padding: 0; overflow: hidden; }
+  .day-card img { display: block; width: 100%; height: 150px; object-fit: cover; border-bottom: 3px solid var(--ink); }
+  .day-card .body { padding: 14px 16px 16px; }
+  .day-card .kicker { font-family: var(--heading); font-weight: 600; color: var(--ink-soft); }
+  .day-card .result { margin-top: 10px; padding: 8px 10px; border-radius: 10px; background: var(--green-soft); border: 2px solid var(--ink); font-weight: 700; font-size: 0.92rem; }
+
+  .goals td:first-child { width: 34%; }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0 16px; }
+  .t { display: inline-block; padding: 1px 10px; border: 2px solid var(--ink); border-radius: 8px; font-family: var(--heading); font-weight: 600; font-size: 0.85rem; white-space: nowrap; }
+  .t.input { background: var(--blue-soft); }
+  .t.build { background: var(--green-soft); }
+  .t.test { background: var(--yellow-soft); }
+  .t.pause { background: var(--gray-soft); }
+  .t.show { background: var(--purple-soft); }
+
+  .day-head { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+  .day-head .daynum { flex: none; width: 64px; height: 64px; border: 3px solid var(--ink); border-radius: 16px; background: var(--yellow); display: grid; place-items: center; font-family: var(--heading); font-weight: 700; font-size: 1.1rem; line-height: 1; text-align: center; box-shadow: var(--shadow); }
+  .day-head .daynum big { display: block; font-size: 1.8rem; }
+  .day-head h2 { margin: 0; }
+  .day-head p { margin: 2px 0 0; color: var(--ink-soft); font-weight: 700; }
+
+  .timeline { list-style: none; margin: 0; padding: 0; position: relative; }
+  .timeline::before { content: ""; position: absolute; left: 92px; top: 6px; bottom: 6px; width: 4px; background: var(--ink); border-radius: 2px; }
+  .slot { display: grid; grid-template-columns: 78px 1fr; gap: 0 30px; position: relative; padding-bottom: 14px; }
+  .slot::before { content: ""; position: absolute; left: 84px; top: 14px; width: 20px; height: 20px; border: 3px solid var(--ink); border-radius: 50%; background: var(--card); }
+  .slot.input::before { background: var(--blue); }
+  .slot.build::before { background: var(--grass); }
+  .slot.test::before { background: var(--yellow); }
+  .slot.pause::before { background: #c9c6d1; }
+  .slot.show::before { background: var(--purple); }
+  .slot time { font-family: var(--heading); font-weight: 700; font-size: 1.05rem; padding-top: 12px; text-align: right; white-space: nowrap; }
+  .slot time small { display: block; font-size: 0.75rem; color: var(--ink-soft); font-weight: 600; }
+  .slot .card { padding: 10px 14px; }
+  .slot.pause .card { background: var(--gray-soft); box-shadow: none; border-style: dashed; padding: 6px 14px; }
+  .slot h4 { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 4px; }
+  .slot p, .slot ul { margin: 0; font-size: 0.95rem; }
+  .slot ul { padding-left: 18px; }
+  .slot .needs { margin-top: 6px; font-size: 0.85rem; color: var(--ink-soft); font-weight: 700; }
+
+  .flow { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; counter-reset: f; }
+  .flow .card { position: relative; padding-top: 22px; text-align: center; }
+  .flow .card::before { counter-increment: f; content: counter(f); position: absolute; top: -14px; left: 50%; transform: translateX(-50%); width: 28px; height: 28px; border: 2.5px solid var(--ink); border-radius: 50%; background: var(--yellow); font-family: var(--heading); font-weight: 700; display: grid; place-items: center; }
+  .flow .emoji { font-size: 1.8rem; display: block; }
+  .flow b { font-family: var(--heading); display: block; }
+  .flow p { font-size: 0.88rem; margin: 4px 0 0; }
+
+  .checklists { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .checklists h3 { display: flex; gap: 8px; align-items: center; }
+  .checklists .when { display: inline-block; font-size: 0.8rem; font-family: var(--heading); background: var(--yellow-soft); border: 2px solid var(--ink); border-radius: 8px; padding: 0 8px; }
+
+  @media (max-width: 560px) {
+    .timeline::before { left: 70px; }
+    .slot { grid-template-columns: 56px 1fr; gap: 0 26px; }
+    .slot::before { left: 62px; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="hero">
+    <img class="shot" src="img/shot_arena.png" alt="Die Demo-Arena mit zwei Spielern">
+    <div class="title">
+      <h1>Game Dev Ferienworkshop: Arena-Baukasten</h1>
+      <p>Drei Tage vom ersten Klick in Unity bis zum großen Arcade-Finale, in dem alle Level der Gruppe nacheinander gespielt werden.</p>
+      <div class="facts">
+        <div class="fact"><b>3 × 4 h</b><span>Ferienworkshop</span></div>
+        <div class="fact"><b>12–18</b><span>Jahre, ohne Vorkenntnisse</span></div>
+        <div class="fact"><b>1 Mac</b><span>pro Person</span></div>
+        <div class="fact"><b>Unity 6.3</b><span>6000.3.25f1 LTS</span></div>
+        <div class="fact"><b>2–4</b><span>Spieler pro Level</span></div>
+      </div>
+      <ul class="toc no-print" style="margin-top:14px">
+        <li><a href="#ueberblick"><span class="badge">🗺️ Überblick</span></a></li>
+        <li><a href="#tag1"><span class="badge">Tag 1</span></a></li>
+        <li><a href="#tag2"><span class="badge">Tag 2</span></a></li>
+        <li><a href="#tag3"><span class="badge">Tag 3</span></a></li>
+        <li><a href="#finale"><span class="badge">🏆 Finale</span></a></li>
+        <li><a href="#material"><span class="badge">📦 Material</span></a></li>
+        <li><a href="#vorbereitung"><span class="badge">✅ Vorbereitung</span></a></li>
+        <li><a href="#tipps"><span class="badge">💡 Tipps</span></a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Überblick -->
+  <section id="ueberblick">
+    <h2><span class="num icon">🗺️</span>Überblick</h2>
+    <p class="lead">Die Jugendlichen programmieren kein Spiel von null. Sie bekommen ein fertiges, spielbares 2D-Arena-Spiel im Stil von <i>Duck Game</i> und bauen daraus ihr eigenes Level mit eigenem Spielmodus: Tiles malen, Bausteine platzieren, Werte tunen und Auslöser mit Aktionen verbinden.</p>
+    <div class="grid days">
+      <div class="card day-card">
+        <img src="img/shot_rocket.png" alt="">
+        <div class="body">
+          <div class="kicker">Tag 1</div>
+          <h3>Spiele verstehen &amp; Unity-Führerschein</h3>
+          <p>Genres und Core Loop, Unity-Grundlagen, Spieler und Waffen tunen.</p>
+          <div class="result">Ergebnis: eigenes Level angelegt, eigener Spieler und eigene Waffe</div>
+        </div>
+      </div>
+      <div class="card day-card">
+        <img src="img/shot_camera.png" alt="">
+        <div class="body">
+          <div class="kicker">Tag 2</div>
+          <h3>Level Design: Arenen bauen</h3>
+          <p>Arena auf Papier skizzieren, mit der Tile Palette bauen, Bausteine verbinden, gegenseitig testen.</p>
+          <div class="result">Ergebnis: spielbare Arena „Version 1“</div>
+        </div>
+      </div>
+      <div class="card day-card">
+        <img src="img/shot_volleyball.png" alt="">
+        <div class="body">
+          <div class="kicker">Tag 3</div>
+          <h3>Eigene Spielidee &amp; Arcade-Finale</h3>
+          <p>Eigener Spielmodus als Prototyp, exportieren, alle Level gemeinsam spielen.</p>
+          <div class="result">Ergebnis: alle Level in einem Arcade-Projekt</div>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:24px">So deckt der Workshop die Förderziele ab</h3>
+    <div class="card table-card goals">
+      <table>
+        <thead><tr><th>Förderziel</th><th>Wo im Workshop</th></tr></thead>
+        <tbody>
+          <tr><td>Spielgenres kennenlernen</td><td class="plain">Tag 1: Genre-Wand, Core Loop. Tag 3: Spielmodi (Rennen, King of the Hill, Ballspiel, Münzjagd ...) entstehen aus Bausteinen auf demselben Grundspiel</td></tr>
+          <tr><td>Eigene Spielidee als einfacher Prototyp</td><td class="plain">Tag 3: Spielidee-Steckbrief, zwei Bau-Sprints, eigene Spielregeln über <i>Level Rules</i></td></tr>
+          <tr><td>Level Design</td><td class="plain">Tag 2: Arena-Regeln, Papier-Prototyp, Tile Palette, Bausteine</td></tr>
+          <tr><td>Welten bauen</td><td class="plain">Tag 2 und 3: Tilemaps, Deko, Hintergründe, Kamera passt sich jeder Levelgröße an</td></tr>
+          <tr><td>Testen</td><td class="plain">Jeden Tag: Duelle am eigenen Mac, Tag 2 Playtest-Rotation mit Feedback-Karten, Tag 3 Arcade-Finale</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="legend">
+    <span class="t input">Input</span>
+    <span class="t build">Selber bauen</span>
+    <span class="t test">Testen</span>
+    <span class="t show">Präsentieren</span>
+    <span class="t pause">Pause</span>
+  </div>
+
+  <!-- Tag 1 -->
+  <section id="tag1" class="page-break">
+    <div class="day-head">
+      <div class="daynum">Tag<big>1</big></div>
+      <div><h2>Spiele verstehen &amp; Unity-Führerschein</h2><p>Ziel: Unity bedienen können und merken, wie Zahlen das Spielgefühl verändern.</p></div>
+    </div>
+    <ol class="timeline">
+      <li class="slot input"><time>0:00<small>20 min</small></time><div class="card"><h4>Kennenlernen &amp; Genre-Wand <span class="t input">Input</span></h4><p>Jede Person schreibt ihr Lieblingsspiel auf einen Zettel, gemeinsam an der Wand nach Genres sortieren.</p><div class="needs">📦 Post-its, Stifte, Wandfläche</div></div></li>
+      <li class="slot input"><time>0:20<small>25 min</small></time><div class="card"><h4>Was macht ein Spiel aus? <span class="t input">Input</span></h4><p>Genres, Core Loop, Ziel, Herausforderung, Feedback (TUMO-Folie 3). Beispiele von der Genre-Wand nehmen.</p><div class="needs">📦 Beamer, TUMO-Folien</div></div></li>
+      <li class="slot test"><time>0:45<small>30 min</small></time><div class="card"><h4>Anspielen <span class="t test">Testen</span></h4><p>Zu zweit an einem Mac: <i>Demo_Arena</i> und <i>Demo_RocketVolleyball</i> spielen. Danach an der Tafel sammeln: Welche Mechaniken, Regeln und Ziele hat das Spiel?</p><div class="needs">📦 Spickzettel (Steuerung), Tafel</div></div></li>
+      <li class="slot pause"><time>1:15<small>20 min</small></time><div class="card"><h4>Pause <span class="t pause">Pause</span></h4></div></li>
+      <li class="slot input"><time>1:35<small>35 min</small></time><div class="card"><h4>Unity-Führerschein <span class="t input">Input</span> <span class="t build">Mitmachen</span></h4><p>Live vormachen, alle machen mit: Fenster, Navigieren, Auswählen, Inspector, Play-Modus. Dann <b>TUMO &gt; Alle Bausteine ansehen</b> öffnen und die Bausteine-Szene erkunden.</p><div class="needs">📦 Spickzettel „Unity in einer Minute“</div></div></li>
+      <li class="slot build"><time>2:10<small>50 min</small></time><div class="card"><h4>Tuning-Werkstatt <span class="t build">Selber bauen</span> <span class="t test">Testen</span></h4><ul><li><b>TUMO &gt; Neues Level erstellen</b></li><li>Eigenen Spieler tunen: Max Speed, Jump Height, Fall Gravity, Extra Jumps, Braking</li><li>Level Rules: Gravity (Mondlevel!)</li><li>Mit dem Platz nebenan duellieren und die spaßigsten Werte finden</li></ul><div class="needs">💬 Hier steckt Balancing und Game Feel drin: Was fühlt sich gut an, was ist unfair?</div></div></li>
+      <li class="slot build"><time>3:00<small>40 min</small></time><div class="card"><h4>Eigene Waffe <span class="t build">Selber bauen</span></h4><p>Prefab-Variante einer Waffe, neues Sprite, eigene Werte (Schrotflinte mit 12 Kugeln, Raketen-Minigun ...). Im Duell testen.</p><div class="needs">📦 Spickzettel „Eigene Waffe“, Challenge-Karten 🟢</div></div></li>
+      <li class="slot show"><time>3:40<small>20 min</small></time><div class="card"><h4>Show &amp; Tell <span class="t show">Präsentieren</span></h4><p>Drei Freiwillige zeigen am Beamer ihre verrückteste Waffe oder ihr bestes Movement. Speichern!</p></div></li>
+    </ol>
+  </section>
+
+  <!-- Tag 2 -->
+  <section id="tag2" class="page-break">
+    <div class="day-head">
+      <div class="daynum">Tag<big>2</big></div>
+      <div><h2>Level Design: Arenen bauen</h2><p>Ziel: eine faire, abwechslungsreiche Arena, die andere getestet haben.</p></div>
+    </div>
+    <ol class="timeline">
+      <li class="slot input"><time>0:00<small>25 min</small></time><div class="card"><h4>Level-Design-Input <span class="t input">Input</span></h4><p>TUMO-Folien 6–9 (Sprünge, Lücken, bewegte und fallende Plattformen). Dazu Arena-Regeln:</p><ul><li>faire Startpunkte, mehrere Ebenen und Wege</li><li>Risiko und Belohnung: die beste Waffe liegt an der gefährlichsten Stelle</li><li>keine Camping-Ecken</li></ul><div class="needs">📦 Beamer, TUMO-Folien, Demo_Arena als Beispiel</div></div></li>
+      <li class="slot build"><time>0:25<small>25 min</small></time><div class="card"><h4>Papier-Arena <span class="t build">Selber bauen</span></h4><p>Arena auf Karopapier skizzieren (1 Kästchen = 1 Tile): Boden, Plattformen, Gefahren, Startpunkte, Waffen. Mit dem Platz nebenan Feedback austauschen.</p><div class="needs">📦 Karopapier, Buntstifte</div></div></li>
+      <li class="slot build"><time>0:50<small>50 min</small></time><div class="card"><h4>Arena malen <span class="t build">Selber bauen</span></h4><p>Tile Palette: Ground, Platforms, Hazards, Deko. SpawnPoints, Waffen-Pickups und das Namensschild platzieren.</p><div class="needs">📦 Spickzettel Kapitel 2 und 3</div></div></li>
+      <li class="slot pause"><time>1:40<small>20 min</small></time><div class="card"><h4>Pause <span class="t pause">Pause</span></h4></div></li>
+      <li class="slot input"><time>2:00<small>45 min</small></time><div class="card"><h4>Auslöser &amp; Aktionen <span class="t input">Input</span> <span class="t build">Selber bauen</span></h4><p>Live vormachen: Hebel → Tür, dann eine eigene Falle (TriggerZone → Explosive). Zeigen, dass jeder Baustein so zusammengesteckt ist (Mine, Sprungfeder ...). Danach Bausteine einbauen und kombinieren.</p><div class="needs">📦 Spickzettel Kapitel 5 und 6, Challenge-Karten 🟢 🟡</div></div></li>
+      <li class="slot test"><time>2:45<small>45 min</small></time><div class="card"><h4>Playtest-Rotation <span class="t test">Testen</span></h4><p>Alle 10 Minuten zwei Plätze weiterrücken und dort zu zweit spielen. Pro Level eine Feedback-Karte ausfüllen. Wer gebaut hat, schaut nur zu und sagt nichts!</p><div class="needs">📦 Feedback-Karten, Timer am Beamer</div></div></li>
+      <li class="slot build"><time>3:30<small>30 min</small></time><div class="card"><h4>Feedback einarbeiten <span class="t build">Selber bauen</span></h4><p>Feedback-Karten lesen, die zwei wichtigsten Punkte verbessern, als „Version 1“ speichern.</p></div></li>
+    </ol>
+  </section>
+
+  <!-- Tag 3 -->
+  <section id="tag3" class="page-break">
+    <div class="day-head">
+      <div class="daynum">Tag<big>3</big></div>
+      <div><h2>Eigene Spielidee &amp; Arcade-Finale</h2><p>Ziel: ein eigener Spielmodus als Prototyp und ein gemeinsames Finale.</p></div>
+    </div>
+    <ol class="timeline">
+      <li class="slot input"><time>0:00<small>30 min</small></time><div class="card"><h4>Spielidee finden <span class="t input">Input</span> <span class="t build">Planen</span></h4><p>Remix-Würfel: Modus × Twist × Thema. Jede Person füllt einen Spielidee-Steckbrief aus. Kurz mit der Lehrkraft prüfen: In 2 Stunden machbar?</p><div class="needs">📦 Remix-Würfel, Steckbriefe, Würfel</div></div></li>
+      <li class="slot build"><time>0:30<small>60 min</small></time><div class="card"><h4>Bau-Sprint 1 <span class="t build">Selber bauen</span></h4><p>Spielregeln (Level Rules) einstellen, Kern-Mechanik bauen, früh testen.</p><div class="needs">📦 Challenge-Karten 🟢 🟡 🔴, Spickzettel Rezepte</div></div></li>
+      <li class="slot pause"><time>1:30<small>20 min</small></time><div class="card"><h4>Pause <span class="t pause">Pause</span></h4></div></li>
+      <li class="slot build"><time>1:50<small>50 min</small></time><div class="card"><h4>Bau-Sprint 2 &amp; Feinschliff <span class="t build">Selber bauen</span></h4><p>Deko, Balancing, Namensschild. <b>Feature-Freeze um 2:40:</b> ab dann nur noch Fehler beheben.</p></div></li>
+      <li class="slot test"><time>2:40<small>20 min</small></time><div class="card"><h4>Exportieren &amp; Arcade aufbauen <span class="t test">Testen</span></h4><p>Alle: <b>TUMO &gt; Level exportieren</b> und die Datei abgeben. Während die Lehrkraft die Arcade aufbaut, spielen alle die Level ihrer Nachbarn.</p><div class="needs">📦 USB-Stick oder Netzwerkordner</div></div></li>
+      <li class="slot show"><time>3:00<small>40 min</small></time><div class="card"><h4>Arcade-Finale <span class="t show">Präsentieren</span></h4><p>Am Beamer mit 4 Gamepads: alle Level laufen nacheinander. Wer eine Runde gewinnt, bekommt einen Punkt, dann kommt das nächste Level. Am Anfang jedes Levels steht, wer es gebaut hat.</p><div class="needs">📦 Beamer, Lautsprecher, 4 Xbox-Controller</div></div></li>
+      <li class="slot show"><time>3:40<small>20 min</small></time><div class="card"><h4>Siegerehrung &amp; Reflexion <span class="t show">Präsentieren</span></h4><p>Sticker-Voting (lustigstes Level, kreativste Idee, schönste Arena). Was habe ich gelernt? Wie geht es bei TUMO weiter?</p><div class="needs">📦 Klebepunkte, Urkunden (optional)</div></div></li>
+    </ol>
+  </section>
+
+  <!-- Finale -->
+  <section id="finale" class="page-break">
+    <h2><span class="num icon">🏆</span>So läuft das Arcade-Finale</h2>
+    <div class="flow">
+      <div class="card"><span class="emoji">📦</span><b>Exportieren</b><p><b>TUMO &gt; Level exportieren</b> legt <i>Name.unitypackage</i> auf den Schreibtisch.</p></div>
+      <div class="card"><span class="emoji">💾</span><b>Einsammeln</b><p>Per USB-Stick oder Netzwerkordner in einen Ordner auf dem Lehrer-Mac.</p></div>
+      <div class="card"><span class="emoji">📥</span><b>Importieren</b><p><b>TUMO &gt; Lehrer &gt; Level-Pakete importieren...</b> und den Ordner wählen.</p></div>
+      <div class="card"><span class="emoji">🕹️</span><b>Arcade vorbereiten</b><p><b>TUMO &gt; Lehrer &gt; Arcade vorbereiten</b> legt alle Level in die Build-Liste.</p></div>
+      <div class="card"><span class="emoji">🏆</span><b>Spielen!</b><p>Erstes Level öffnen, Play drücken. Jede gewonnene Runde gibt einen Punkt.</p></div>
+    </div>
+    <div class="grid grid-2" style="margin-top:20px">
+      <div class="card table-card">
+        <table>
+          <thead><tr><th>Taste</th><th>Lehrer-Tasten im Spiel</th></tr></thead>
+          <tbody>
+            <tr><td><kbd>H</kbd></td><td class="plain">Hilfe und Tasten-Test (zeigt gedrückte Tasten)</td></tr>
+            <tr><td><kbd>N</kbd></td><td class="plain">Nächstes Level (kaputtes Level überspringen)</td></tr>
+            <tr><td><kbd>R</kbd></td><td class="plain">Level neu starten</td></tr>
+            <tr><td><kbd>K</kbd></td><td class="plain">Anzahl Tastatur-Spieler (2 / 1 / 0)</td></tr>
+            <tr><td><kbd>0</kbd></td><td class="plain">Punkte zurücksetzen</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3>Spieler im Finale</h3>
+        <ul class="ticks">
+          <li>Bis zu 2 Spieler an einer Tastatur, jedes verbundene Gamepad ist ein weiterer Spieler.</li>
+          <li>Mit 4 Gamepads: <kbd>K</kbd> bis „0 Tastatur-Spieler“ drücken, dann spielen 4 Personen nur mit Controllern.</li>
+          <li>Rotieren: Nach jedem Level geben die Spieler die Controller weiter.</li>
+          <li>Hat ein Level einen Fehler: <kbd>N</kbd> drücken und später nachsehen.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Material -->
+  <section id="material">
+    <h2><span class="num icon">📦</span>Material</h2>
+    <div class="grid checklists">
+      <div class="card">
+        <h3>💻 Technik</h3>
+        <ul class="check">
+          <li>1 Mac pro Person mit Unity 6000.3.25f1</li>
+          <li>Projekt <i>TUMO_ArenaKit</i> auf jedem Mac (mit Library-Ordner)</li>
+          <li>Lehrer-Mac mit Beamer und Lautsprechern</li>
+          <li>4 Xbox-Wireless-Controller, geladen, plus Kabel</li>
+          <li>USB-Stick oder Netzwerkordner zum Einsammeln</li>
+          <li>Optional: Kopfhörer, falls es zu laut wird</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>🖨️ Ausdrucke</h3>
+        <ul class="check">
+          <li><a href="Spickzettel.html">Spickzettel</a>, 1 pro Person</li>
+          <li><a href="Karten.html">Feedback-Karten</a>, ca. 4 pro Person</li>
+          <li><a href="Karten.html#steckbrief">Spielidee-Steckbrief</a>, 1 pro Person</li>
+          <li><a href="Karten.html#challenges">Challenge-Karten</a>, 1 Satz pro Tisch</li>
+          <li><a href="Karten.html#remix">Remix-Würfel</a>, 1 pro Tisch</li>
+          <li>Karopapier, ein paar Blätter pro Person</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>✏️ Sonstiges</h3>
+        <ul class="check">
+          <li>Post-its und dicke Stifte (Genre-Wand)</li>
+          <li>Buntstifte für die Papier-Arena</li>
+          <li>Würfel (1 pro Tisch)</li>
+          <li>Klebepunkte für das Voting</li>
+          <li>Namensschilder für die Teilnehmenden</li>
+          <li>TUMO-Folien „Game Development“</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Vorbereitung -->
+  <section id="vorbereitung" class="page-break">
+    <h2><span class="num icon">✅</span>Vorbereitung</h2>
+    <div class="grid checklists">
+      <div class="card">
+        <h3><span class="when">1 Woche vorher</span></h3>
+        <ul class="check">
+          <li>Unity-Version auf den TUMO-Macs prüfen (6000.3.25f1)</li>
+          <li><code>com.unity.pipeline</code> aus <i>Packages/manifest.json</i> entfernen</li>
+          <li>Projekt einmal auf einem TUMO-Mac öffnen und durchspielen</li>
+          <li>Tastatur testen: im Spiel <kbd>H</kbd> drücken, beide Spieler gleichzeitig laufen, springen, schießen</li>
+          <li>Gamepads per Bluetooth mit dem Lehrer-Mac verbinden</li>
+          <li>Ausdrucke machen</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3><span class="when">Am Tag vorher</span></h3>
+        <ul class="check">
+          <li>Projekt mit Library-Ordner auf alle Macs kopieren (spart den langen ersten Import)</li>
+          <li>Auf jedem Mac einmal öffnen</li>
+          <li>Play-Modus-Farbe einstellen: <i>Unity &gt; Settings &gt; Colors &gt; Playmode tint</i>, damit man den Play-Modus sofort sieht</li>
+          <li>Controller laden</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3><span class="when">Jeden Morgen</span></h3>
+        <ul class="check">
+          <li>Beamer und Ton testen</li>
+          <li>Unity auf den Macs starten, bevor die Gruppe kommt</li>
+          <li>Tag 3: Ordner für die Level-Pakete auf dem Lehrer-Mac anlegen</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tipps -->
+  <section id="tipps">
+    <h2><span class="num icon">💡</span>Tipps aus der Planung</h2>
+    <div class="grid grid-2">
+      <div class="callout warn" style="margin:0"><span class="emoji">⏯️</span><p>Änderungen im Play-Modus gehen verloren. Am ersten Tag einmal bewusst „reinfallen lassen“, dann merken es sich alle.</p></div>
+      <div class="callout warn" style="margin:0"><span class="emoji">⌘</span><p><kbd>⌘</kbd>+<kbd>Q</kbd> beendet Unity sofort. Beim Spielen nur die linke Shift-Taste und die rechte Wahltaste zum Schießen benutzen.</p></div>
+      <div class="callout info" style="margin:0"><span class="emoji">🎚️</span><p>Große Altersspanne: Mit den Challenge-Karten in drei Stufen (🟢 🟡 🔴) können alle in ihrem Tempo weitermachen.</p></div>
+      <div class="callout info" style="margin:0"><span class="emoji">🧩</span><p>Fortgeschrittene können eigene Scripts schreiben. Wichtig: Dateiname beginnt mit dem eigenen Namen, sonst gibt es im Finale Konflikte.</p></div>
+      <div class="callout tip" style="margin:0"><span class="emoji">📁</span><p>Nur im eigenen Ordner arbeiten. Der Export warnt, wenn Kit-Dateien verändert wurden, denn diese Änderungen kämen im Finale nicht mit.</p></div>
+      <div class="callout tip" style="margin:0"><span class="emoji">🔎</span><p>Die Szene <b>TUMO &gt; Alle Bausteine ansehen</b> zeigt unter jedem Baustein, aus welchen Auslösern und Aktionen er gebaut ist. Gut zum Nachbauen.</p></div>
+    </div>
+  </section>
+
+  <footer>Arena-Baukasten · TUMO Ferienworkshop · Grafiken: Kenney (CC0)</footer>
+</div>
+</body>
+</html>

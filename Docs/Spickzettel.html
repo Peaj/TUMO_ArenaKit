@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spickzettel Arena-Baukasten</title>
+<link rel="stylesheet" href="arena.css">
+<style>
+  /* Controls */
+  .controls { grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
+  .player-card { text-align: center; padding-top: 14px; }
+  .player-card h3 { display: inline-block; padding: 2px 14px; border: 3px solid var(--ink); border-radius: 999px; color: #fff; }
+  .p1 h3 { background: var(--red); }
+  .p2 h3 { background: var(--blue); }
+  .pad h3 { background: var(--grass-dark); }
+  .keyrow { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; align-items: center; text-align: left; margin-top: 10px; }
+  .keyrow span { font-weight: 700; }
+  .keyrow kbd { font-size: 1.05rem; }
+  .player-card .marker { width: 0; height: 0; margin: 0 auto 8px; border-left: 14px solid transparent; border-right: 14px solid transparent; border-top: 22px solid var(--ink); }
+  .p1 .marker { border-top-color: var(--red); }
+  .p2 .marker { border-top-color: var(--blue); }
+  .pad .marker { border-top-color: var(--grass-dark); }
+
+  /* Unity editor sketch */
+  .editor {
+    display: grid;
+    grid-template-columns: 1fr 2.2fr 1.2fr;
+    grid-template-rows: 2fr 1fr;
+    min-height: 300px;
+    grid-template-areas: "hier scene insp" "proj proj insp";
+    gap: 6px;
+    padding: 8px;
+    background: #3c3a45;
+    border: 3px solid var(--ink);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  .pane { background: #f3f2f6; border-radius: 6px; padding: 6px 9px; font-size: 0.85rem; position: relative; overflow: hidden; }
+  .pane b { font-family: var(--heading); font-size: 0.95rem; display: block; }
+  .pane .what { color: var(--ink-soft); font-size: 0.8rem; line-height: 1.25; }
+  .scene { grid-area: scene; background: var(--sky) url("img/shot_arena.png") center/cover; color: var(--ink); }
+  .scene .tag { position: absolute; left: 6px; top: 6px; background: rgba(255,255,255,0.92); border-radius: 6px; padding: 3px 8px; }
+  .hier { grid-area: hier; }
+  .insp { grid-area: insp; }
+  .proj { grid-area: proj; }
+  .fake-row { height: 7px; border-radius: 4px; background: #d9d6e0; margin: 6px 0; }
+  .fake-row.short { width: 60%; }
+
+  /* Tilemaps */
+  .layer { display: flex; align-items: center; gap: 12px; }
+  .layer img { height: 44px; width: 44px; object-fit: contain; flex: none; }
+  .layer .tile-none { width: 44px; height: 44px; flex: none; border: 2px dashed var(--ink-soft); border-radius: 8px; }
+
+  /* Blocks */
+  .blocks { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+  .block { display: flex; gap: 12px; align-items: center; padding: 10px 12px; }
+  .block .pic { flex: none; width: 58px; height: 58px; display: grid; place-items: center; }
+  .block .pic img { max-width: 58px; max-height: 58px; }
+  .block .pic .emoji { font-size: 2rem; }
+  .block h4 { margin: 0 0 2px; }
+  .block p { margin: 0; font-size: 0.9rem; line-height: 1.3; }
+
+  .strip { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 12px; }
+  .strip img { width: 100%; border: 3px solid var(--ink); border-radius: 10px; display: block; }
+
+  /* Trigger -> action */
+  .flow { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 10px 14px; padding: 18px; }
+  .flow .box { border: 3px solid var(--ink); border-radius: 12px; padding: 10px 14px; text-align: center; background: var(--card); min-width: 150px; }
+  .flow .box small { display: block; color: var(--ink-soft); font-weight: 700; }
+  .flow .box.trigger { background: var(--blue-soft); }
+  .flow .box.action { background: var(--green-soft); }
+  .flow .arrow { font-family: var(--heading); font-size: 2rem; font-weight: 700; }
+  .flow img { height: 40px; display: block; margin: 0 auto 4px; }
+
+  .event-mock { font-family: var(--body); font-size: 0.92rem; border: 2px solid #9d9aa8; border-radius: 6px; background: #f3f2f6; overflow: hidden; max-width: 460px; }
+  .event-mock .head { background: #e2e0e8; padding: 4px 10px; font-weight: 800; border-bottom: 2px solid #9d9aa8; }
+  .event-mock .row { display: grid; grid-template-columns: 1fr 1.4fr; gap: 6px; padding: 8px 10px; }
+  .event-mock .field { background: #fff; border: 1.5px solid #9d9aa8; border-radius: 4px; padding: 2px 8px; font-size: 0.85rem; position: relative; }
+  .event-mock .field.drop::after { content: "▾"; position: absolute; right: 6px; }
+  .event-mock .foot { text-align: right; padding: 0 10px 8px; font-weight: 800; }
+  .event-mock .callnum { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--yellow); border: 2px solid var(--ink); font-family: var(--heading); font-size: 0.8rem; margin-right: 4px; }
+
+  /* Recipes */
+  .recipes { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .recipe h3 { display: flex; align-items: center; gap: 10px; }
+  .recipe h3 .emoji { font-size: 1.6rem; }
+  .recipe ul { margin: 0; padding-left: 20px; }
+  .recipe li { margin: 3px 0; }
+  .wire { font-family: var(--heading); font-weight: 600; }
+
+  /* Weapons */
+  .weapons { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+  .weapon { background: var(--sky); border: 2.5px solid var(--ink); border-radius: 12px; padding: 8px; text-align: center; font-family: var(--heading); font-weight: 600; font-size: 0.9rem; }
+  .weapon img { height: 50px; width: 100%; object-fit: contain; display: block; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="hero">
+    <img class="shot" src="img/shot_rocket.png" alt="Zwei Spieler in der Arena, der rote schießt eine Rakete">
+    <div class="title">
+      <h1>Spickzettel: Arena-Baukasten</h1>
+      <p>Bau deine eigene Arena, erfinde deinen eigenen Spielmodus und spiel ihn im großen Finale mit allen anderen!</p>
+      <ul class="toc no-print">
+        <li><a href="#steuerung"><span class="badge">🎮 Steuerung</span></a></li>
+        <li><a href="#unity"><span class="badge">🧭 Unity</span></a></li>
+        <li><a href="#level"><span class="badge">1 Level anlegen</span></a></li>
+        <li><a href="#malen"><span class="badge">2 Malen</span></a></li>
+        <li><a href="#bausteine"><span class="badge">3 Bausteine</span></a></li>
+        <li><a href="#regeln"><span class="badge">4 Spielregeln</span></a></li>
+        <li><a href="#events"><span class="badge">5 Auslöser &amp; Aktionen</span></a></li>
+        <li><a href="#rezepte"><span class="badge">6 Rezepte</span></a></li>
+        <li><a href="#abgeben"><span class="badge">7 Abgeben</span></a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Steuerung -->
+  <section id="steuerung">
+    <h2><span class="num icon">🎮</span>Steuerung</h2>
+    <div class="grid controls">
+      <div class="card player-card p1">
+        <div class="marker"></div>
+        <h3>Spieler 1</h3>
+        <div class="muted small">Tastatur links</div>
+        <div class="keyrow">
+          <span>Laufen</span><span><kbd>A</kbd> <kbd>D</kbd></span>
+          <span>Springen</span><span><kbd>W</kbd></span>
+          <span>Schießen</span><span><kbd>⇧ Shift</kbd> <span class="muted small">links</span></span>
+        </div>
+      </div>
+      <div class="card player-card p2">
+        <div class="marker"></div>
+        <h3>Spieler 2</h3>
+        <div class="muted small">Tastatur rechts</div>
+        <div class="keyrow">
+          <span>Laufen</span><span><kbd>←</kbd> <kbd>→</kbd></span>
+          <span>Springen</span><span><kbd>↑</kbd></span>
+          <span>Schießen</span><span><kbd>⌥ alt</kbd> <span class="muted small">rechts</span></span>
+        </div>
+      </div>
+      <div class="card player-card pad">
+        <div class="marker"></div>
+        <h3>Gamepad</h3>
+        <div class="muted small">Spieler 3 und 4</div>
+        <div class="keyrow">
+          <span>Laufen</span><span><kbd>Stick</kbd></span>
+          <span>Springen</span><span><kbd>A</kbd></span>
+          <span>Schießen</span><span><kbd>X</kbd> <span class="muted small">oder</span> <kbd>RT</kbd></span>
+        </div>
+      </div>
+    </div>
+    <div class="grid grid-2" style="margin-top:16px">
+      <div class="card">
+        <ul class="ticks">
+          <li>Durch eine Plattform nach unten fallen: <b>runter + springen</b></li>
+          <li>Waffen hebst du auf, indem du hineinläufst. Ist die Munition leer, fällt die Waffe runter.</li>
+          <li><kbd>H</kbd> zeigt die Hilfe, <kbd>R</kbd> startet das Level neu.</li>
+        </ul>
+      </div>
+      <div class="callout warn" style="margin:0">
+        <span class="emoji">⚠️</span>
+        <p>Beim Spielen <b>nie die Cmd-Taste ⌘</b> drücken! <kbd>⌘</kbd>+<kbd>Q</kbd> beendet Unity, <kbd>⌘</kbd>+<kbd>W</kbd> schließt Fenster.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Unity -->
+  <section id="unity">
+    <h2><span class="num icon">🧭</span>Unity in einer Minute</h2>
+    <div class="grid grid-2">
+      <div class="editor" aria-label="Skizze des Unity-Editors">
+        <div class="pane hier"><b>Hierarchy</b><span class="what">Alle Objekte in deinem Level</span><div class="fake-row"></div><div class="fake-row short"></div><div class="fake-row"></div></div>
+        <div class="pane scene"><span class="tag"><b>Scene</b> hier baust du &nbsp;·&nbsp; <b>Game</b> so sieht es beim Spielen aus</span></div>
+        <div class="pane insp"><b>Inspector</b><span class="what">Einstellungen des ausgewählten Objekts</span><div class="fake-row"></div><div class="fake-row short"></div><div class="fake-row"></div><div class="fake-row short"></div><div class="fake-row"></div></div>
+        <div class="pane proj"><b>Project</b><span class="what">Alle Dateien: Prefabs, Bilder, Tiles ...</span></div>
+      </div>
+      <div class="card table-card">
+        <table>
+          <thead><tr><th>Taste</th><th>Was passiert</th></tr></thead>
+          <tbody>
+            <tr><td><kbd>Q</kbd></td><td class="plain">Ansicht verschieben (Hand)</td></tr>
+            <tr><td><kbd>W</kbd> <kbd>E</kbd> <kbd>R</kbd></td><td class="plain">Verschieben, drehen, skalieren</td></tr>
+            <tr><td><kbd>F</kbd></td><td class="plain">Zum ausgewählten Objekt springen</td></tr>
+            <tr><td>🖱️ Scrollrad</td><td class="plain">Zoomen</td></tr>
+            <tr><td><kbd>⌘</kbd>+<kbd>P</kbd></td><td class="plain">Play: Spiel starten und stoppen</td></tr>
+            <tr><td><kbd>⌘</kbd>+<kbd>S</kbd></td><td class="plain">Speichern, bitte oft!</td></tr>
+            <tr><td><kbd>⌘</kbd>+<kbd>Z</kbd></td><td class="plain">Rückgängig</td></tr>
+            <tr><td><kbd>⌘</kbd>+<kbd>D</kbd></td><td class="plain">Objekt verdoppeln</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="callout">
+      <span class="emoji">⏯️</span>
+      <p>Alles, was du im <b>Play-Modus</b> änderst, ist danach wieder weg! Erst Play stoppen, dann ändern.</p>
+    </div>
+  </section>
+
+  <!-- 1 -->
+  <section id="level">
+    <h2><span class="num">1</span>Dein Level anlegen</h2>
+    <div class="card">
+      <ol class="steps">
+        <li>Menü <b>TUMO &gt; Neues Level erstellen...</b></li>
+        <li>Deinen Vornamen und einen Namen für dein Level eintragen und auf <b>Level erstellen</b> klicken.</li>
+        <li>Jetzt hast du einen eigenen Ordner <b>Assets/Levels/DeinName</b>. <b>Arbeite nur in diesem Ordner!</b></li>
+        <li>Später öffnest du dein Level wieder mit <b>TUMO &gt; Mein Level öffnen</b>.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section id="malen" class="page-break">
+    <h2><span class="num">2</span>Malen mit der Tile Palette</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <ol class="steps">
+          <li><b>Window &gt; 2D &gt; Tile Palette</b> öffnen.</li>
+          <li>Oben eine Palette wählen: <span class="chip">1 Ground</span> <span class="chip">2 Platforms</span> <span class="chip">3 Hazards</span> <span class="chip">4 Decoration</span></li>
+          <li><b>Wichtig:</b> Bei <b>Active Tilemap</b> die passende Ebene auswählen (Tabelle rechts).</li>
+          <li><kbd>B</kbd> Pinsel malt, <kbd>D</kbd> Radierer löscht (oder <kbd>⇧</kbd> + Klick), <kbd>U</kbd> füllt ein Rechteck.</li>
+        </ol>
+        <div class="callout tip" style="margin-bottom:0">
+          <span class="emoji">💡</span>
+          <p>Die Boden-Tiles setzen Ränder und Ecken automatisch. Du malst einfach drauflos.</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="grid" style="gap:10px">
+          <div class="layer"><img src="img/terrain_grass_block_top.png" alt=""><div><b>Ground</b><br><span class="small muted">Fester Boden und Wände</span></div></div>
+          <div class="layer"><img src="img/terrain_grass_cloud_middle.png" alt=""><div><b>Platforms</b><br><span class="small muted">Von unten kann man durchspringen</span></div></div>
+          <div class="layer"><img src="img/lava_top.png" alt=""><div><b>Hazards</b><br><span class="small muted">Tödlich: Lava und Stacheln</span></div></div>
+          <div class="layer"><img src="img/torch_on_a.png" alt=""><div><b>Back Decoration</b><br><span class="small muted">Deko hinter den Spielern</span></div></div>
+          <div class="layer"><img src="img/star.png" alt=""><div><b>Front Decoration</b><br><span class="small muted">Deko vor den Spielern</span></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="grid grid-2" style="margin-top:16px">
+      <div class="card">
+        <h3>🎥 Die Kamera</h3>
+        <p>Die Kamera zeigt immer alle Spieler und zoomt automatisch rein und raus. <b>Dein Level darf größer sein als der Bildschirm</b>: Male einfach weiter, die Kamera erkennt die Größe an den Tiles auf <i>Ground</i> und <i>Platforms</i>.</p>
+        <p class="small">Einstellungen im Objekt <b>CameraRig</b>: <b>Min Size</b> (so nah zoomt sie höchstens), <b>Max Size</b> (so weit höchstens), <b>Framing</b> (Platz um die Spieler), <b>Shake Strength</b> (Wackeln bei Explosionen, 0 = gar nicht).</p>
+      </div>
+      <img src="img/shot_camera.png" alt="Kamera zeigt beide Spieler" style="border:3px solid var(--ink); border-radius: var(--radius); box-shadow: var(--shadow); align-self:start">
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section id="bausteine" class="page-break">
+    <h2><span class="num">3</span>Bausteine einbauen</h2>
+    <p class="lead">Ziehe Prefabs aus <b>Assets/Kit/Prefabs</b> in deine Szene. Die Einstellungen änderst du im <b>Inspector</b>.</p>
+    <div class="grid blocks">
+      <div class="card block"><div class="pic"><span class="emoji">📍</span></div><div><h4>SpawnPoint</h4><p>Startpunkt für Spieler 1-4. Bei <i>Start Weapon</i> gibt's gleich eine Waffe</p></div></div>
+      <div class="card block"><div class="pic"><img src="img/weapons/Bazooka.png" alt=""></div><div><h4>Pickups</h4><p>Waffe zum Aufheben. <i>Pickup_Random</i> = Zufallswaffe</p></div></div>
+      <div class="card block"><div class="pic"><img src="img/block_exclamation.png" alt=""></div><div><h4>WeaponCrate</h4><p>Aufschießen: eine Waffe fällt raus</p></div></div>
+      <div class="card block"><div class="pic"><img src="img/block_planks.png" alt=""></div><div><h4>Crate / BrickWall</h4><p>Kaputtbare Kiste bzw. Mauer</p></div></div>
+      <div class="card block"><div class="pic"><img src="img/spring.png" alt=""></div><div><h4>JumpPad</h4><p>Sprungfeder. Dreh sie, dann wird sie zum Seiten-Booster</p></div></div>
+      <div class="card block"><div class="pic"><img src="img/terrain_grass_cloud_middle.png" alt=""></div><div><h4>MovingPlatform / Elevator</h4><p>Fährt hin und her. Die gelbe Linie zeigt wohin (<i>Offset</i>)</p></div></div>
+      <div class="card block"><div class="pic"><img src="img/teleporter.png" alt=""></div><div><h4>TeleporterPair</h4><p>Zwei Portale, die verbunden sind</p></div></div>
+      <div class="card block"><div class="pic"><img src="img/mine_armed.png" alt=""></div><div><h4>Mine</h4><p>Drauftreten: das Licht blinkt. Runtergehen oder draufschießen: Bumm!</p></div></div>
+      <div class="card block"><div class="pic"><img src="img/block_strong_danger.png" alt=""></div><div><h4>TNTBlock</h4><p>Explodiert, wenn man draufschießt</p></div></div>
+      <div class="card block"><div class="pic"><img src="img/saw.png" alt=""></div><div><h4>Spikes / Saw</h4><p>Tödlich, auch für Kisten</p></div></div>
+      <div class="card block"><div class="pic"><img src="img/lava_top.png" alt=""></div><div><h4>RisingLava</h4><p>Nach 30 Sekunden steigt die Lava!</p></div></div>
+      <div class="card block"><div class="pic"><img src="img/door.png" alt=""></div><div><h4>Door / LockBlock</h4><p>Versperrt den Weg, bis ein Event sie öffnet</p></div></div>
+      <div class="card block"><div class="pic"><img src="img/lever_left.png" alt=""></div><div><h4>Lever / Button</h4><p>Schalter: an und aus durch Berühren oder Schießen</p></div></div>
+      <div class="card block"><div class="pic"><img src="img/key_red.png" alt=""></div><div><h4>Key</h4><p>Schlüssel zum Einsammeln</p></div></div>
+      <div class="card block"><div class="pic"><span class="emoji">⬚</span></div><div><h4>TriggerZone</h4><p>Unsichtbare Zone. Löst etwas aus, wenn jemand hineinläuft</p></div></div>
+      <div class="card block"><div class="pic"><span class="emoji">⏱️</span></div><div><h4>Timer / Counter</h4><p>„Nach X Sekunden ...“ und „Nach N Mal ...“</p></div></div>
+      <div class="card block"><div class="pic"><span class="emoji">✨</span></div><div><h4>Spawner</h4><p>Erzeugt immer wieder etwas, z.B. Kisten oder Bälle</p></div></div>
+      <div class="card block"><div class="pic"><img src="img/flag_yellow_a.png" alt=""></div><div><h4>FinishFlag</h4><p>Wer zuerst hier ist, gewinnt</p></div></div>
+      <div class="card block"><div class="pic"><span class="emoji">👑</span></div><div><h4>ScoreZone</h4><p>König des Hügels: wer allein drin steht, bekommt Punkte</p></div></div>
+      <div class="card block"><div class="pic"><img src="img/coin_gold.png" alt=""></div><div><h4>Coin / Gem</h4><p>Punkte zum Einsammeln</p></div></div>
+      <div class="card block"><div class="pic"><img src="img/ball.png" alt=""></div><div><h4>Ball + Goal</h4><p>Ballspiele: Ball im Tor gibt einen Punkt</p></div></div>
+      <div class="card block"><div class="pic"><img src="img/sign.png" alt=""></div><div><h4>NameSign</h4><p>Schild mit deinem Namen</p></div></div>
+    </div>
+    <div class="callout tip">
+      <span class="emoji">💡</span>
+      <p><b>TUMO &gt; Alle Bausteine ansehen</b> öffnet eine Szene, in der alle Bausteine nebeneinander stehen. Drück Play und probier sie aus! Danach öffnest du dein Level wieder mit <b>TUMO &gt; Mein Level öffnen</b>.</p>
+    </div>
+    <div class="strip">
+      <img src="img/showcase_2.png" alt="Bausteine-Szene: Kisten, TNT, Mine, Sprungfeder">
+      <img src="img/showcase_4.png" alt="Bausteine-Szene: Hebel, Knopf, Timer und Counter mit Türen">
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section id="regeln" class="page-break">
+    <h2><span class="num">4</span>Die Spielregeln (Level Rules)</h2>
+    <p class="lead">Klicke in der Hierarchy auf <b>Level Rules</b>. Hier entscheidest du, was für ein Spiel dein Level ist.</p>
+    <div class="card table-card">
+      <table>
+        <thead><tr><th>Einstellung</th><th>Bedeutung</th></tr></thead>
+        <tbody>
+          <tr><td>Level Name / Built By</td><td class="plain">Wird am Anfang groß angezeigt</td></tr>
+          <tr><td>Last Player Standing Wins</td><td class="plain">Wer als Letzter lebt, gewinnt die Runde</td></tr>
+          <tr><td>Points To Win</td><td class="plain">So viele Punkte braucht man zum Sieg</td></tr>
+          <tr><td>Kills Give Points</td><td class="plain">Jeder Treffer, der tötet, gibt einen Punkt</td></tr>
+          <tr><td>Time Limit</td><td class="plain">Sekunden bis zum Rundenende (0 = kein Limit)</td></tr>
+          <tr><td>Max Players</td><td class="plain">Wie viele mitspielen (1 = allein, z.B. zum Erkunden)</td></tr>
+          <tr><td>Player Prefab</td><td class="plain">Dein eigener Spieler (liegt schon in deinem Ordner)</td></tr>
+          <tr><td>Player Health</td><td class="plain">Leben aller Spieler (0 = normal, 1000 = fast unverwundbar)</td></tr>
+          <tr><td>Respawn Players</td><td class="plain">Tote Spieler kommen zurück</td></tr>
+          <tr><td>Gravity</td><td class="plain">1 = normal, 0.3 = Mond, 2 = schwer</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section id="events">
+    <h2><span class="num">5</span>Auslöser und Aktionen</h2>
+    <p class="lead">Jeder Baustein ist aus kleinen Scripts zusammengesteckt: <span class="chip trigger">Auslöser</span> merken, dass etwas passiert. <span class="chip action">Aktionen</span> machen etwas. Eine Sprungfeder ist zum Beispiel:</p>
+    <div class="card flow">
+      <div class="box trigger"><img src="img/spring.png" alt=""><b>TriggerZone</b><small>jemand läuft rein</small></div>
+      <div class="arrow">→</div>
+      <div class="box"><b>On Enter</b><small>das Event</small></div>
+      <div class="arrow">→</div>
+      <div class="box action"><b>ForcePush &gt; Push</b><small>schubst ihn nach oben</small></div>
+    </div>
+
+    <div class="grid grid-2" style="margin-top:16px">
+      <div class="card">
+        <h3>So verbindest du sie</h3>
+        <ol class="steps">
+          <li>Beim Event des Auslösers (z.B. <i>On Enter</i>) auf <kbd>+</kbd> klicken.</li>
+          <li>Das Objekt mit der Aktion aus der Hierarchy in das leere Feld ziehen.</li>
+          <li>Rechts die Aktion auswählen, z.B. <b>ForcePush &gt; Push ()</b>.</li>
+        </ol>
+      </div>
+      <div class="card">
+        <div class="event-mock" aria-label="So sieht ein Event im Inspector aus">
+          <div class="head">On Enter (Int32)</div>
+          <div class="row">
+            <div class="field drop">Runtime Only</div>
+            <div class="field drop"><span class="callnum">3</span>ForcePush.Push</div>
+            <div class="field"><span class="callnum">2</span>JumpPad</div>
+            <div></div>
+          </div>
+          <div class="foot"><span class="callnum">1</span>+ &nbsp;−</div>
+        </div>
+        <p class="small muted" style="margin-top:8px">Die Zahl bei Events ist die <b>Spielernummer</b>. Funktionen unter <b>Dynamic int</b> (z.B. <i>LevelRules &gt; AddPoint</i>) bekommen sie direkt.</p>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <span class="emoji">👉</span>
+      <p>Aktionen wirken auf den, der sie ausgelöst hat. Läuft Spieler 2 in die TriggerZone, schubst <i>ForcePush</i> Spieler 2, <i>Damager</i> verletzt Spieler 2 und <i>Score</i> gibt Spieler 2 den Punkt.</p>
+    </div>
+
+    <div class="grid grid-2 align-start">
+      <div class="card table-card">
+        <table>
+          <thead><tr><th>Auslöser</th><th>Event: wann?</th></tr></thead>
+          <tbody>
+            <tr><td><span class="chip trigger">TriggerZone</span></td><td class="plain"><b>On Enter / On Exit:</b> jemand läuft rein / raus. Bei <i>Reacts To</i> stellst du ein, wer: Spieler, Bälle, Geschosse, alles ...</td></tr>
+            <tr><td><span class="chip trigger">HitSensor</span></td><td class="plain"><b>On Hit:</b> angeschossen oder von einer Explosion getroffen</td></tr>
+            <tr><td><span class="chip trigger">Breakable</span></td><td class="plain"><b>On Broken:</b> hat genug Schaden bekommen</td></tr>
+            <tr><td><span class="chip trigger">Switch</span></td><td class="plain"><b>On Turned On / Off:</b> an- oder ausgeschaltet</td></tr>
+            <tr><td><span class="chip trigger">Timer</span></td><td class="plain"><b>On Finished:</b> nach X Sekunden</td></tr>
+            <tr><td><span class="chip trigger">Counter</span></td><td class="plain"><b>On Reached:</b> nach N Mal</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card table-card">
+        <table>
+          <thead><tr><th>Aktion</th><th>Was passiert?</th></tr></thead>
+          <tbody>
+            <tr><td><span class="chip action">Explosive &gt; Explode</span></td><td class="plain">Bumm!</td></tr>
+            <tr><td><span class="chip action">ForcePush &gt; Push</span></td><td class="plain">Schubst in Richtung des grünen Pfeils</td></tr>
+            <tr><td><span class="chip action">Damager &gt; Hurt / Kill</span></td><td class="plain">Verletzt bzw. tötet</td></tr>
+            <tr><td><span class="chip action">Teleporter &gt; Teleport</span></td><td class="plain">Beamt zum <i>Target</i></td></tr>
+            <tr><td><span class="chip action">Score</span></td><td class="plain"><b>AddPoints</b>, <b>WinRound</b>, <b>SendToStart</b></td></tr>
+            <tr><td><span class="chip action">Disappear &gt; Hide</span></td><td class="plain">Verschwindet (kommt nach <i>Respawn Time</i> zurück)</td></tr>
+            <tr><td><span class="chip action">Remover</span></td><td class="plain"><b>RemoveObject</b> (Kisten, Waffen ...) oder <b>RemoveSelf</b></td></tr>
+            <tr><td><span class="chip action">Spawner &gt; Spawn</span></td><td class="plain">Erzeugt ein Objekt</td></tr>
+            <tr><td><span class="chip action">Door</span></td><td class="plain"><b>Open</b>, <b>Close</b>, <b>Toggle</b></td></tr>
+            <tr><td><span class="chip action">Mover</span></td><td class="plain"><b>MoveToEnd</b>, <b>MoveToStart</b>, <b>Toggle</b></td></tr>
+            <tr><td><span class="chip action">Switch / Counter / Timer</span></td><td class="plain"><b>Toggle</b>, <b>Add</b>, <b>StartTimer</b></td></tr>
+            <tr><td><span class="chip action">SwapSprite / PlaySound</span></td><td class="plain">Anderes Bild zeigen, Sound abspielen</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section id="rezepte" class="page-break">
+    <h2><span class="num">6</span>Rezepte für eigene Spielideen</h2>
+    <div class="grid recipes">
+      <div class="card recipe">
+        <h3><span class="emoji">🚪</span>Tür mit Hebel</h3>
+        <ul>
+          <li>Door und Lever einbauen.</li>
+          <li class="wire">Lever &gt; On Turned On → Door &gt; Open</li>
+          <li class="wire">Lever &gt; On Turned Off → Door &gt; Close</li>
+        </ul>
+      </div>
+      <div class="card recipe">
+        <h3><span class="emoji">🔑</span>Schlüssel-Tür</h3>
+        <ul>
+          <li>Key und LockBlock einbauen.</li>
+          <li class="wire">Key &gt; TriggerZone &gt; On Enter → LockBlock &gt; Open</li>
+        </ul>
+      </div>
+      <div class="card recipe">
+        <h3><span class="emoji">💣</span>Falle</h3>
+        <ul>
+          <li>Eine TriggerZone in einen Gang legen, eine Kiste mit <b>Explosive</b> darüber.</li>
+          <li class="wire">TriggerZone &gt; On Enter → Explosive &gt; Explode</li>
+          <li>Als Zeitbombe: <span class="wire">Timer &gt; On Finished → Explosive &gt; Explode</span></li>
+        </ul>
+      </div>
+      <div class="card recipe">
+        <h3><span class="emoji">🌀</span>Fallen-Knopf</h3>
+        <ul>
+          <li>Button und einen <b>Teleporter</b> einbauen, <i>Target</i> = ein Ort über der Lava.</li>
+          <li class="wire">Button &gt; On Turned On → Teleporter &gt; Teleport</li>
+          <li>Wer draufdrückt, wird weggebeamt!</li>
+        </ul>
+      </div>
+      <div class="card recipe">
+        <h3><span class="emoji">🌬️</span>Aufwind</h3>
+        <ul>
+          <li>TriggerZone hoch und schmal machen, <b>ForcePush</b> dazu (<i>Speed</i> = 6).</li>
+          <li>TriggerZone: <b>Repeat While Inside</b> = 0.25</li>
+          <li class="wire">TriggerZone &gt; On Enter → ForcePush &gt; Push</li>
+        </ul>
+      </div>
+      <div class="card recipe">
+        <h3><span class="emoji">🌋</span>Sudden Death</h3>
+        <ul>
+          <li><b>RisingLava</b> ins Level ziehen. Beim <i>Timer</i> stellst du ein, nach wie vielen Sekunden die Lava steigt.</li>
+        </ul>
+      </div>
+      <div class="card recipe">
+        <h3><span class="emoji">🏁</span>Parkour-Rennen</h3>
+        <ul>
+          <li>Level Rules: <b>Last Player Standing Wins</b> aus, <b>Respawn Players</b> an.</li>
+          <li>Eine <b>FinishFlag</b> ans Ziel, dazu Sägen, Stacheln und bewegte Plattformen.</li>
+        </ul>
+      </div>
+      <div class="card recipe">
+        <h3><span class="emoji">👑</span>König des Hügels</h3>
+        <ul>
+          <li>Level Rules: <b>Points To Win</b> = 10, <b>Respawn Players</b> an.</li>
+          <li>Eine <b>ScoreZone</b> auf einen gefährlichen Platz stellen.</li>
+        </ul>
+      </div>
+      <div class="card recipe">
+        <h3><span class="emoji">🪙</span>Münzjagd</h3>
+        <ul>
+          <li>Level Rules: <b>Points To Win</b> = 10, <b>Respawn Players</b> an, <b>Last Player Standing Wins</b> aus.</li>
+          <li>Viele <b>Coins</b> verteilen, dazu Waffen zum Stören.</li>
+        </ul>
+      </div>
+      <div class="card recipe">
+        <h3><span class="emoji">🏐</span>Raketen-Volleyball</h3>
+        <ul>
+          <li>Schau dir das Level <i>Demo_RocketVolleyball</i> an.</li>
+          <li><b>Ball</b> und je ein <b>Goal</b> auf den Boden jeder Hälfte.</li>
+          <li>Beim Goal im Script <i>Score</i>: <b>For Player</b> = der Spieler auf der anderen Seite.</li>
+          <li>Level Rules: <b>Points To Win</b> = 5, <b>Player Health</b> = 1000.</li>
+        </ul>
+      </div>
+      <div class="card recipe">
+        <h3><span class="emoji">⚽</span>Fußball</h3>
+        <ul>
+          <li>Wie Volleyball, aber das Goal steht an der Wand.</li>
+          <li><b>For Player</b> = 0: der Spieler, der den Ball zuletzt berührt hat, bekommt den Punkt.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="strip">
+      <img src="img/shot_volleyball.png" alt="Raketen-Volleyball">
+      <img src="img/shot_arena.png" alt="Die Demo-Arena Kisten-Chaos">
+    </div>
+  </section>
+
+  <!-- Eigene Waffe / Spieler -->
+  <section class="page-break">
+    <h2><span class="num icon">🔫</span>Eigene Waffe</h2>
+    <div class="grid grid-2 align-start">
+      <div class="card">
+        <ol class="steps">
+          <li>Rechtsklick auf eine Waffe in <i>Assets/Kit/Prefabs/Weapons</i> &gt; <b>Create &gt; Prefab Variant</b>.</li>
+          <li>Die Variante in <b>deinen Ordner</b> schieben und umbenennen.</li>
+          <li>Werte ändern: <i>Projectiles Per Shot</i>, <i>Spread</i>, <i>Fire Delay</i>, <i>Recoil</i>, <i>Ammo</i> (-1 = unendlich) ...</li>
+          <li>Neues Aussehen: ein Bild aus <b>Assets/Kit/Art/Weapons</b> ins Feld <i>Sprite</i> des <i>Sprite Renderer</i> ziehen. Dann das Kind-Objekt <b>Muzzle</b> an die Mündung schieben: dort kommen die Schüsse raus, in Richtung des gelben Pfeils.</li>
+          <li>Zum Benutzen: ein Pickup ins Level ziehen und bei <i>Weapon</i> deine Waffe eintragen, oder sie beim <i>SpawnPoint</i> als <i>Start Weapon</i> eintragen.</li>
+        </ol>
+      </div>
+      <div>
+        <div class="weapons">
+          <div class="weapon"><img src="img/weapons/Pistol.png" alt="">Pistol</div>
+          <div class="weapon"><img src="img/weapons/Shotgun.png" alt="">Shotgun</div>
+          <div class="weapon"><img src="img/weapons/Minigun.png" alt="">Minigun</div>
+          <div class="weapon"><img src="img/weapons/GrenadeLauncher.png" alt="">GrenadeLauncher</div>
+          <div class="weapon"><img src="img/weapons/Revolver.png" alt="">Revolver</div>
+          <div class="weapon"><img src="img/weapons/Blaster.png" alt="">Blaster</div>
+          <div class="weapon"><img src="img/weapons/LaserRifle.png" alt="">LaserRifle</div>
+          <div class="weapon"><img src="img/weapons/SMG.png" alt="">SMG</div>
+          <div class="weapon"><img src="img/weapons/SniperRifle.png" alt="">SniperRifle</div>
+          <div class="weapon"><img src="img/weapons/WaterGun.png" alt="">WaterGun</div>
+          <div class="weapon"><img src="img/weapons/Flamethrower.png" alt="">Flamethrower</div>
+          <div class="weapon"><img src="img/weapons/HandCannon.png" alt="">HandCannon</div>
+        </div>
+        <p class="small muted" style="margin-top:8px">Passende Geschosse (Laser, Wassertropfen, Kanonenkugel) liegen in <i>Weapons/Projectiles</i>: in eine Prefab-Variante von <i>Bullet</i> einsetzen und bei <i>Projectile</i> eintragen.</p>
+      </div>
+    </div>
+
+    <h2 style="margin-top:28px"><span class="num icon">🏃</span>Eigener Spieler</h2>
+    <p class="lead">Öffne <b>DeinNamePlayer</b> in deinem Ordner und ändere:</p>
+    <div class="card table-card">
+      <table>
+        <thead><tr><th>Einstellung</th><th>Bedeutung</th></tr></thead>
+        <tbody>
+          <tr><td>Max Speed</td><td class="plain">Wie schnell der Spieler läuft</td></tr>
+          <tr><td>Braking</td><td class="plain">Wie schnell er stehen bleibt (0 = rutscht wie auf Eis)</td></tr>
+          <tr><td>Jump Height</td><td class="plain">Sprunghöhe in Tiles, wenn man Springen gedrückt hält</td></tr>
+          <tr><td>Min Jump Height</td><td class="plain">Sprunghöhe, wenn man nur kurz tippt</td></tr>
+          <tr><td>Fall Gravity</td><td class="plain">Wie schnell er wieder runterfällt (2 = doppelt so schnell, wie bei Mario)</td></tr>
+          <tr><td>Extra Jumps</td><td class="plain">Sprünge in der Luft (1 = Doppelsprung)</td></tr>
+          <tr><td>Health</td><td class="plain">Wie viel er aushält</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section id="abgeben">
+    <h2><span class="num">7</span>Abgeben</h2>
+    <div class="grid grid-2">
+      <div class="card">
+        <ol class="steps">
+          <li><b>Built By</b> in den Level Rules ausfüllen, das Schild zeigt deinen Namen.</li>
+          <li>Speichern: <kbd>⌘</kbd>+<kbd>S</kbd></li>
+          <li><b>TUMO &gt; Level exportieren</b>. Die Datei <b>DeinName.unitypackage</b> liegt dann auf dem Schreibtisch.</li>
+          <li>Gib die Datei deiner Lehrerin oder deinem Lehrer. Im Finale spielen alle Level nacheinander! 🎉</li>
+        </ol>
+      </div>
+      <div class="card" style="background: var(--green-soft)">
+        <h3>Regeln, damit das Finale klappt</h3>
+        <ul class="ticks">
+          <li>Nur in deinem Ordner <b>Assets/Levels/DeinName</b> arbeiten.</li>
+          <li>Einstellungen an den Objekten <b>in deiner Szene</b> ändern, nicht die Originale in <i>Assets/Kit</i>.</li>
+          <li>Eigene Waffen und Spieler als <b>Prefab-Variante in deinem Ordner</b> anlegen.</li>
+          <li>Eigene Scripts beginnen mit deinem Namen, z.B. <i>LenaTrampolin.cs</i>.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>Arena-Baukasten · TUMO Ferienworkshop · Grafiken: Kenney (CC0)</footer>
+</div>
+</body>
+</html>
