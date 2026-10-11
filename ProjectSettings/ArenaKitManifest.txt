@@ -430,7 +430,7 @@ Assets/Kit/Art/Platformer/Sprites/_Character/char_enemy_alienShip-damaged.png	D7
 Assets/Kit/Art/Platformer/Sprites/_Character/char_enemy_alienShip-dead.png	BE1F0B32E804A0E2F7234161491E1536
 Assets/Kit/Art/Platformer/Sprites/_Character/char_enemy_alienSlug.png	963E008D4D4500FE4AA9BB28E6E1E5E5
 Assets/Kit/Art/Platformer/Sprites/_Character/char_enemy_alienSlug-dead.png	1546106F376EC5CC1B4BE49709DE4D7C
-Assets/Kit/Art/Platformer/Sprites/_Character/char_hero_beanMan.png	7816C4AA2495C6DB50B99925405CCA50
+Assets/Kit/Art/Platformer/Sprites/_Character/char_hero_beanMan.png	4046E6137F1B2A14CCF592CC68C76B29
 Assets/Kit/Art/Platformer/Sprites/_Environment/env_Bank.png	985456DB818CA3A6143749B97B0C1984
 Assets/Kit/Art/Platformer/Sprites/_Environment/env_bg.png	4B2EB8B9BF98B039698CD45E654DDDE9
 Assets/Kit/Art/Platformer/Sprites/_Environment/env_BigBen.png	CC98F503AD7B5A68213E24642FD7FF4C
@@ -482,7 +482,7 @@ Assets/Kit/Art/Weapons/WaterGun.png	B0496299582A1993FB5E8AE2DD750366
 Assets/Kit/Art/Weapons/weapons.json	2E60920DCA4D929E25ADEB7F811DC7E5
 Assets/Kit/Editor/ArenaKit.Editor.asmdef	2640CEED8D9DC8E34C31C58FCBEC2F5C
 Assets/Kit/Editor/ArenaMenu.cs	5847256ABE23F5EB3FE0B2D99BA4D56F
-Assets/Kit/Editor/KitBuilder.cs	261525995337DF0FFF9C3E7980A0F1FF
+Assets/Kit/Editor/KitBuilder.cs	1A45CF24E859F3428283DEAA719847B9
 Assets/Kit/Editor/KitManifest.cs	ABBC74D93B9BD38DD904E80BD2B21251
 Assets/Kit/Input/ArenaControls.inputactions	6A43B5119E79F87D679A37E504AFE402
 Assets/Kit/Palettes/1 Ground.prefab	4D0D18B09BC3E984B2B67F50481F0ED2
@@ -543,7 +543,7 @@ Assets/Kit/Prefabs/Weapons/Minigun.prefab	AA57407A7050BF4EA63317D19388145A
 Assets/Kit/Prefabs/Weapons/Pistol.prefab	941D486BE4977794C1E9223B6BD94BE0
 Assets/Kit/Prefabs/Weapons/Shotgun.prefab	455EE355AA42727769194986EB1CB2B2
 Assets/Kit/Resources/ArenaKit/ArenaFont.ttf	3B80D074AEC847722AAD8EC5A5DBA52A
-Assets/Kit/Resources/ArenaKit/Player.prefab	892CE95F8AC70244C62AE42CB3E1F043
+Assets/Kit/Resources/ArenaKit/Player.prefab	99F829A79332217D59AAD7BB42B29002
 Assets/Kit/Scenes/Template.unity	1A79D1AEBA04A93953B974C0E6F2B172
 Assets/Kit/Scripts/ArenaKit.asmdef	D858B1D211C706AE6671EED7D958DC92
 Assets/Kit/Scripts/Blocks/Ball.cs	9BD1688DCB4C9ACDD562CC53CA495E82
@@ -566,7 +566,7 @@ Assets/Kit/Scripts/Blocks/Timer.cs	6E039035B4A15746202C3D879D6C68F3
 Assets/Kit/Scripts/Blocks/TriggerZone.cs	F53FEFFF3AABCC2B16C7F6256E62F58B
 Assets/Kit/Scripts/Core/ArenaCamera.cs	6385E8A309EBA106EBD6DBAD083A1F95
 Assets/Kit/Scripts/Core/CameraBackground.cs	97B3CAD2C3053BD10D11C457653B9394
-Assets/Kit/Scripts/Core/Character.cs	F9AC2A8BBD89C797EFFB1920D63F43FB
+Assets/Kit/Scripts/Core/Character.cs	B6AB84D6AF5F14E0C81DCFCA8FBA2BC2
 Assets/Kit/Scripts/Core/GameManager.cs	23645CDAF07C765BDAA15EC383D5441B
 Assets/Kit/Scripts/Core/Interfaces.cs	457C47B49E82DB94F059E6FE678FE060
 Assets/Kit/Scripts/Core/LevelRules.cs	8DC1CB4C11419DC62EF15DA507E8CE14

@@ -47,7 +47,7 @@ namespace ArenaKit
         [Tooltip("These sprites get the player color (red, blue, green, yellow)")]
         public SpriteRenderer[] ColoredParts;
         [Tooltip("How strong the player color is")]
-        [Range(0f, 1f)] public float ColorStrength = 0.6f;
+        [Range(0f, 1f)] public float ColorStrength = 1f;
         [Tooltip("Arrow above the head in the full player color")]
         public SpriteRenderer Marker;
 

@@ -878,7 +878,7 @@ namespace ArenaKit.EditorTools
                 character.AirControl = 1f;
                 character.WeaponMount = mount;
                 character.ColoredParts = new[] { root.transform.Find("body").GetComponent<SpriteRenderer>() };
-                character.ColorStrength = 0.6f;
+                character.ColorStrength = 1f;
                 character.Marker = markerRenderer;
                 character.JumpSounds = new[] { PlatformerSound("Player/Jumps/Player-jump1.wav"), PlatformerSound("Player/Jumps/Player-jump2.wav"), PlatformerSound("Player/Jumps/Player-jump3.wav") };
                 character.HurtSounds = new[] { PlatformerSound("Player/Ouch/Player-ouch1.wav"), PlatformerSound("Player/Ouch/Player-ouch2.wav"), PlatformerSound("Player/Ouch/Player-ouch3.wav") };

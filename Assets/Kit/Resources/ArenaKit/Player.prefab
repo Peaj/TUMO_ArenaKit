@@ -756,7 +756,7 @@ MonoBehaviour:
   WeaponMount: {fileID: 400026}
   ColoredParts:
   - {fileID: 21200022}
-  ColorStrength: 0.6
+  ColorStrength: 1
   Marker: {fileID: 6050961251290626073}
   JumpSounds:
   - {fileID: 8300000, guid: 50a8d8a939a0f4e77a0dac6ecd2e582b, type: 3}
