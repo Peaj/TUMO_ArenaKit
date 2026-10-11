@@ -522,6 +522,22 @@ namespace ArenaKit.Tests
             Assert.AreEqual(cratesBefore + 1, Object.FindObjectsByType<Breakable>(FindObjectsSortMode.None).Length, "The trigger zone makes the spawner drop a crate");
         }
 
+        [UnityTest]
+        public IEnumerator Showcase_OnlyPlayerOne_CameraFollowsThroughTheWholeRow()
+        {
+            yield return LoadLevel(ShowcaseScene);
+            Assert.AreEqual(1, LevelRules.Current.Players.Count, "Only player 1 explores the showcase");
+            Character player = Player(1);
+
+            foreach (float x in new[] { 30f, 95f, 150f })
+            {
+                yield return TouchAt(player, x);
+                yield return new WaitForSeconds(2f);
+                AssertOnScreen(player, $"Player at x = {x}");
+                Assert.Less(Camera.main.orthographicSize, 9f, $"The camera stays zoomed in on the player at x = {x}");
+            }
+        }
+
         /// <summary>Not a real check: saves pictures of the whole showcase row if ARENA_PREVIEW_DIR is set.</summary>
         [UnityTest]
         public IEnumerator Showcase_Preview()

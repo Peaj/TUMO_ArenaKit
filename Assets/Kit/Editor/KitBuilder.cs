@@ -1812,6 +1812,7 @@ namespace ArenaKit.EditorTools
             rules.LastPlayerStandingWins = false;
             rules.RespawnPlayers = true;
             rules.PointsToWin = 999;
+            rules.MaxPlayers = 1;
 
             const int right = 169;
             Transform labels = new GameObject("Labels").transform;
@@ -1821,11 +1822,8 @@ namespace ArenaKit.EditorTools
             Fill(level.Ground, "Grass", -2, 0, -2, 11);
             Fill(level.Ground, "Grass", right, 0, right, 11);
 
-            PlaceSpawn(level, 1, new Vector3(1f, 1.2f, 0f));
-            PlaceSpawn(level, 2, new Vector3(2.5f, 1.2f, 0f));
-            PlaceSpawn(level, 3, new Vector3(4f, 1.2f, 0f));
-            PlaceSpawn(level, 4, new Vector3(5.5f, 1.2f, 0f));
-            Label(labels, "SpawnPoint", "Hier starten die Spieler", 3.25f);
+            PlaceSpawn(level, 1, new Vector3(3.25f, 1.2f, 0f));
+            Label(labels, "SpawnPoint", "Hier startest du", 3.25f);
 
             // --- Weapons ---
             string[] pickups = { "Pickup_Pistol", "Pickup_Shotgun", "Pickup_Minigun", "Pickup_Bazooka", "Pickup_GrenadeLauncher", "Pickup_Random" };
@@ -1953,7 +1951,8 @@ namespace ArenaKit.EditorTools
             Place("ScoreZone", new Vector3(135.5f, 1.5f, 0f));
             Label(labels, "ScoreZone", "Allein drinstehen = Punkte", 135.5f);
 
-            Place("Ball", new Vector3(140f, 3f, 0f));
+            // The camera follows the player through the whole row, not the ball at the far end.
+            Place("Ball", new Vector3(140f, 3f, 0f)).GetComponent<Ball>().CameraFollows = false;
             Place("Goal", new Vector3(144.5f, 1.5f, 0f));
             Label(labels, "Ball  +  Goal", "Ball ins Tor = Punkt", 142.25f);
 

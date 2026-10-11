@@ -16,7 +16,7 @@ Student material in German: [Docs/Spickzettel.md](Docs/Spickzettel.md)
 2. Open `Assets/Levels/Demo_Arena/Demo_Arena.unity` and press Play.
 3. After every round the next level of the build list loads (Demo_Arena → Demo_RocketVolleyball → ...).
 4. To try every building block, use `TUMO > Alle Bausteine ansehen`. It opens `Assets/Kit/Scenes/Showcase.unity`, where all blocks stand in one row with labels:
-   - Players start on the left.
+   - Only player 1 plays (`Level Rules > Max Players` = 1) and starts on the left. The camera follows them through the whole row.
    - Respawn is on and nobody wins.
    - The event examples are already wired: lever → door, button → door, timer → door, 3 coins → counter → door, key → lock block, trigger zone → spawner, lever → rising lava.
 
@@ -162,14 +162,14 @@ Players always start without a weapon. Use a `SpawnPoint > Start Weapon` to hand
 
   `KitBuilder.BuildShowcaseOnly` rebuilds just the showcase. When you add a new block prefab, also add it to `BuildShowcase`. The builder warns about any block that is missing there.
 - **Kit checksum:** after changing kit files by hand, run `TUMO > Lehrer > Kit-Prüfsumme speichern` so the export check doesn't warn students about your changes.
-- **Tests:** `Window > General > Test Runner > PlayMode`, 24 tests. They cover:
+- **Tests:** `Window > General > Test Runner > PlayMode`, 25 tests. They cover:
   - spawning, both keyboard halves, jumping, quick stop, variable jump height
   - pickups, bazooka kill and round end, empty weapons dropping, rocket rotation, grenade launcher aim
   - jump pad, explosion with crate drop
   - level rotation, volleyball goal
   - camera: follows living players, drops dead ones, zooms in on the winner, stays inside the level at 16:9, 16:10, 4:3 and 21:9
   - tile collision in every kit scene
-  - showcase events: lever, coins → counter, key, trigger zone → spawner
+  - showcase: lever, coins → counter, key, trigger zone → spawner, only player 1, camera follows along the whole row
 
   Batch mode:
   `Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ArenaKit.Tests`

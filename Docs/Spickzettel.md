@@ -117,6 +117,7 @@ Klicke in der Hierarchy auf **Level Rules**:
 | **Points To Win** | So viele Punkte braucht man zum Sieg |
 | **Kills Give Points** | Jeder Treffer, der tötet, gibt einen Punkt |
 | **Time Limit** | Sekunden bis zum Rundenende (0 = kein Limit) |
+| **Max Players** | Wie viele mitspielen (1 = allein, z.B. zum Erkunden) |
 | **Player Prefab** | Dein eigener Spieler (liegt schon in deinem Ordner) |
 | **Player Health** | Leben aller Spieler (0 = normal, 1000 = fast unverwundbar) |
 | **Respawn Players** | Tote Spieler kommen zurück |

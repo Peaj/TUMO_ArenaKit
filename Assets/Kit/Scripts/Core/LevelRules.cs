@@ -33,6 +33,8 @@ namespace ArenaKit
         [Min(0f)] public float TimeLimit = 0f;
 
         [Header("Players")]
+        [Tooltip("How many players can play this level. 1 = only player 1, e.g. for a level to explore alone")]
+        [Range(1, GameManager.MaxPlayers)] public int MaxPlayers = GameManager.MaxPlayers;
         [Tooltip("Your own player prefab (variant) to change speed, jump, health... Leave empty for the standard player")]
         public Character PlayerPrefab;
         [Tooltip("Health of every player in this level. 0 = use the value of the player prefab")]
@@ -115,6 +117,8 @@ namespace ArenaKit
 
             foreach (GameManager.PlayerSlot slot in GameManager.Instance.GetPlayerSlots())
             {
+                if (slot.Number > MaxPlayers)
+                    continue;
                 this.slots[slot.Number] = slot;
                 SpawnPlayer(slot.Number);
             }
