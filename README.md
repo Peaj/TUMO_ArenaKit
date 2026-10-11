@@ -202,10 +202,10 @@ Players always start without a weapon. Use a `SpawnPoint > Start Weapon` to hand
 
   `KitBuilder.BuildShowcaseOnly` rebuilds just the showcase. When you add a new block prefab, also add it to `BuildShowcase`. The builder warns about any block that is missing there.
 - **Kit checksum:** after changing kit files by hand, run `TUMO > Lehrer > Kit-Prüfsumme speichern` so the export check doesn't warn students about your changes.
-- **Tests:** `Window > General > Test Runner > PlayMode`, 27 tests. They cover:
+- **Tests:** `Window > General > Test Runner > PlayMode`, 28 tests. They cover:
   - spawning, both keyboard halves, jumping, quick stop, variable jump height
   - pickups, bazooka kill and round end, empty weapons dropping, rocket rotation, grenade launcher aim
-  - jump pad, explosion with crate drop, mine (arms on step, explodes on leaving), TNT chain
+  - jump pad, explosion with crate drop, mine (arms on step, explodes on leaving), TNT chain, spikes and saw breaking crates
   - level rotation, volleyball goal
   - camera: follows living players, drops dead ones, zooms in on the winner, stays inside the level at 16:9, 16:10, 4:3 and 21:9
   - tile collision in every kit scene

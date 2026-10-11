@@ -152,7 +152,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ec6802e157b66e74a89995ad51d6f568, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArenaKit::ArenaKit.TriggerZone
-  ReactsTo: 0
+  ReactsTo: 3
   OnlyForPlayer: 0
   OnlyOnce: 0
   Cooldown: 0

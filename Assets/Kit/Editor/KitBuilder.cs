@@ -1239,14 +1239,14 @@ namespace ArenaKit.EditorTools
                 var box = root.AddComponent<BoxCollider2D>();
                 box.size = new Vector2(0.9f, 0.45f);
                 box.offset = new Vector2(0f, -0.25f);
-                AddDeadlyTouch(root, TriggerTarget.Players);
+                AddDeadlyTouch(root, TriggerTarget.AnyPhysicsObject);
                 PrefabLookup["Spikes"] = SavePrefab(root, $"{blocks}/Spikes.prefab");
             }
             {
                 var root = new GameObject("Saw");
                 AddSprite(root, Kenney("saw"), OrderProps);
                 root.AddComponent<CircleCollider2D>().radius = 0.42f;
-                AddDeadlyTouch(root, TriggerTarget.Players);
+                AddDeadlyTouch(root, TriggerTarget.AnyPhysicsObject);
                 var mover = root.AddComponent<Mover>();
                 mover.Offset = new Vector2(3f, 0f);
                 mover.Speed = 2f;

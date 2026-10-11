@@ -589,6 +589,18 @@ namespace ArenaKit.Tests
             }
         }
 
+        [UnityTest]
+        public IEnumerator Showcase_SpikesAndSawBreakCrates()
+        {
+            yield return LoadLevel(ShowcaseScene);
+            var crateOnSpikes = Object.Instantiate(LoadPrefab<Breakable>("Blocks/Crate"), new Vector3(118f, 2f, 0f), Quaternion.identity);
+            var crateOnSaw = Object.Instantiate(LoadPrefab<Breakable>("Blocks/Crate"), new Vector3(123.5f, 2f, 0f), Quaternion.identity);
+            yield return new WaitForSeconds(3f);
+
+            Assert.IsTrue(crateOnSpikes == null, "A crate falling into spikes breaks");
+            Assert.IsTrue(crateOnSaw == null, "The saw cuts through a crate");
+        }
+
         /// <summary>Not a real check: saves pictures of the whole showcase row if ARENA_PREVIEW_DIR is set.</summary>
         [UnityTest]
         public IEnumerator Showcase_Preview()
