@@ -1,26 +1,21 @@
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Events;
 
 namespace ArenaKit
 {
     /// <summary>
-    /// Beams players (and objects) to its target teleporter. Speed is kept.
-    /// Link two teleporters to each other to go back and forth.
+    /// Beams whatever triggered it to the target. Speed is kept.
+    /// The TeleporterPair prefab: two portals, each a TriggerZone > Teleporter > Teleport with the other one as target.
     /// </summary>
-    [RequireComponent(typeof(Collider2D))]
     public class Teleporter : MonoBehaviour
     {
         [Tooltip("Where things come out")]
-        public Teleporter Target;
-        [Tooltip("Also beam projectiles, balls and crates")]
+        public Transform Target;
+        [Tooltip("Also beam projectiles, balls and crates, not only players")]
         public bool TeleportObjects = true;
         public AudioClip Sound;
 
-        [Header("Events")]
-        [Tooltip("Called with the player who got teleported (0 = no player)")]
-        public UnityEvent<int> OnTeleport = new UnityEvent<int>();
-
+        /// <summary>Coming out of a portal must not beam you right back.</summary>
         const float Cooldown = 0.4f;
         static readonly Dictionary<Rigidbody2D, float> lastTeleport = new Dictionary<Rigidbody2D, float>();
 
@@ -30,18 +25,11 @@ namespace ArenaKit
             lastTeleport.Clear();
         }
 
-        void Awake()
+        /// <summary>Beams whatever triggered the event to the target.</summary>
+        public void Teleport()
         {
-            GetComponent<Collider2D>().isTrigger = true;
-        }
-
-        void OnTriggerEnter2D(Collider2D other)
-        {
-            if (Target == null || Target == this)
-                return;
-
-            Rigidbody2D body = other.attachedRigidbody;
-            if (body == null || body.bodyType != RigidbodyType2D.Dynamic)
+            Rigidbody2D body = TriggeredBy.Body;
+            if (Target == null || body == null || body.bodyType != RigidbodyType2D.Dynamic)
                 return;
 
             var character = body.GetComponent<Character>();
@@ -54,9 +42,11 @@ namespace ArenaKit
                 return;
             lastTeleport[body] = Time.time;
 
-            Vector2 exit = Target.transform.position;
+            Vector2 exit = Target.position;
             if (character != null)
+            {
                 character.Teleport(exit);
+            }
             else
             {
                 body.position = exit;
@@ -64,7 +54,6 @@ namespace ArenaKit
             }
 
             GameManager.PlaySound(Sound, 0.7f);
-            OnTeleport.Invoke(character != null ? character.PlayerNumber : 0);
         }
 
         void OnDrawGizmos()
@@ -72,7 +61,7 @@ namespace ArenaKit
             if (Target == null)
                 return;
             Gizmos.color = new Color(0.7f, 0.4f, 1f, 0.8f);
-            Gizmos.DrawLine(transform.position, Target.transform.position);
+            Gizmos.DrawLine(transform.position, Target.position);
         }
     }
 }

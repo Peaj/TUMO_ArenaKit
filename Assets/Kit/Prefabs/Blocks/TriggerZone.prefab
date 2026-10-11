@@ -92,8 +92,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ArenaKit::ArenaKit.TriggerZone
   ReactsTo: 0
+  OnlyForPlayer: 0
   OnlyOnce: 0
   Cooldown: 0
+  RepeatWhileInside: 0
   OnEnter:
     m_PersistentCalls:
       m_Calls: []

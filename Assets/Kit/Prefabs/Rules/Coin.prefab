@@ -11,7 +11,11 @@ GameObject:
   - component: {fileID: 6933104207477656087}
   - component: {fileID: 6415597253327874105}
   - component: {fileID: 3482940495290609538}
-  - component: {fileID: 5491294408062571316}
+  - component: {fileID: 8044519525349955823}
+  - component: {fileID: 8876652241226938537}
+  - component: {fileID: 2354311288702844862}
+  - component: {fileID: 5708590077389623760}
+  - component: {fileID: 5926986705172301880}
   m_Layer: 0
   m_Name: Coin
   m_TagString: Untagged
@@ -123,13 +127,13 @@ CircleCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 0.35
---- !u!114 &5491294408062571316
+--- !u!114 &8044519525349955823
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -138,12 +142,108 @@ MonoBehaviour:
   m_GameObject: {fileID: 8836279659608058806}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a823ab3707453ef47a52e54f8ebcd713, type: 3}
+  m_Script: {fileID: 11500000, guid: 28b115542794de74f81aa0dce214b423, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: ArenaKit::ArenaKit.Collectible
-  Points: 1
-  RespawnTime: 0
-  Sound: {fileID: 8300000, guid: d2237b22a11f37c4e9f0b697823dbe8f, type: 3}
-  OnCollected:
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.Hover
+  Height: 0.08
+  Speed: 3
+--- !u!114 &8876652241226938537
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8836279659608058806}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec6802e157b66e74a89995ad51d6f568, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.TriggerZone
+  ReactsTo: 0
+  OnlyForPlayer: 0
+  OnlyOnce: 0
+  Cooldown: 0
+  RepeatWhileInside: 0
+  OnEnter:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2354311288702844862}
+        m_TargetAssemblyTypeName: ArenaKit.PlaySound, ArenaKit
+        m_MethodName: Play
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 5708590077389623760}
+        m_TargetAssemblyTypeName: ArenaKit.Score, ArenaKit
+        m_MethodName: AddPoints
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 5926986705172301880}
+        m_TargetAssemblyTypeName: ArenaKit.Disappear, ArenaKit
+        m_MethodName: Hide
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnExit:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &2354311288702844862
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8836279659608058806}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76df5bc061ae41b48a834d21a4c780ef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.PlaySound
+  Sound: {fileID: 8300000, guid: d2237b22a11f37c4e9f0b697823dbe8f, type: 3}
+  Volume: 0.7
+--- !u!114 &5708590077389623760
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8836279659608058806}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81337805ca0f7264dbf38b5c47fef300, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.Score
+  Points: 1
+  ForPlayer: 0
+--- !u!114 &5926986705172301880
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8836279659608058806}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 43c69487d0e51e949b6e4b666b4fcdab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.Disappear
+  RespawnTime: 0

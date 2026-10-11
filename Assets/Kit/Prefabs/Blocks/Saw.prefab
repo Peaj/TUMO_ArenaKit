@@ -11,7 +11,8 @@ GameObject:
   - component: {fileID: 3806264389670448052}
   - component: {fileID: 6467309475944245050}
   - component: {fileID: 6797103355135648264}
-  - component: {fileID: 8259106195098321229}
+  - component: {fileID: 3622956702206498939}
+  - component: {fileID: 7140282913849055577}
   - component: {fileID: 1616953705221741495}
   m_Layer: 0
   m_Name: Saw
@@ -130,7 +131,7 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 0.42
---- !u!114 &8259106195098321229
+--- !u!114 &3622956702206498939
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -139,18 +140,48 @@ MonoBehaviour:
   m_GameObject: {fileID: 5123874712527487161}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 48d7dd0c4cef57b40b12558b20ea7984, type: 3}
+  m_Script: {fileID: 11500000, guid: ec6802e157b66e74a89995ad51d6f568, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: ArenaKit::ArenaKit.Hazard
-  InstantKill: 1
-  Damage: 34
-  DamageInterval: 0.5
-  Knockback: 0
-  RemoveObjects: 0
-  HitSound: {fileID: 0}
-  OnHurtPlayer:
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.TriggerZone
+  ReactsTo: 0
+  OnlyForPlayer: 0
+  OnlyOnce: 0
+  Cooldown: 0
+  RepeatWhileInside: 0
+  OnEnter:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 7140282913849055577}
+        m_TargetAssemblyTypeName: ArenaKit.Damager, ArenaKit
+        m_MethodName: Hurt
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnExit:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &7140282913849055577
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5123874712527487161}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e24f4899f0586347af91f901a1a3763, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.Damager
+  InstantKill: 1
+  Damage: 34
+  Knockback: 0
+  HitSound: {fileID: 0}
 --- !u!114 &1616953705221741495
 MonoBehaviour:
   m_ObjectHideFlags: 0

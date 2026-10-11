@@ -10,7 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 6031283229447967717}
   - component: {fileID: 8836084518956682800}
-  - component: {fileID: 2713222990887233989}
+  - component: {fileID: 751495678063699716}
+  - component: {fileID: 2166523656556681095}
+  - component: {fileID: 1605911403207921763}
   m_Layer: 0
   m_Name: KillZone
   m_TagString: Untagged
@@ -79,7 +81,7 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 60, y: 4}
   m_EdgeRadius: 0
---- !u!114 &2713222990887233989
+--- !u!114 &751495678063699716
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -88,15 +90,70 @@ MonoBehaviour:
   m_GameObject: {fileID: 6534694218759401270}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 48d7dd0c4cef57b40b12558b20ea7984, type: 3}
+  m_Script: {fileID: 11500000, guid: ec6802e157b66e74a89995ad51d6f568, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: ArenaKit::ArenaKit.Hazard
-  InstantKill: 1
-  Damage: 34
-  DamageInterval: 0.5
-  Knockback: 0
-  RemoveObjects: 1
-  HitSound: {fileID: 0}
-  OnHurtPlayer:
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.TriggerZone
+  ReactsTo: 4
+  OnlyForPlayer: 0
+  OnlyOnce: 0
+  Cooldown: 0
+  RepeatWhileInside: 0
+  OnEnter:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 2166523656556681095}
+        m_TargetAssemblyTypeName: ArenaKit.Damager, ArenaKit
+        m_MethodName: Kill
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 1605911403207921763}
+        m_TargetAssemblyTypeName: ArenaKit.Remover, ArenaKit
+        m_MethodName: RemoveObject
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnExit:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &2166523656556681095
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6534694218759401270}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7e24f4899f0586347af91f901a1a3763, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.Damager
+  InstantKill: 1
+  Damage: 34
+  Knockback: 0
+  HitSound: {fileID: 0}
+--- !u!114 &1605911403207921763
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6534694218759401270}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8dcabbea53876a4ba125ec1c7da47ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.Remover
+  BallResetDelay: 0

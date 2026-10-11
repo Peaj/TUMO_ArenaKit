@@ -78,7 +78,8 @@ Ziehe Prefabs aus **Assets/Kit/Prefabs** in deine Szene. Die Einstellungen ände
 | **JumpPad** | Sprungfeder. Dreh sie, dann wird sie zum Seiten-Booster |
 | **MovingPlatform / Elevator** | Bewegte Plattform. Die gelbe Linie zeigt, wohin sie fährt (*Offset*) |
 | **TeleporterPair** | Zwei Portale, die verbunden sind |
-| **Mine / TNTBlock** | Explodiert bei Berührung bzw. wenn man draufschießt |
+| **Mine** | Drauftreten: das Licht blinkt. Runtergehen oder draufschießen: Bumm! |
+| **TNTBlock** | Explodiert, wenn man draufschießt |
 | **Spikes / Saw** | Tödlich |
 | **RisingLava** | Nach 30 Sekunden steigt die Lava! |
 | **Door / LockBlock** | Versperrt den Weg, bis ein Event sie öffnet |
@@ -123,15 +124,50 @@ Klicke in der Hierarchy auf **Level Rules**:
 | **Respawn Players** | Tote Spieler kommen zurück |
 | **Gravity** | 1 = normal, 0.3 = Mond, 2 = schwer |
 
-## 5. Dinge verbinden mit Events
+## 5. Auslöser und Aktionen
 
-Viele Bausteine haben unten im Inspector **Events** (z.B. *On Turned On*). So verbindest du sie:
+Jeder Baustein ist aus kleinen Scripts zusammengesteckt: **Auslöser** merken, dass etwas passiert, **Aktionen** machen etwas. Eine Sprungfeder ist zum Beispiel eine *TriggerZone* (jemand läuft rein) plus ein *ForcePush* (schubst ihn nach oben). Klick einen Baustein an und schau im Inspector nach!
 
-1. Beim Event auf **+** klicken.
-2. Das Objekt, das reagieren soll, aus der Hierarchy in das leere Feld ziehen.
-3. Rechts die Funktion auswählen, z.B. **Door > Open ()**.
+So verbindest du einen Auslöser mit einer Aktion:
 
-Die Zahl bei Events ist die **Spielernummer**. Wählst du eine Funktion unter **Dynamic int** (z.B. *LevelRules > AddPoint*), bekommt genau der Spieler den Punkt, der den Baustein ausgelöst hat.
+1. Beim Event des Auslösers (z.B. *On Enter*) auf **+** klicken.
+2. Das Objekt mit der Aktion aus der Hierarchy in das leere Feld ziehen.
+3. Rechts die Aktion auswählen, z.B. **ForcePush > Push ()**.
+
+**Wichtig:** Aktionen wirken auf den, der sie ausgelöst hat. Läuft Spieler 2 in die TriggerZone, schubst *ForcePush* Spieler 2, *Damager* verletzt Spieler 2 und *Score* gibt Spieler 2 den Punkt.
+
+**Auslöser** (haben Events)
+
+| Script | Event | Wann? |
+|---|---|---|
+| **TriggerZone** | On Enter / On Exit | Jemand läuft rein / raus. Bei *Reacts To* stellst du ein, wer: Spieler, Bälle, Geschosse, alles ... |
+| **HitSensor** | On Hit | Wird angeschossen oder von einer Explosion getroffen |
+| **Breakable** | On Broken | Hat genug Schaden bekommen |
+| **Switch** | On Turned On / Off | Wird an- oder ausgeschaltet |
+| **Timer** | On Finished | Nach X Sekunden |
+| **Counter** | On Reached | Nach N Mal |
+
+**Aktionen** (wählst du rechts im Event aus)
+
+| Script | Aktion | Was passiert? |
+|---|---|---|
+| **Explosive** | Explode | Bumm! |
+| **ForcePush** | Push | Schubst in Richtung des grünen Pfeils |
+| **Damager** | Hurt / Kill | Verletzt bzw. tötet |
+| **Teleporter** | Teleport | Beamt zum *Target* |
+| **Score** | AddPoints / WinRound / SendToStart | Punkte, Sieg, zurück zum Start |
+| **Disappear** | Hide | Verschwindet (und kommt nach *Respawn Time* zurück) |
+| **Remover** | RemoveObject / RemoveSelf | Entfernt Kisten, Waffen ... bzw. sich selbst |
+| **Spawner** | Spawn | Erzeugt ein Objekt |
+| **Door** | Open / Close / Toggle | Tür auf und zu |
+| **Mover** | MoveToEnd / MoveToStart / Toggle | Fährt hin und zurück |
+| **Switch** | Toggle / TurnOn / TurnOff | Schalter umlegen |
+| **Counter** | Add | Zählt eins hoch |
+| **Timer** | StartTimer | Startet die Uhr |
+| **SwapSprite** | Show / ShowFor | Zeigt ein anderes Bild |
+| **PlaySound** | Play | Spielt einen Sound |
+
+Die Zahl bei Events ist die **Spielernummer**. Funktionen unter **Dynamic int** (z.B. *LevelRules > AddPoint*) bekommen sie direkt.
 
 ## 6. Rezepte für eigene Spielideen
 
@@ -142,7 +178,21 @@ Die Zahl bei Events ist die **Spielernummer**. Wählst du eine Funktion unter **
 
 **🔑 Schlüssel-Tür**
 - Key und LockBlock einbauen.
-- Key > *On Collected* → LockBlock > **Open**
+- Key > TriggerZone > *On Enter* → LockBlock > **Open**
+
+**💣 Falle**
+- Eine TriggerZone in einen Gang legen und eine Kiste mit **Explosive** darüber.
+- TriggerZone > *On Enter* → Explosive > **Explode**
+- Oder als Zeitbombe: Timer > *On Finished* → Explosive > **Explode**
+
+**🌬️ Aufwind**
+- TriggerZone hoch und schmal machen, **ForcePush** dazu (*Speed* = 6).
+- TriggerZone: **Repeat While Inside** = 0.25
+- TriggerZone > *On Enter* → ForcePush > **Push**. Wer drin ist, wird immer wieder nach oben geschubst.
+
+**🌀 Fallen-Knopf**
+- Button und einen **Teleporter** einbauen, *Target* = ein Ort über der Lava.
+- Button > Switch > *On Turned On* → Teleporter > **Teleport**. Wer draufdrückt, wird weggebeamt!
 
 **🌋 Sudden Death**
 - RisingLava ins Level ziehen. Beim *Timer* stellst du ein, nach wie vielen Sekunden die Lava steigt.
@@ -162,12 +212,12 @@ Die Zahl bei Events ist die **Spielernummer**. Wählst du eine Funktion unter **
 **🏐 Raketen-Volleyball**
 - Schau dir das Level *Demo_RocketVolleyball* an.
 - **Ball** und je ein **Goal** auf den Boden jeder Hälfte legen.
-- Beim *Goal* ist **Point For Player** der Spieler auf der anderen Seite.
+- Beim *Goal* ist im Script *Score* **For Player** der Spieler auf der anderen Seite.
 - Level Rules: **Points To Win** = 5, **Player Health** = 1000.
 
 **⚽ Fußball**
 - Wie Volleyball, aber das *Goal* steht an der Wand.
-- **Point For Player** = 0, dann bekommt der Spieler den Punkt, der den Ball zuletzt berührt hat.
+- **For Player** = 0, dann bekommt der Spieler den Punkt, der den Ball zuletzt berührt hat.
 
 **🔫 Eigene Waffe**
 1. Rechtsklick auf eine Waffe in *Assets/Kit/Prefabs/Weapons* > **Create > Prefab Variant**.

@@ -11,7 +11,10 @@ GameObject:
   - component: {fileID: 8123955134983686271}
   - component: {fileID: 8994659345325121505}
   - component: {fileID: 5859012484894880950}
-  - component: {fileID: 8003158179678296226}
+  - component: {fileID: 6504818976606486673}
+  - component: {fileID: 5967485356382769051}
+  - component: {fileID: 8154017425597478937}
+  - component: {fileID: 4986500940557383045}
   m_Layer: 0
   m_Name: Goal
   m_TagString: Untagged
@@ -123,7 +126,7 @@ BoxCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
@@ -139,7 +142,7 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
---- !u!114 &8003158179678296226
+--- !u!114 &6504818976606486673
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -148,12 +151,94 @@ MonoBehaviour:
   m_GameObject: {fileID: 9192577388197809634}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ffed1e63586906640a6abffc1df2f684, type: 3}
+  m_Script: {fileID: 11500000, guid: ec6802e157b66e74a89995ad51d6f568, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: ArenaKit::ArenaKit.Goal
-  PointForPlayer: 0
-  ResetBall: 1
-  GoalSound: {fileID: 8300000, guid: b56b79986bea4bc428a4947b2f6e2fbe, type: 3}
-  OnGoal:
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.TriggerZone
+  ReactsTo: 2
+  OnlyForPlayer: 0
+  OnlyOnce: 0
+  Cooldown: 0
+  RepeatWhileInside: 0
+  OnEnter:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 5967485356382769051}
+        m_TargetAssemblyTypeName: ArenaKit.PlaySound, ArenaKit
+        m_MethodName: Play
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 8154017425597478937}
+        m_TargetAssemblyTypeName: ArenaKit.Score, ArenaKit
+        m_MethodName: AddPoints
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 4986500940557383045}
+        m_TargetAssemblyTypeName: ArenaKit.Remover, ArenaKit
+        m_MethodName: RemoveObject
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnExit:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &5967485356382769051
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9192577388197809634}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76df5bc061ae41b48a834d21a4c780ef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.PlaySound
+  Sound: {fileID: 8300000, guid: b56b79986bea4bc428a4947b2f6e2fbe, type: 3}
+  Volume: 0.7
+--- !u!114 &8154017425597478937
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9192577388197809634}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81337805ca0f7264dbf38b5c47fef300, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.Score
+  Points: 1
+  ForPlayer: 0
+--- !u!114 &4986500940557383045
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9192577388197809634}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f8dcabbea53876a4ba125ec1c7da47ac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.Remover
+  BallResetDelay: 0.5

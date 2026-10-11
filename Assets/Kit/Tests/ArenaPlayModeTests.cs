@@ -308,7 +308,7 @@ namespace ArenaKit.Tests
         {
             yield return LoadLevel(ArenaScene);
             Character left = Player(1);
-            JumpPad pad = Object.FindAnyObjectByType<JumpPad>();
+            ForcePush pad = Object.FindAnyObjectByType<ForcePush>();
             yield return new WaitForSeconds(0.3f);
 
             left.Teleport((Vector2)pad.transform.position + Vector2.up * 1.2f);
@@ -338,6 +338,57 @@ namespace ArenaKit.Tests
             Assert.Less(left.CurrentHealth, left.Health, "The explosion hurts the player");
             Assert.IsTrue(crate == null, "The weapon crate breaks");
             Assert.AreEqual(pickupsBefore + 1, Object.FindObjectsByType<WeaponPickup>(FindObjectsSortMode.None).Length, "The crate drops a weapon");
+        }
+
+        [UnityTest]
+        public IEnumerator Arena_MineArmsWhenSteppedOn_ExplodesWhenLeft()
+        {
+            yield return LoadLevel(ArenaScene);
+            Character left = Player(1);
+            Explosive mine = null;
+            foreach (Explosive explosive in Object.FindObjectsByType<Explosive>(FindObjectsSortMode.None))
+                if (explosive.name == "Mine")
+                    mine = explosive;
+            Assert.IsNotNull(mine, "The arena has a mine");
+            var spriteRenderer = mine.GetComponent<SpriteRenderer>();
+            Sprite idle = spriteRenderer.sprite;
+
+            left.Teleport((Vector2)mine.transform.position + Vector2.up * 1.2f);
+            left.Body.linearVelocity = Vector2.zero;
+            bool blinked = false;
+            for (float end = Time.time + 0.5f; Time.time < end; )
+            {
+                blinked |= spriteRenderer.sprite != idle;
+                yield return null;
+            }
+
+            Assert.IsTrue(blinked, "Standing on the mine makes its light blink");
+            Assert.IsTrue(mine != null && !mine.IsArmed, "The mine waits while someone stands on it");
+
+            left.Teleport(new Vector2(-10f, -5.8f));
+            yield return new WaitForSeconds(0.3f);
+            Assert.IsTrue(mine == null, "Stepping off the mine blows it up");
+        }
+
+        [UnityTest]
+        public IEnumerator Arena_TNTExplodesWhenHit()
+        {
+            yield return LoadLevel(ArenaScene);
+            Explosive tnt = null;
+            foreach (Explosive explosive in Object.FindObjectsByType<Explosive>(FindObjectsSortMode.None))
+                if (explosive.name == "TNTBlock")
+                    tnt = explosive;
+            Assert.IsNotNull(tnt, "The arena has a TNT block");
+
+            // Player 2 stands next to the TNT, player 1 shoots it (a small explosion from far away).
+            Character right = Player(2);
+            right.Teleport((Vector2)tnt.transform.position + new Vector2(1.2f, 0.7f));
+            yield return new WaitForSeconds(0.2f);
+            Explosion.Create((Vector2)tnt.transform.position + Vector2.left * 0.6f, 0.3f, 10f, 0f, 1);
+            yield return new WaitForSeconds(0.5f);
+
+            Assert.IsTrue(tnt == null, "Any damage breaks the TNT and it explodes");
+            Assert.IsTrue(right.IsDead, "The TNT explosion kills the player next to it");
         }
 
         [UnityTest]
@@ -388,9 +439,9 @@ namespace ArenaKit.Tests
             var body = ball.GetComponent<Rigidbody2D>();
             Assert.AreEqual(RigidbodyType2D.Dynamic, body.bodyType, "The ball falls after the start delay");
 
-            Goal rightGoal = null;
-            foreach (Goal goal in Object.FindObjectsByType<Goal>(FindObjectsSortMode.None))
-                if (goal.PointForPlayer == 1)
+            Score rightGoal = null;
+            foreach (Score goal in Object.FindObjectsByType<Score>(FindObjectsSortMode.None))
+                if (goal.ForPlayer == 1)
                     rightGoal = goal;
 
             body.position = rightGoal.transform.position;

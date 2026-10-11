@@ -5,29 +5,33 @@ using UnityEngine.Events;
 namespace ArenaKit
 {
     /// <summary>
-    /// Crates and walls that break when they take enough damage. Can drop something, e.g. a weapon.
+    /// Has health and breaks when it took enough damage from shots, explosions or hazards.
+    /// Connect "On Broken" to make things happen: a Spawner drops a weapon (weapon crate), Explode blows it up (TNT)...
     /// </summary>
     public class Breakable : MonoBehaviour, IDamageable
     {
         [Tooltip("Damage it can take before it breaks")]
         public float Health = 50f;
-        [Tooltip("One of these appears when it breaks (e.g. weapon pickups). Empty = nothing")]
-        public GameObject[] Drops;
-        [Tooltip("Pieces flying around when it breaks")]
+        [Tooltip("On = it falls apart when broken. Off = it stays, e.g. so an Explode action can blow it up")]
+        public bool RemoveWhenBroken = true;
+        [Tooltip("Pieces flying around when it falls apart")]
         [Range(0, 12)] public int DebrisPieces = 4;
         public AudioClip HitSound;
         public AudioClip BreakSound;
 
         [Header("Events")]
+        [Tooltip("Called with the player who did the damage (0 = no player)")]
+        public UnityEvent<int> OnDamaged = new UnityEvent<int>();
         [Tooltip("Called with the player who broke it (0 = no player)")]
         public UnityEvent<int> OnBroken = new UnityEvent<int>();
 
-        bool broken;
+        public bool IsBroken { get; private set; }
+
         bool flashing;
 
         public void TakeDamage(float damage, int attacker)
         {
-            if (this.broken)
+            if (IsBroken)
                 return;
 
             Health -= damage;
@@ -38,6 +42,7 @@ namespace ArenaKit
             }
 
             GameManager.PlaySound(HitSound, 0.6f);
+            TriggeredBy.Invoke(OnDamaged, TriggeredBy.PlayerObject(attacker), attacker);
             if (!this.flashing && isActiveAndEnabled)
                 StartCoroutine(Flash());
         }
@@ -45,29 +50,24 @@ namespace ArenaKit
         /// <summary>Breaks it right away (for events).</summary>
         public void Break()
         {
-            Break(0);
+            Break(TriggeredBy.Player);
         }
 
         void Break(int attacker)
         {
-            if (this.broken)
+            if (IsBroken)
                 return;
-            this.broken = true;
+            IsBroken = true;
 
-            Vector3 position = transform.position;
-            if (Drops != null && Drops.Length > 0)
-            {
-                GameObject drop = Drops[Random.Range(0, Drops.Length)];
-                if (drop != null)
-                    Instantiate(drop, new Vector3(position.x, position.y, 0f), Quaternion.identity);
-            }
+            GameManager.PlaySound(BreakSound);
+            TriggeredBy.Invoke(OnBroken, TriggeredBy.PlayerObject(attacker), attacker);
+
+            if (!RemoveWhenBroken)
+                return;
 
             var spriteRenderer = GetComponentInChildren<SpriteRenderer>();
             if (spriteRenderer != null)
                 Debris.Burst(spriteRenderer, DebrisPieces);
-
-            GameManager.PlaySound(BreakSound);
-            OnBroken.Invoke(attacker);
             Destroy(gameObject);
         }
 

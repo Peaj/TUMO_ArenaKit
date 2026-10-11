@@ -314,8 +314,32 @@ PROJECTILES = {
 }
 
 
+OLIVE = (0.47, 0.53, 0.31)
+
+
+def mine(light, light_shine):
+    """A flat landmine with a pressure plate, hazard stripes and a warning light. Pivot: bottom center."""
+    stripes = [line(16 + i * 13, 35, 23 + i * 13, 27, DARK, 4) for i in range(4)]
+    return [
+        rrect(0, 14, 92, 42, OLIVE, 12),
+        rrect(10, 27, 68, 35, YELLOW, 3, shine=False),
+        *stripes,
+        rrect(18, 4, 74, 18, METAL, 6),
+        rrect(38, -6, 54, 6, METAL_DARK, 4, shine=False),
+        circle(80, 29, 7, light, shine=light_shine),
+    ]
+
+
+PROPS = {
+    "Mine": dict(parts=mine((0.45, 0.13, 0.13), False), grip=(46, 42)),
+    "Mine_Armed": dict(parts=mine((1.0, 0.22, 0.18), True), grip=(46, 42)),
+}
+
+
 def main():
     weapons = [render(name, weapon["parts"], ROOT, weapon["grip"], weapon["muzzle"]) for name, weapon in WEAPONS.items()]
+    # Props use the same "grip" entry for their pivot.
+    weapons += [render(name, prop["parts"], os.path.join(ROOT, "Props"), prop["grip"]) for name, prop in PROPS.items()]
     for name, parts in PROJECTILES.items():
         render(name, parts, os.path.join(ROOT, "Projectiles"))
     with open(os.path.join(ROOT, "weapons.json"), "w", encoding="utf-8") as file:

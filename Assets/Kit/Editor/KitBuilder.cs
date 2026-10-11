@@ -964,24 +964,25 @@ namespace ArenaKit.EditorTools
                 PrefabLookup["SpawnPoint"] = SavePrefab(root, $"{rules}/SpawnPoint.prefab");
             }
             {
+                // Players die, crates disappear, balls go back to their start.
                 var root = new GameObject("KillZone");
-                var box = root.AddComponent<BoxCollider2D>();
-                box.isTrigger = true;
-                box.size = new Vector2(60f, 4f);
-                var hazard = root.AddComponent<Hazard>();
-                hazard.InstantKill = true;
-                hazard.RemoveObjects = true;
+                root.AddComponent<BoxCollider2D>().size = new Vector2(60f, 4f);
+                TriggerZone zone = AddTriggerZone(root, TriggerTarget.Everything);
+                var damager = root.AddComponent<Damager>();
+                Wire(zone.OnEnter, damager.Kill);
+                Wire(zone.OnEnter, root.AddComponent<Remover>().RemoveObject);
                 PrefabLookup["KillZone"] = SavePrefab(root, $"{rules}/KillZone.prefab");
             }
             {
                 var root = new GameObject("FinishFlag");
                 SpriteRenderer spriteRenderer = AddSprite(root, Kenney("flag_yellow_a"), OrderProps);
-                var box = root.AddComponent<BoxCollider2D>();
-                box.size = new Vector2(0.8f, 1f);
-                var flag = root.AddComponent<FinishFlag>();
-                flag.Renderer = spriteRenderer;
-                flag.WaveSprites = new[] { Kenney("flag_yellow_a"), Kenney("flag_yellow_b") };
-                flag.Sound = KenneySound("sfx_magic");
+                var wave = root.AddComponent<SpriteAnimation>();
+                wave.Renderer = spriteRenderer;
+                wave.Sprites = new[] { Kenney("flag_yellow_a"), Kenney("flag_yellow_b") };
+                root.AddComponent<BoxCollider2D>().size = new Vector2(0.8f, 1f);
+                TriggerZone zone = AddTriggerZone(root, TriggerTarget.Players);
+                Wire(zone.OnEnter, AddSound(root, KenneySound("sfx_magic")).Play);
+                Wire(zone.OnEnter, root.AddComponent<Score>().WinRound);
                 PrefabLookup["FinishFlag"] = SavePrefab(root, $"{rules}/FinishFlag.prefab");
             }
             {
@@ -999,7 +1000,13 @@ namespace ArenaKit.EditorTools
                 root.transform.localScale = new Vector3(1f, 3f, 1f);
                 AddSprite(root, GeneratedSprite("Square"), OrderBackDecoration + 1, new Color(1f, 1f, 1f, 0.25f));
                 root.AddComponent<BoxCollider2D>().size = Vector2.one;
-                root.AddComponent<Goal>().GoalSound = KenneySound("sfx_gem");
+                // A ball gets in: the player who touched it last (or "For Player") scores, the ball goes back.
+                TriggerZone zone = AddTriggerZone(root, TriggerTarget.Balls);
+                Wire(zone.OnEnter, AddSound(root, KenneySound("sfx_gem")).Play);
+                Wire(zone.OnEnter, root.AddComponent<Score>().AddPoints);
+                var remover = root.AddComponent<Remover>();
+                remover.BallResetDelay = 0.5f;
+                Wire(zone.OnEnter, remover.RemoveObject);
                 PrefabLookup["Goal"] = SavePrefab(root, $"{rules}/Goal.prefab");
             }
             {
@@ -1021,24 +1028,8 @@ namespace ArenaKit.EditorTools
                 ball.BounceSound = KenneySound("sfx_bump");
                 PrefabLookup["Ball"] = SavePrefab(root, $"{rules}/Ball.prefab");
             }
-            {
-                var root = new GameObject("Coin");
-                AddSprite(root, Kenney("coin_gold"), OrderProps);
-                root.AddComponent<CircleCollider2D>().radius = 0.35f;
-                var coin = root.AddComponent<Collectible>();
-                coin.Points = 1;
-                coin.Sound = KenneySound("sfx_coin");
-                PrefabLookup["Coin"] = SavePrefab(root, $"{rules}/Coin.prefab");
-            }
-            {
-                var root = new GameObject("Gem");
-                AddSprite(root, Kenney("gem_blue"), OrderProps);
-                root.AddComponent<CircleCollider2D>().radius = 0.35f;
-                var gem = root.AddComponent<Collectible>();
-                gem.Points = 3;
-                gem.Sound = KenneySound("sfx_gem");
-                PrefabLookup["Gem"] = SavePrefab(root, $"{rules}/Gem.prefab");
-            }
+            PrefabLookup["Coin"] = SavePrefab(Collectible("Coin", "coin_gold", "sfx_coin", 1), $"{rules}/Coin.prefab");
+            PrefabLookup["Gem"] = SavePrefab(Collectible("Gem", "gem_blue", "sfx_gem", 3), $"{rules}/Gem.prefab");
             {
                 var root = new GameObject("NameSign");
                 root.transform.localScale = Vector3.one * 1.6f;
@@ -1089,8 +1080,8 @@ namespace ArenaKit.EditorTools
                 root.AddComponent<Spawner>();
                 PrefabLookup["Spawner"] = SavePrefab(root, $"{blocks}/Spawner.prefab");
             }
-            PrefabLookup["Lever"] = SavePrefab(SwitchObject("Lever", "lever_left", "lever_right", 0f), $"{blocks}/Lever.prefab");
-            PrefabLookup["Button"] = SavePrefab(SwitchObject("Button", "switch_red", "switch_red_pressed", 3f), $"{blocks}/Button.prefab");
+            PrefabLookup["Lever"] = SavePrefab(SwitchObject("Lever", "lever_left", "lever_right", 0f, toggle: true), $"{blocks}/Lever.prefab");
+            PrefabLookup["Button"] = SavePrefab(SwitchObject("Button", "switch_red", "switch_red_pressed", 3f, toggle: false), $"{blocks}/Button.prefab");
 
             // --- Doors ---
             {
@@ -1126,63 +1117,63 @@ namespace ArenaKit.EditorTools
                 root.layer = GroundLayer;
                 PrefabLookup["LockBlock"] = SavePrefab(root, $"{blocks}/LockBlock.prefab");
             }
-            {
-                var root = new GameObject("Key");
-                AddSprite(root, Kenney("key_red"), OrderProps);
-                root.AddComponent<CircleCollider2D>().radius = 0.35f;
-                var key = root.AddComponent<Collectible>();
-                key.Points = 0;
-                key.Sound = KenneySound("sfx_magic");
-                PrefabLookup["Key"] = SavePrefab(root, $"{blocks}/Key.prefab");
-            }
+            // A key gives no points: connect its TriggerZone > On Enter to a LockBlock > Open.
+            PrefabLookup["Key"] = SavePrefab(Collectible("Key", "key_red", "sfx_magic", 0), $"{blocks}/Key.prefab");
 
             // --- Movement ---
             PrefabLookup["MovingPlatform"] = SavePrefab(Platform("MovingPlatform", new Vector2(4f, 0f)), $"{blocks}/MovingPlatform.prefab");
             PrefabLookup["Elevator"] = SavePrefab(Platform("Elevator", new Vector2(0f, 4f)), $"{blocks}/Elevator.prefab");
             {
+                // TriggerZone > ForcePush: launches everything along the green arrow, the spring pops out.
                 var root = new GameObject("JumpPad");
                 SpriteRenderer spriteRenderer = AddSprite(root, Kenney("spring"), OrderProps);
                 var box = root.AddComponent<BoxCollider2D>();
                 box.size = new Vector2(0.8f, 0.6f);
                 box.offset = new Vector2(0f, -0.15f);
-                var pad = root.AddComponent<JumpPad>();
-                pad.LaunchSpeed = 13f;
-                pad.Renderer = spriteRenderer;
-                pad.IdleSprite = Kenney("spring");
-                pad.LaunchSprite = Kenney("spring_out");
-                pad.Sound = KenneySound("sfx_jump-high");
+                TriggerZone zone = AddTriggerZone(root, TriggerTarget.AnyPhysicsObject);
+                var push = root.AddComponent<ForcePush>();
+                push.Speed = 13f;
+                push.Sound = KenneySound("sfx_jump-high");
+                Wire(zone.OnEnter, push.Push);
+                SwapSprite spring = AddSwapSprite(root, spriteRenderer, Kenney("spring_out"));
+                UnityEventTools.AddFloatPersistentListener(zone.OnEnter, spring.ShowFor, 0.25f);
                 PrefabLookup["JumpPad"] = SavePrefab(root, $"{blocks}/JumpPad.prefab");
             }
             {
                 var root = new GameObject("TeleporterPair");
                 Teleporter a = TeleporterObject("Teleporter A", root.transform, new Vector3(-3f, 0f, 0f), new Color(0.75f, 0.5f, 1f));
                 Teleporter b = TeleporterObject("Teleporter B", root.transform, new Vector3(3f, 0f, 0f), new Color(0.4f, 0.9f, 1f));
-                a.Target = b;
-                b.Target = a;
+                a.Target = b.transform;
+                b.Target = a.transform;
                 PrefabLookup["TeleporterPair"] = SavePrefab(root, $"{blocks}/TeleporterPair.prefab");
             }
 
             // --- Danger ---
             {
+                // Step on it: the light blinks. Step off (or shoot it): boom.
                 var root = new GameObject("Mine");
-                root.transform.localScale = Vector3.one * 0.6f;
-                SpriteRenderer spriteRenderer = AddSprite(root, Kenney("bomb"), OrderProps);
-                var circle = root.AddComponent<CircleCollider2D>();
-                circle.isTrigger = true;
-                circle.radius = 0.45f;
+                root.transform.localScale = Vector3.one * 0.8f;
+                SpriteRenderer spriteRenderer = AddSprite(root, PropSprite("Mine"), OrderProps);
+                var box = root.AddComponent<BoxCollider2D>();
+                box.size = new Vector2(1.1f, 0.6f);
+                box.offset = new Vector2(0f, 0.3f);
+                TriggerZone zone = AddTriggerZone(root, TriggerTarget.Players);
+                SwapSprite light = AddSwapSprite(root, spriteRenderer, PropSprite("Mine_Armed"));
+                light.Blink = true;
+                light.BlinkSpeed = 8f;
+                Wire(zone.OnEnter, light.Show);
+                Wire(zone.OnEnter, AddSound(root, KenneySound("sfx_select")).Play);
                 var mine = root.AddComponent<Explosive>();
                 mine.Radius = 2.2f;
                 mine.PushForce = 16f;
-                mine.FuseTime = 0.3f;
-                mine.ExplodeOnTouch = true;
-                mine.ExplodeWhenHit = true;
-                mine.Renderer = spriteRenderer;
-                mine.ArmedSprite = Kenney("bomb_active");
+                mine.FuseTime = 0f;
                 mine.ExplosionEffect = PrefabLookup["Explosion"];
-                mine.FuseSound = PlatformerSound("FX/bombFuse.wav");
+                Wire(zone.OnExit, mine.Explode);
+                Wire(root.AddComponent<HitSensor>().OnHit, mine.Explode);
                 PrefabLookup["Mine"] = SavePrefab(root, $"{blocks}/Mine.prefab");
             }
             {
+                // Breakable > On Broken > Explosive: any damage lights the fuse.
                 var root = new GameObject("TNTBlock");
                 SpriteRenderer spriteRenderer = AddSprite(root, Kenney("block_strong_danger"), OrderProps);
                 var box = root.AddComponent<BoxCollider2D>();
@@ -1190,15 +1181,17 @@ namespace ArenaKit.EditorTools
                 box.sharedMaterial = LoadPhysics("Crate");
                 var body = root.AddComponent<Rigidbody2D>();
                 body.mass = 2f;
+                var breakable = root.AddComponent<Breakable>();
+                breakable.Health = 1f;
+                breakable.RemoveWhenBroken = false;
                 var tnt = root.AddComponent<Explosive>();
                 tnt.Radius = 3f;
                 tnt.PushForce = 20f;
                 tnt.FuseTime = 0.15f;
-                tnt.ExplodeOnTouch = false;
-                tnt.ExplodeWhenHit = true;
                 tnt.Renderer = spriteRenderer;
                 tnt.ExplosionEffect = PrefabLookup["Explosion"];
                 tnt.ExplosionSound = PlatformerSound("FX/bigBoom.ogg");
+                Wire(breakable.OnBroken, tnt.Explode);
                 PrefabLookup["TNTBlock"] = SavePrefab(root, $"{blocks}/TNTBlock.prefab");
             }
             {
@@ -1214,13 +1207,19 @@ namespace ArenaKit.EditorTools
                 PrefabLookup["Crate"] = SavePrefab(root, $"{blocks}/Crate.prefab");
             }
             {
+                // Breakable > On Broken > Spawner: a random weapon appears.
                 var root = new GameObject("WeaponCrate");
                 AddSprite(root, Kenney("block_exclamation"), OrderProps);
                 root.AddComponent<BoxCollider2D>().size = Vector2.one;
                 var crate = root.AddComponent<Breakable>();
                 crate.Health = 1f;
-                crate.Drops = new[] { PrefabLookup["Drop_Random"] };
                 crate.BreakSound = KenneySound("sfx_disappear");
+                var drop = root.AddComponent<Spawner>();
+                drop.Prefabs = new[] { PrefabLookup["Drop_Random"] };
+                drop.Interval = 0f;
+                drop.SpawnAtStart = false;
+                drop.MaxAlive = 0;
+                Wire(crate.OnBroken, drop.Spawn);
                 root.layer = GroundLayer;
                 PrefabLookup["WeaponCrate"] = SavePrefab(root, $"{blocks}/WeaponCrate.prefab");
             }
@@ -1238,19 +1237,16 @@ namespace ArenaKit.EditorTools
                 var root = new GameObject("Spikes");
                 AddSprite(root, Kenney("spikes"), OrderProps);
                 var box = root.AddComponent<BoxCollider2D>();
-                box.isTrigger = true;
                 box.size = new Vector2(0.9f, 0.45f);
                 box.offset = new Vector2(0f, -0.25f);
-                root.AddComponent<Hazard>().InstantKill = true;
+                AddDeadlyTouch(root, TriggerTarget.Players);
                 PrefabLookup["Spikes"] = SavePrefab(root, $"{blocks}/Spikes.prefab");
             }
             {
                 var root = new GameObject("Saw");
                 AddSprite(root, Kenney("saw"), OrderProps);
-                var circle = root.AddComponent<CircleCollider2D>();
-                circle.isTrigger = true;
-                circle.radius = 0.42f;
-                root.AddComponent<Hazard>().InstantKill = true;
+                root.AddComponent<CircleCollider2D>().radius = 0.42f;
+                AddDeadlyTouch(root, TriggerTarget.Players);
                 var mover = root.AddComponent<Mover>();
                 mover.Offset = new Vector2(3f, 0f);
                 mover.Speed = 2f;
@@ -1259,7 +1255,7 @@ namespace ArenaKit.EditorTools
                 PrefabLookup["Saw"] = SavePrefab(root, $"{blocks}/Saw.prefab");
             }
             {
-                // Sudden death: lava starts rising after a while.
+                // Sudden death: after 30 seconds (Timer) the lava rises (Mover). Touching it kills (TriggerZone > Damager).
                 var root = new GameObject("RisingLava");
                 root.transform.position = new Vector3(0f, -20f, 0f);
                 var surface = new GameObject("Surface");
@@ -1272,19 +1268,17 @@ namespace ArenaKit.EditorTools
                 lavaRenderer.drawMode = SpriteDrawMode.Tiled;
                 lavaRenderer.size = new Vector2(40f, 10f);
                 var box = root.AddComponent<BoxCollider2D>();
-                box.isTrigger = true;
                 box.size = new Vector2(40f, 11f);
                 box.offset = new Vector2(0f, 0.3f);
-                var hazard = root.AddComponent<Hazard>();
-                hazard.InstantKill = true;
-                hazard.RemoveObjects = true;
+                TriggerZone zone = AddDeadlyTouch(root, TriggerTarget.Everything);
+                Wire(zone.OnEnter, root.AddComponent<Remover>().RemoveObject);
                 var mover = root.AddComponent<Mover>();
                 mover.Offset = new Vector2(0f, 12f);
                 mover.Speed = 0.5f;
                 mover.MoveAutomatically = false;
                 var timer = root.AddComponent<Timer>();
                 timer.Seconds = 30f;
-                UnityEventTools.AddVoidPersistentListener(timer.OnFinished, mover.MoveToEnd);
+                Wire(timer.OnFinished, mover.MoveToEnd);
                 PrefabLookup["RisingLava"] = SavePrefab(root, $"{blocks}/RisingLava.prefab");
             }
         }
@@ -1386,12 +1380,12 @@ namespace ArenaKit.EditorTools
             return root;
         }
 
-        static GameObject SwitchObject(string name, string offSprite, string onSprite, float autoReset)
+        /// <summary>A Switch flipped by walking into it (TriggerZone) or shooting it (HitSensor).</summary>
+        static GameObject SwitchObject(string name, string offSprite, string onSprite, float autoReset, bool toggle)
         {
             var root = new GameObject(name);
             SpriteRenderer spriteRenderer = AddSprite(root, Kenney(offSprite), OrderProps);
             var box = root.AddComponent<BoxCollider2D>();
-            box.isTrigger = true;
             box.size = new Vector2(0.8f, 0.7f);
             box.offset = new Vector2(0f, -0.15f);
             var lever = root.AddComponent<Switch>();
@@ -1400,6 +1394,9 @@ namespace ArenaKit.EditorTools
             lever.OnSprite = Kenney(onSprite);
             lever.AutoResetTime = autoReset;
             lever.Sound = KenneySound("sfx_select");
+            UnityEngine.Events.UnityAction flip = toggle ? lever.Toggle : lever.TurnOn;
+            Wire(AddTriggerZone(root, TriggerTarget.Players).OnEnter, flip);
+            Wire(root.AddComponent<HitSensor>().OnHit, flip);
             return root;
         }
 
@@ -1447,12 +1444,75 @@ namespace ArenaKit.EditorTools
             top.transform.localPosition = Vector3.up;
             AddSprite(top, Kenney("door_open_top"), OrderProps - 1, color);
             var box = root.AddComponent<BoxCollider2D>();
-            box.isTrigger = true;
             box.size = new Vector2(0.6f, 1.4f);
             box.offset = new Vector2(0f, 0.3f);
+            TriggerZone zone = AddTriggerZone(root, TriggerTarget.AnyPhysicsObject);
             var teleporter = root.AddComponent<Teleporter>();
             teleporter.Sound = KenneySound("sfx_magic");
+            Wire(zone.OnEnter, teleporter.Teleport);
             return teleporter;
+        }
+
+        /// <summary>Coins, gems, keys: TriggerZone > sound, points (if any) and disappear.</summary>
+        static GameObject Collectible(string name, string sprite, string sound, int points)
+        {
+            var root = new GameObject(name);
+            AddSprite(root, Kenney(sprite), OrderProps);
+            root.AddComponent<CircleCollider2D>().radius = 0.35f;
+            root.AddComponent<Hover>();
+            TriggerZone zone = AddTriggerZone(root, TriggerTarget.Players);
+            Wire(zone.OnEnter, AddSound(root, KenneySound(sound)).Play);
+            if (points != 0)
+            {
+                var score = root.AddComponent<Score>();
+                score.Points = points;
+                Wire(zone.OnEnter, score.AddPoints);
+            }
+            Wire(zone.OnEnter, root.AddComponent<Disappear>().Hide);
+            return root;
+        }
+
+        /// <summary>Spikes, saws, lava: TriggerZone > Damager > Hurt.</summary>
+        static TriggerZone AddDeadlyTouch(GameObject root, TriggerTarget target)
+        {
+            TriggerZone zone = AddTriggerZone(root, target);
+            Wire(zone.OnEnter, root.AddComponent<Damager>().Hurt);
+            return zone;
+        }
+
+        static TriggerZone AddTriggerZone(GameObject root, TriggerTarget target)
+        {
+            foreach (Collider2D collider in root.GetComponents<Collider2D>())
+                collider.isTrigger = true;
+            var zone = root.AddComponent<TriggerZone>();
+            zone.ReactsTo = target;
+            return zone;
+        }
+
+        static PlaySound AddSound(GameObject root, AudioClip clip)
+        {
+            var sound = root.AddComponent<PlaySound>();
+            sound.Sound = clip;
+            return sound;
+        }
+
+        static SwapSprite AddSwapSprite(GameObject root, SpriteRenderer spriteRenderer, Sprite sprite)
+        {
+            var swap = root.AddComponent<SwapSprite>();
+            swap.Renderer = spriteRenderer;
+            swap.Sprite = sprite;
+            return swap;
+        }
+
+        /// <summary>Connects an event to an action, like dragging it in the Inspector.</summary>
+        static void Wire(UnityEngine.Events.UnityEventBase unityEvent, UnityEngine.Events.UnityAction action)
+        {
+            UnityEventTools.AddVoidPersistentListener(unityEvent, action);
+        }
+
+        static Sprite PropSprite(string name)
+        {
+            return AssetDatabase.LoadAssetAtPath<Sprite>($"{WeaponArt}/Props/{name}.png");
         }
 
         // ---------------------------------------------------------------
@@ -1495,7 +1555,8 @@ namespace ArenaKit.EditorTools
             AddSolidCollision(level.Platforms.gameObject, oneWay: true);
             level.Hazards = CreateTilemap(grid, "Hazards", OrderGround + 2, 0);
             level.Hazards.gameObject.AddComponent<TilemapCollider2D>().isTrigger = true;
-            level.Hazards.gameObject.AddComponent<Hazard>().InstantKill = true;
+            // Lava and spike tiles: TriggerZone > Damager > Hurt.
+            AddDeadlyTouch(level.Hazards.gameObject, TriggerTarget.Everything);
             level.FrontDecoration = CreateTilemap(grid, "Front Decoration", OrderFrontDecoration, 0);
 
             var rulesObject = new GameObject("Level Rules");
@@ -1706,18 +1767,20 @@ namespace ArenaKit.EditorTools
             Fill(level.Platforms, "StonePlatform", -5, 2, 4, 2);
             Fill(level.Platforms, "StonePlatform", -14, 5, -11, 5);
             Fill(level.Platforms, "StonePlatform", 10, 5, 13, 5);
+            Fill(level.Platforms, "StonePlatform", -15, 0, -14, 0);
+            Fill(level.Platforms, "StonePlatform", 13, 0, 14, 0);
 
             Fill(level.BackDecoration, "BackWallStone", -2, -1, 1, 1);
             level.FrontDecoration.SetTile(new Vector3Int(-15, -7, 0), TileByKey("Torch"));
             level.FrontDecoration.SetTile(new Vector3Int(14, -7, 0), TileByKey("Torch"));
 
-            PlaceSpawn(level, 1, new Vector3(-13f, -5.8f, 0f));
-            PlaceSpawn(level, 2, new Vector3(13f, -5.8f, 0f));
+            PlaceSpawn(level, 1, new Vector3(-12.27f, -5.8f, 0f));
+            PlaceSpawn(level, 2, new Vector3(12.27f, -5.8f, 0f));
             PlaceSpawn(level, 3, new Vector3(-10f, -1.8f, 0f));
             PlaceSpawn(level, 4, new Vector3(9f, -1.8f, 0f));
 
             Place("Pickup_Bazooka", new Vector3(-0.5f, 3.8f, 0f));
-            Place("Pickup_Shotgun", new Vector3(-12.5f, 6.8f, 0f));
+            Place("Pickup_Shotgun", new Vector3(-11.29f, 6.8f, 0f));
             Place("Pickup_Minigun", new Vector3(11.5f, 6.8f, 0f));
             Place("Pickup_Pistol", new Vector3(-10f, -6.2f, 0f));
             Place("Pickup_GrenadeLauncher", new Vector3(9f, -6.2f, 0f));
@@ -1727,13 +1790,13 @@ namespace ArenaKit.EditorTools
             Place("Crate", new Vector3(5.5f, -6.5f, 0f));
             Place("TNTBlock", new Vector3(6.5f, -6.5f, 0f));
             Place("WeaponCrate", new Vector3(0.5f, -0.5f, 0f));
-            Place("JumpPad", new Vector3(-14.5f, -6.5f, 0f));
+            Place("JumpPad", new Vector3(-13.47f, -6.5f, 0f));
             Place("JumpPad", new Vector3(13.5f, -6.5f, 0f));
-            Place("Mine", new Vector3(-1.2f, -0.7f, 0f));
+            Place("Mine", new Vector3(-1.2f, -1f, 0f));
 
             GameObject teleporters = Place("TeleporterPair", new Vector3(-0.5f, 5f, 0f));
-            teleporters.transform.Find("Teleporter A").localPosition = new Vector3(-9f, 1.5f, 0f);
-            teleporters.transform.Find("Teleporter B").localPosition = new Vector3(9f, 1.5f, 0f);
+            teleporters.transform.Find("Teleporter A").localPosition = new Vector3(-12.77f, 1.5f, 0f);
+            teleporters.transform.Find("Teleporter B").localPosition = new Vector3(13.82f, 1.5f, 0f);
 
             Place("NameSign", new Vector3(-5f, -6.2f, 0f));
 
@@ -1778,12 +1841,12 @@ namespace ArenaKit.EditorTools
             GameObject leftGoal = Place("Goal", new Vector3(-8f, -6.75f, 0f));
             leftGoal.name = "Goal Left (point for P2)";
             leftGoal.transform.localScale = new Vector3(14f, 0.5f, 1f);
-            leftGoal.GetComponent<Goal>().PointForPlayer = 2;
+            leftGoal.GetComponent<Score>().ForPlayer = 2;
 
             GameObject rightGoal = Place("Goal", new Vector3(8f, -6.75f, 0f));
             rightGoal.name = "Goal Right (point for P1)";
             rightGoal.transform.localScale = new Vector3(14f, 0.5f, 1f);
-            rightGoal.GetComponent<Goal>().PointForPlayer = 1;
+            rightGoal.GetComponent<Score>().ForPlayer = 1;
 
             Place("Ball", new Vector3(-0.2f, 5f, 0f));
             Place("NameSign", new Vector3(-14f, -6.2f, 0f));
@@ -1838,44 +1901,44 @@ namespace ArenaKit.EditorTools
 
             Place("WeaponCrate", new Vector3(20.5f, 2.5f, 0f));
             Place("WeaponCrate", new Vector3(22f, 0.5f, 0f));
-            Label(labels, "WeaponCrate", "Aufschießen: Waffe drin", 21.25f);
+            Label(labels, "WeaponCrate", "Aufschießen: Waffe drin", 21.25f, recipe: "Breakable > Spawner");
 
             // --- Breakables and explosives ---
             Place("Crate", new Vector3(26.5f, 0.5f, 0f));
             Place("Crate", new Vector3(26.5f, 1.5f, 0f));
             Place("Crate", new Vector3(27.5f, 0.5f, 0f));
-            Label(labels, "Crate", "Kaputtbare Kiste", 27f);
+            Label(labels, "Crate", "Kaputtbare Kiste", 27f, recipe: "Breakable");
 
             for (int y = 0; y < 3; y++)
                 Place("BrickWall", new Vector3(30.5f, y + 0.5f, 0f));
-            Label(labels, "BrickWall", "Hält mehr aus", 30.5f);
+            Label(labels, "BrickWall", "Hält mehr aus", 30.5f, recipe: "Breakable");
 
             Place("TNTBlock", new Vector3(34.5f, 0.5f, 0f));
-            Label(labels, "TNTBlock", "Draufschießen!", 34.5f);
-            Place("Mine", new Vector3(37.5f, 0.3f, 0f));
-            Label(labels, "Mine", "Explodiert bei Berührung", 37.8f, 3.5f);
+            Label(labels, "TNTBlock", "Draufschießen!", 34.5f, recipe: "Breakable > Explosive");
+            Place("Mine", new Vector3(38f, 0f, 0f));
+            Label(labels, "Mine", "Drauftreten, runtergehen: Bumm!", 38f, 3.2f, recipe: "TriggerZone (On Exit) > Explosive");
 
             // --- Movement ---
-            Place("JumpPad", new Vector3(41.5f, 0.5f, 0f));
-            GameObject booster = Place("JumpPad", new Vector3(44.5f, 0.5f, 0f));
+            Place("JumpPad", new Vector3(42.5f, 0.5f, 0f));
+            GameObject booster = Place("JumpPad", new Vector3(45f, 0.5f, 0f));
             booster.name = "JumpPad (rotated)";
             booster.transform.rotation = Quaternion.Euler(0f, 0f, -90f);
-            Label(labels, "JumpPad", "Gedreht = Seiten-Booster", 43f);
+            Label(labels, "JumpPad", "Gedreht = Seiten-Booster", 43.75f, recipe: "TriggerZone > ForcePush");
 
-            Place("MovingPlatform", new Vector3(48f, 2.5f, 0f));
-            Label(labels, "MovingPlatform", "Fährt hin und her", 50f);
+            Place("MovingPlatform", new Vector3(48.5f, 2.5f, 0f));
+            Label(labels, "MovingPlatform", "Fährt hin und her", 50.5f, recipe: "Mover");
             Place("Elevator", new Vector3(56.5f, 1f, 0f));
-            Label(labels, "Elevator", "Fährt hoch und runter", 56.5f, 7f);
+            Label(labels, "Elevator", "Fährt hoch und runter", 56.5f, 7f, recipe: "Mover");
 
             Place("TeleporterPair", new Vector3(64f, 0.5f, 0f));
-            Label(labels, "TeleporterPair", "Rein und auf der anderen Seite raus", 64f);
+            Label(labels, "TeleporterPair", "Rein und auf der anderen Seite raus", 64f, recipe: "TriggerZone > Teleporter");
 
             // --- Switches and doors (connected with events) ---
             var lever = Place("Lever", new Vector3(71.5f, 0.5f, 0f)).GetComponent<Switch>();
             var leverDoor = Place("Door", new Vector3(73.5f, 0.5f, 0f)).GetComponent<Door>();
             UnityEventTools.AddVoidPersistentListener(lever.OnTurnedOn, leverDoor.Open);
             UnityEventTools.AddVoidPersistentListener(lever.OnTurnedOff, leverDoor.Close);
-            Label(labels, "Lever  >  Door", "Hebel öffnet und schließt", 72.5f);
+            Label(labels, "Lever  >  Door", "Hebel öffnet und schließt", 72.5f, recipe: "TriggerZone + HitSensor > Switch");
 
             var button = Place("Button", new Vector3(77.5f, 0.5f, 0f)).GetComponent<Switch>();
             var buttonDoor = Place("Door", new Vector3(79.5f, 0.5f, 0f)).GetComponent<Door>();
@@ -1895,22 +1958,22 @@ namespace ArenaKit.EditorTools
             counter.ResetWhenReached = true;
             for (int i = 0; i < 3; i++)
             {
-                var coin = Place("Coin", new Vector3(88.5f + i * 1.5f, 1f, 0f)).GetComponent<Collectible>();
-                coin.RespawnTime = 5f;
-                UnityEventTools.AddVoidPersistentListener(coin.OnCollected, counter.Add);
+                GameObject coin = Place("Coin", new Vector3(88.5f + i * 1.5f, 1f, 0f));
+                coin.GetComponent<Disappear>().RespawnTime = 5f;
+                UnityEventTools.AddVoidPersistentListener(coin.GetComponent<TriggerZone>().OnEnter, counter.Add);
             }
             var counterDoor = Place("Door", new Vector3(94f, 0.5f, 0f)).GetComponent<Door>();
             counterDoor.AutoCloseTime = 5f;
             UnityEventTools.AddVoidPersistentListener(counter.OnReached, counterDoor.Open);
             Label(labels, "Counter  >  Door", "3 Coins öffnen die Tür", 91f);
 
-            var key = Place("Key", new Vector3(98.5f, 1f, 0f)).GetComponent<Collectible>();
-            key.RespawnTime = 5f;
+            GameObject key = Place("Key", new Vector3(98.5f, 1f, 0f));
+            key.GetComponent<Disappear>().RespawnTime = 5f;
             for (int y = 0; y < 2; y++)
             {
                 var lockBlock = Place("LockBlock", new Vector3(101.5f, y + 0.5f, 0f)).GetComponent<Door>();
                 lockBlock.AutoCloseTime = 5f;
-                UnityEventTools.AddVoidPersistentListener(key.OnCollected, lockBlock.Open);
+                UnityEventTools.AddVoidPersistentListener(key.GetComponent<TriggerZone>().OnEnter, lockBlock.Open);
             }
             Label(labels, "Key  >  LockBlock", "Schlüssel öffnet das Schloss", 100f);
 
@@ -1931,16 +1994,16 @@ namespace ArenaKit.EditorTools
             Label(labels, "TriggerZone  >  Spawner", "Reinlaufen: eine Kiste fällt", 106.5f, 7f);
 
             // --- Points ---
-            Place("Coin", new Vector3(111.5f, 1f, 0f)).GetComponent<Collectible>().RespawnTime = 3f;
-            Place("Gem", new Vector3(113f, 1f, 0f)).GetComponent<Collectible>().RespawnTime = 3f;
-            Label(labels, "Coin / Gem", "1 und 3 Punkte", 112.25f);
+            Place("Coin", new Vector3(111.5f, 1f, 0f)).GetComponent<Disappear>().RespawnTime = 3f;
+            Place("Gem", new Vector3(113f, 1f, 0f)).GetComponent<Disappear>().RespawnTime = 3f;
+            Label(labels, "Coin / Gem", "1 und 3 Punkte", 112.25f, recipe: "TriggerZone > Score + Disappear");
 
             // --- Danger ---
             Place("Spikes", new Vector3(117.5f, 0.5f, 0f));
             Place("Spikes", new Vector3(118.5f, 0.5f, 0f));
-            Label(labels, "Spikes", "Tödlich", 118f);
+            Label(labels, "Spikes", "Tödlich", 118f, recipe: "TriggerZone > Damager");
             Place("Saw", new Vector3(122f, 0.6f, 0f));
-            Label(labels, "Saw", "Tödlich und bewegt sich", 123.5f);
+            Label(labels, "Saw", "Tödlich und bewegt sich", 123.5f, recipe: "TriggerZone > Damager + Mover");
 
             for (int x = 128; x <= 130; x++)
                 level.Ground.SetTile(new Vector3Int(x, -1, 0), null);
@@ -1954,10 +2017,18 @@ namespace ArenaKit.EditorTools
             // The camera follows the player through the whole row, not the ball at the far end.
             Place("Ball", new Vector3(140f, 3f, 0f)).GetComponent<Ball>().CameraFollows = false;
             Place("Goal", new Vector3(144.5f, 1.5f, 0f));
-            Label(labels, "Ball  +  Goal", "Ball ins Tor = Punkt", 142.25f);
+            Label(labels, "Ball  +  Goal", "Ball ins Tor = Punkt", 142.25f, recipe: "TriggerZone (Balls) > Score + Remover");
 
-            Place("FinishFlag", new Vector3(149f, 0.5f, 0f)).GetComponent<FinishFlag>().Points = 1;
-            Label(labels, "FinishFlag", "Punkt und zurück zum Start", 149f);
+            // Here the flag gives a point and sends you back, instead of winning the round.
+            GameObject flag = Place("FinishFlag", new Vector3(149f, 0.5f, 0f));
+            TriggerZone flagZone = flag.GetComponent<TriggerZone>();
+            var flagScore = flag.GetComponent<Score>();
+            for (int i = flagZone.OnEnter.GetPersistentEventCount() - 1; i >= 0; i--)
+                if (flagZone.OnEnter.GetPersistentMethodName(i) == nameof(Score.WinRound))
+                    UnityEventTools.RemovePersistentListener(flagZone.OnEnter, i);
+            UnityEventTools.AddVoidPersistentListener(flagZone.OnEnter, flagScore.AddPoints);
+            UnityEventTools.AddVoidPersistentListener(flagZone.OnEnter, flagScore.SendToStart);
+            Label(labels, "FinishFlag", "Punkt und zurück zum Start", 149f, recipe: "TriggerZone > Score");
 
             Place("NameSign", new Vector3(153f, 0.8f, 0f));
             Label(labels, "NameSign", "Zeigt deinen Namen", 153f);
@@ -1982,10 +2053,10 @@ namespace ArenaKit.EditorTools
             var lavaLever = Place("Lever", new Vector3(157f, 0.5f, 0f)).GetComponent<Switch>();
             UnityEventTools.AddVoidPersistentListener(lavaLever.OnTurnedOn, lavaMover.MoveToEnd);
             UnityEventTools.AddVoidPersistentListener(lavaLever.OnTurnedOff, lavaMover.MoveToStart);
-            Label(labels, "RisingLava", "Steigt nach 30 s, oder mit dem Hebel", 161f, 6f);
+            Label(labels, "RisingLava", "Steigt nach 30 s, oder mit dem Hebel", 161f, 6f, recipe: "Timer > Mover, TriggerZone > Damager");
 
-            GameObject killZone = Object.FindObjectsByType<Hazard>(FindObjectsSortMode.None)
-                .First(hazard => hazard.name == "KillZone").gameObject;
+            GameObject killZone = Object.FindObjectsByType<TriggerZone>(FindObjectsSortMode.None)
+                .First(zone => zone.name == "KillZone").gameObject;
             killZone.transform.position = new Vector3(right * 0.5f, -16f, 0f);
             killZone.transform.localScale = new Vector3(3f, 1f, 1f);
 
@@ -1993,8 +2064,11 @@ namespace ArenaKit.EditorTools
             Save(level, ShowcaseScene);
         }
 
-        /// <summary>A name (and a short German hint below it) floating above a showcase station.</summary>
-        static void Label(Transform parent, string title, string hint, float x, float y = 5f, float size = 1f)
+        /// <summary>
+        /// A name floating above a showcase station, a short German hint below it and the recipe:
+        /// which trigger and action scripts the prefab is made of.
+        /// </summary>
+        static void Label(Transform parent, string title, string hint, float x, float y = 5f, float size = 1f, string recipe = null)
         {
             var root = new GameObject(title);
             root.transform.SetParent(parent, false);
@@ -2002,6 +2076,8 @@ namespace ArenaKit.EditorTools
             LabelLine(root.transform, title, 0f, 0.12f * size, new Color(0.13f, 0.15f, 0.25f));
             if (!string.IsNullOrEmpty(hint))
                 LabelLine(root.transform, hint, -0.65f * size, 0.075f * size, new Color(0.25f, 0.28f, 0.4f));
+            if (!string.IsNullOrEmpty(recipe))
+                LabelLine(root.transform, recipe, -1.15f * size, 0.06f * size, new Color(0.1f, 0.45f, 0.25f));
         }
 
         static void LabelLine(Transform parent, string text, float y, float characterSize, Color color)

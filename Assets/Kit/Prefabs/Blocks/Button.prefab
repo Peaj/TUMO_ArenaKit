@@ -12,6 +12,8 @@ GameObject:
   - component: {fileID: 4450136176803916372}
   - component: {fileID: 8516378283358242311}
   - component: {fileID: 9078917593612590866}
+  - component: {fileID: 4880831960499938931}
+  - component: {fileID: 1521551901363041300}
   m_Layer: 0
   m_Name: Button
   m_TagString: Untagged
@@ -152,8 +154,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ArenaKit::ArenaKit.Switch
   IsOn: 0
-  FlipOnTouch: 1
-  FlipWhenShot: 1
   AutoResetTime: 3
   Renderer: {fileID: 4450136176803916372}
   OffSprite: {fileID: 21300000, guid: f19415a0f0b46a74f91e9d2775d24cbc, type: 3}
@@ -165,3 +165,67 @@ MonoBehaviour:
   OnTurnedOff:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &4880831960499938931
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3720723430741162640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec6802e157b66e74a89995ad51d6f568, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.TriggerZone
+  ReactsTo: 0
+  OnlyForPlayer: 0
+  OnlyOnce: 0
+  Cooldown: 0
+  RepeatWhileInside: 0
+  OnEnter:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 9078917593612590866}
+        m_TargetAssemblyTypeName: ArenaKit.Switch, ArenaKit
+        m_MethodName: TurnOn
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnExit:
+    m_PersistentCalls:
+      m_Calls: []
+--- !u!114 &1521551901363041300
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3720723430741162640}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38ab12951bf2dc9458af2784fdda2d74, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.HitSensor
+  Shots: 1
+  Explosions: 1
+  OnHit:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 9078917593612590866}
+        m_TargetAssemblyTypeName: ArenaKit.Switch, ArenaKit
+        m_MethodName: TurnOn
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2

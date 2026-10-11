@@ -10,8 +10,12 @@ GameObject:
   m_Component:
   - component: {fileID: 713476032367137315}
   - component: {fileID: 1315914894164515144}
-  - component: {fileID: 8268061186574317353}
-  - component: {fileID: 6679343477336457542}
+  - component: {fileID: 829489388876892775}
+  - component: {fileID: 7279650000898602934}
+  - component: {fileID: 6063232429523853460}
+  - component: {fileID: 7037617517778026076}
+  - component: {fileID: 540502167681634047}
+  - component: {fileID: 3242251276453173958}
   m_Layer: 0
   m_Name: Mine
   m_TagString: Untagged
@@ -29,7 +33,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.6, y: 0.6, z: 0.6}
+  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
@@ -83,18 +87,18 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 5
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 21300000, guid: b88d51712ef968e409269fcb3f10ecbc, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 7c6c95109f6bf0a41af533ad65f1a7eb, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 1.575, y: 1.025}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
---- !u!58 &8268061186574317353
-CircleCollider2D:
+--- !u!61 &829489388876892775
+BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -127,9 +131,19 @@ CircleCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0}
-  m_Radius: 0.45
---- !u!114 &6679343477336457542
+  m_Offset: {x: 0, y: 0.3}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.20731707}
+    oldSize: {x: 1.575, y: 1.025}
+    newSize: {x: 1.575, y: 1.025}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  m_Size: {x: 1.1, y: 0.6}
+  m_EdgeRadius: 0
+--- !u!114 &7279650000898602934
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -138,21 +152,137 @@ MonoBehaviour:
   m_GameObject: {fileID: 5386312632094051467}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 199839c9c5b8c5f46aea10cb1fd619f7, type: 3}
+  m_Script: {fileID: 11500000, guid: ec6802e157b66e74a89995ad51d6f568, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.TriggerZone
+  ReactsTo: 0
+  OnlyForPlayer: 0
+  OnlyOnce: 0
+  Cooldown: 0
+  RepeatWhileInside: 0
+  OnEnter:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 6063232429523853460}
+        m_TargetAssemblyTypeName: ArenaKit.SwapSprite, ArenaKit
+        m_MethodName: Show
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 7037617517778026076}
+        m_TargetAssemblyTypeName: ArenaKit.PlaySound, ArenaKit
+        m_MethodName: Play
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnExit:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 540502167681634047}
+        m_TargetAssemblyTypeName: ArenaKit.Explosive, ArenaKit
+        m_MethodName: Explode
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &6063232429523853460
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5386312632094051467}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e66c88e5ed4e5254bb997c194a53d318, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.SwapSprite
+  Renderer: {fileID: 1315914894164515144}
+  Sprite: {fileID: 21300000, guid: e8de7e2eb9b21da4fbc828da88106ee5, type: 3}
+  Blink: 1
+  BlinkSpeed: 8
+--- !u!114 &7037617517778026076
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5386312632094051467}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76df5bc061ae41b48a834d21a4c780ef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.PlaySound
+  Sound: {fileID: 8300000, guid: eabd39d31f94fad4a9ba244428fdcb68, type: 3}
+  Volume: 0.7
+--- !u!114 &540502167681634047
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5386312632094051467}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 262d1294d8389fa4597cd39644b3266a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArenaKit::ArenaKit.Explosive
   Damage: 100
   Radius: 2.2
   PushForce: 16
-  ExplodeOnTouch: 1
-  ExplodeWhenHit: 1
-  FuseTime: 0.3
+  FuseTime: 0
+  RemoveObject: 1
   RespawnTime: 0
-  Renderer: {fileID: 1315914894164515144}
-  ArmedSprite: {fileID: 21300000, guid: 52020db2817dd9543ad7ce94b7125b6c, type: 3}
+  Renderer: {fileID: 0}
   ExplosionEffect: {fileID: 100000, guid: 42404bf7d14c342f69690c9961a7530d, type: 3}
-  FuseSound: {fileID: 8300000, guid: 238da4efc08184aee919af254edb2ef1, type: 3}
+  FuseSound: {fileID: 0}
   ExplosionSound: {fileID: 0}
   OnExplode:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &3242251276453173958
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5386312632094051467}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 38ab12951bf2dc9458af2784fdda2d74, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.HitSensor
+  Shots: 1
+  Explosions: 1
+  OnHit:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 540502167681634047}
+        m_TargetAssemblyTypeName: ArenaKit.Explosive, ArenaKit
+        m_MethodName: Explode
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2

@@ -152,10 +152,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ArenaKit::ArenaKit.Breakable
   Health: 150
-  Drops: []
+  RemoveWhenBroken: 1
   DebrisPieces: 4
   HitSound: {fileID: 0}
   BreakSound: {fileID: 8300000, guid: ab17d669b0a600a47b4a2c7f43062087, type: 3}
+  OnDamaged:
+    m_PersistentCalls:
+      m_Calls: []
   OnBroken:
     m_PersistentCalls:
       m_Calls: []

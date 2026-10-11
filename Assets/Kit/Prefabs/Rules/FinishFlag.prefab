@@ -10,8 +10,11 @@ GameObject:
   m_Component:
   - component: {fileID: 4477599894323407073}
   - component: {fileID: 1678669533993797392}
+  - component: {fileID: 4542632174367997154}
   - component: {fileID: 4031570796923001976}
-  - component: {fileID: 6648817648116536563}
+  - component: {fileID: 1227328137413201005}
+  - component: {fileID: 6873861514823510594}
+  - component: {fileID: 3553522229193342848}
   m_Layer: 0
   m_Name: FinishFlag
   m_TagString: Untagged
@@ -93,6 +96,23 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 0
+--- !u!114 &4542632174367997154
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2466810120520358021}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 12023eafcfe6c714c9cb7b65b3a3420b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.SpriteAnimation
+  Renderer: {fileID: 1678669533993797392}
+  Sprites:
+  - {fileID: 21300000, guid: 40b50186c03c7f04ab3ee5f072e897b3, type: 3}
+  - {fileID: 21300000, guid: d126c01df3ea39442a139a5b5ee3b425, type: 3}
+  FramesPerSecond: 4
 --- !u!61 &4031570796923001976
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -123,7 +143,7 @@ BoxCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
@@ -139,7 +159,7 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.8, y: 1}
   m_EdgeRadius: 0
---- !u!114 &6648817648116536563
+--- !u!114 &1227328137413201005
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -148,16 +168,69 @@ MonoBehaviour:
   m_GameObject: {fileID: 2466810120520358021}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f3bded9361ebaeb40a596abd31ffde9e, type: 3}
+  m_Script: {fileID: 11500000, guid: ec6802e157b66e74a89995ad51d6f568, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: ArenaKit::ArenaKit.FinishFlag
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.TriggerZone
+  ReactsTo: 0
   OnlyForPlayer: 0
-  Points: 0
-  Sound: {fileID: 8300000, guid: ee6e5aa3dac703443b42327025135e5c, type: 3}
-  Renderer: {fileID: 1678669533993797392}
-  WaveSprites:
-  - {fileID: 21300000, guid: 40b50186c03c7f04ab3ee5f072e897b3, type: 3}
-  - {fileID: 21300000, guid: d126c01df3ea39442a139a5b5ee3b425, type: 3}
-  OnReached:
+  OnlyOnce: 0
+  Cooldown: 0
+  RepeatWhileInside: 0
+  OnEnter:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 6873861514823510594}
+        m_TargetAssemblyTypeName: ArenaKit.PlaySound, ArenaKit
+        m_MethodName: Play
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 3553522229193342848}
+        m_TargetAssemblyTypeName: ArenaKit.Score, ArenaKit
+        m_MethodName: WinRound
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnExit:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &6873861514823510594
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2466810120520358021}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 76df5bc061ae41b48a834d21a4c780ef, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.PlaySound
+  Sound: {fileID: 8300000, guid: ee6e5aa3dac703443b42327025135e5c, type: 3}
+  Volume: 0.7
+--- !u!114 &3553522229193342848
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2466810120520358021}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 81337805ca0f7264dbf38b5c47fef300, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.Score
+  Points: 1
+  ForPlayer: 0

@@ -12,7 +12,8 @@ GameObject:
   - component: {fileID: 3732392866691260558}
   - component: {fileID: 1790916027279389789}
   - component: {fileID: 1146685152627284145}
-  - component: {fileID: 7738283005231402505}
+  - component: {fileID: 3527664974379078674}
+  - component: {fileID: 669224769807009464}
   m_Layer: 0
   m_Name: TNTBlock
   m_TagString: Untagged
@@ -167,7 +168,7 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!114 &7738283005231402505
+--- !u!114 &3527664974379078674
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -176,18 +177,51 @@ MonoBehaviour:
   m_GameObject: {fileID: 118259392353720040}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 199839c9c5b8c5f46aea10cb1fd619f7, type: 3}
+  m_Script: {fileID: 11500000, guid: 52da973688c6bfa4aa2f1d5d713d6367, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.Breakable
+  Health: 1
+  RemoveWhenBroken: 0
+  DebrisPieces: 4
+  HitSound: {fileID: 0}
+  BreakSound: {fileID: 0}
+  OnDamaged:
+    m_PersistentCalls:
+      m_Calls: []
+  OnBroken:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 669224769807009464}
+        m_TargetAssemblyTypeName: ArenaKit.Explosive, ArenaKit
+        m_MethodName: Explode
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &669224769807009464
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 118259392353720040}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 262d1294d8389fa4597cd39644b3266a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: ArenaKit::ArenaKit.Explosive
   Damage: 100
   Radius: 3
   PushForce: 20
-  ExplodeOnTouch: 0
-  ExplodeWhenHit: 1
   FuseTime: 0.15
+  RemoveObject: 1
   RespawnTime: 0
   Renderer: {fileID: 3732392866691260558}
-  ArmedSprite: {fileID: 0}
   ExplosionEffect: {fileID: 100000, guid: 42404bf7d14c342f69690c9961a7530d, type: 3}
   FuseSound: {fileID: 0}
   ExplosionSound: {fileID: 8300000, guid: 8b4e61c51941a46d1aac273472c814fd, type: 3}

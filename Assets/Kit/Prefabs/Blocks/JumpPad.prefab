@@ -11,7 +11,9 @@ GameObject:
   - component: {fileID: 4597901802792859237}
   - component: {fileID: 394842197794484163}
   - component: {fileID: 5363150039620255805}
-  - component: {fileID: 8038538934329666391}
+  - component: {fileID: 2587846834129652846}
+  - component: {fileID: 5269817626653537465}
+  - component: {fileID: 2253000746000376327}
   m_Layer: 0
   m_Name: JumpPad
   m_TagString: Untagged
@@ -123,7 +125,7 @@ BoxCollider2D:
   m_CallbackLayers:
     serializedVersion: 2
     m_Bits: 4294967295
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
@@ -139,7 +141,7 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 0.8, y: 0.6}
   m_EdgeRadius: 0
---- !u!114 &8038538934329666391
+--- !u!114 &2587846834129652846
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -148,15 +150,73 @@ MonoBehaviour:
   m_GameObject: {fileID: 2567824554347587743}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 01880a2878035884d82e21e39a170481, type: 3}
+  m_Script: {fileID: 11500000, guid: ec6802e157b66e74a89995ad51d6f568, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: ArenaKit::ArenaKit.JumpPad
-  LaunchSpeed: 13
-  LaunchObjects: 1
-  Renderer: {fileID: 394842197794484163}
-  IdleSprite: {fileID: 21300000, guid: 8c577c713c6d6a84896224f971d84603, type: 3}
-  LaunchSprite: {fileID: 21300000, guid: 3c5319c2a68022c48bed7cabfb719c5d, type: 3}
-  Sound: {fileID: 8300000, guid: b00eedca6f3154a40ac98ca2add729b6, type: 3}
-  OnLaunch:
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.TriggerZone
+  ReactsTo: 3
+  OnlyForPlayer: 0
+  OnlyOnce: 0
+  Cooldown: 0
+  RepeatWhileInside: 0
+  OnEnter:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 5269817626653537465}
+        m_TargetAssemblyTypeName: ArenaKit.ForcePush, ArenaKit
+        m_MethodName: Push
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 2253000746000376327}
+        m_TargetAssemblyTypeName: ArenaKit.SwapSprite, ArenaKit
+        m_MethodName: ShowFor
+        m_Mode: 4
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0.25
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  OnExit:
     m_PersistentCalls:
       m_Calls: []
+--- !u!114 &5269817626653537465
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2567824554347587743}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b9547b5a24283d847b0190f28d5382ee, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.ForcePush
+  Speed: 13
+  PushObjects: 1
+  KeepSidewaysSpeed: 1
+  Sound: {fileID: 8300000, guid: b00eedca6f3154a40ac98ca2add729b6, type: 3}
+--- !u!114 &2253000746000376327
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2567824554347587743}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e66c88e5ed4e5254bb997c194a53d318, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.SwapSprite
+  Renderer: {fileID: 394842197794484163}
+  Sprite: {fileID: 21300000, guid: 3c5319c2a68022c48bed7cabfb719c5d, type: 3}
+  Blink: 0
+  BlinkSpeed: 6

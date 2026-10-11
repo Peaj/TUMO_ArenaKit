@@ -113,34 +113,74 @@ Settings on the CameraRig (`ArenaCamera`):
 
 All scripts are in the `ArenaKit` namespace (`Assets/Kit/Scripts`). Everything a student sets up has English field names, tooltips and events. The in-game text is German.
 
-| Prefab (Assets/Kit/Prefabs) | Component | What it does |
+### Triggers and actions
+
+The blocks are compositions of small scripts, so students can recombine them:
+- **Triggers** (`Scripts/Triggers`) notice that something happened and fire UnityEvents.
+- **Actions** (`Scripts/Actions`) are the methods students pick in those events.
+
+Actions work on **whoever triggered the event**. While a trigger's event runs, `TriggeredBy` remembers the thing and the player behind it. So `TriggerZone.OnEnter → ForcePush.Push()` launches exactly what entered the zone, with no "Dynamic" parameters to set up. This context passes down a chain: in TriggerZone → Switch → Counter → Explosive, the explosion still credits the player who walked into the zone.
+
+| Trigger | Events | Fires when |
 |---|---|---|
-| Rules/LevelRules | `LevelRules` | Level name, builder name, win rules (last player standing, points to win, kills give points, time limit), respawn, player prefab and health, gravity. Methods for events: `AddPoint(int)`, `RemovePoint(int)`, `WinRound(int)`, `Draw()` |
+| `TriggerZone` | `OnEnter(int)`, `OnExit(int)` | Something enters or leaves. Settings: `ReactsTo` (players, projectiles, balls, any physics object, everything), `OnlyForPlayer`, `OnlyOnce`, `Cooldown`, and `RepeatWhileInside`, which fires `OnEnter` again every X s, e.g. for lava |
+| `HitSensor` | `OnHit(int)` | Shot or caught in an explosion |
+| `Breakable` | `OnDamaged(int)`, `OnBroken(int)` | Took damage / health is used up. `RemoveWhenBroken` off keeps it alive, e.g. for an `Explosive` |
+| `Switch` | `OnTurnedOn(int)`, `OnTurnedOff(int)` | Its state changes (`Toggle`, `TurnOn`, `TurnOff`, `AutoResetTime`) |
+| `Timer` | `OnFinished` | After X seconds, optionally repeating |
+| `Counter` | `OnReached`, `OnCountChanged(int)` | The count reaches its target |
+
+| Action | Methods | Works on |
+|---|---|---|
+| `Explosive` | `Explode()` | Itself: fuse with blinking, explosion, then removed or respawned. Kill credit goes to the triggering player |
+| `ForcePush` | `Push()` | Whoever triggered it: velocity along the object's up direction (green arrow) |
+| `Damager` | `Hurt()`, `Kill()` | Whoever triggered it: players, and breakables (lava breaks crates) |
+| `Teleporter` | `Teleport()` | Whoever triggered it: beamed to `Target`, speed kept |
+| `Score` | `AddPoints()`, `RemovePoints()`, `WinRound()`, `SendToStart()` | The triggering player (for balls: who touched it last), or a fixed `ForPlayer` |
+| `Disappear` | `Hide()`, `Show()` | Itself, optionally coming back after `RespawnTime` |
+| `Remover` | `RemoveObject()`, `RemoveSelf()` | Whoever triggered it (crates, dropped weapons; balls go back to their start), or itself |
+| `Spawner` | `Spawn()` | Spawns prefabs at its position, also on an interval |
+| `Door` | `Open()`, `Close()`, `Toggle()` | Itself |
+| `Mover` | `MoveToEnd()`, `MoveToStart()`, `Toggle()`, `StartMoving()`, `StopMoving()` | Itself, between start and start + `Offset`. Players ride along |
+| `SwapSprite` | `Show()`, `ShowFor(float)`, `Restore()` | Its renderer, optionally blinking |
+| `PlaySound` | `Play()` | Plays a clip |
+
+Visual helpers (`Scripts/Visuals`): `SpriteAnimation` (looping frames) and `Hover` (bobbing).
+
+### Prefabs
+
+| Prefab (Assets/Kit/Prefabs) | Made of | What it does |
+|---|---|---|
+| Rules/LevelRules | `LevelRules` | Level name, builder name, win rules (last player standing, points to win, kills give points, time limit), max players, respawn, player prefab and health, gravity. Methods for events: `AddPoint(int)`, `RemovePoint(int)`, `WinRound(int)`, `Draw()` |
 | Rules/SpawnPoint | `SpawnPoint` | Start point for player 1-4, optional start weapon |
-| Rules/FinishFlag | `FinishFlag` | First player to touch it wins the round, or gets points (race / parkour) |
+| Rules/FinishFlag | TriggerZone → Score.WinRound | First player to touch it wins the round |
 | Rules/ScoreZone | `ScoreZone` | King of the hill: one point per second while alone inside |
-| Rules/Coin, Gem | `Collectible` | Points for collecting, optional respawn |
-| Rules/Goal + Rules/Ball | `Goal`, `Ball` | Ball games: the ball in a goal gives a point to a fixed player or to whoever touched it last |
-| Rules/KillZone | `Hazard` | Kills everything below the level |
+| Rules/Coin, Gem | TriggerZone → PlaySound, Score.AddPoints, Disappear.Hide | Points for collecting, optional respawn |
+| Rules/Goal + Rules/Ball | TriggerZone (balls) → Score.AddPoints, Remover.RemoveObject; `Ball` | The ball in a goal gives a point to `Score.ForPlayer`, or to whoever touched it last |
+| Rules/KillZone | TriggerZone (everything) → Damager.Kill, Remover.RemoveObject | Kills players, removes objects and resets balls below the level |
 | Rules/NameSign | `NameSign` | Sign with the builder's name |
 | Rules/CameraRig | `ArenaCamera` | Duck Game camera, see [Camera](#camera) |
-| Blocks/TriggerZone | `TriggerZone` | Invisible zone with `OnEnter(int player)` / `OnExit(int player)` for players, projectiles, balls or anything |
-| Blocks/Lever, Button | `Switch` | Flipped by touching or shooting it. `OnTurnedOn` / `OnTurnedOff` |
-| Blocks/Door, LockBlock | `Door` | Blocks the way. `Open()`, `Close()`, `Toggle()` |
-| Blocks/Key | `Collectible` | 0 points. Connect `OnCollected` to `LockBlock.Open` |
-| Blocks/MovingPlatform, Elevator | `Mover` | Moves back and forth (or only on command) between start and start + Offset. Players ride along |
-| Blocks/JumpPad | `JumpPad` | Launches players and objects along its up direction |
-| Blocks/TeleporterPair | `Teleporter` | Two linked portals, speed is kept |
-| Blocks/Mine, TNTBlock | `Explosive` | Explodes when touched, shot or hit by another explosion (chain reactions) |
-| Blocks/Crate, WeaponCrate, BrickWall | `Breakable` | Breaks after enough damage. The weapon crate drops a random weapon |
-| Blocks/Spikes, Saw | `Hazard` (+ `Mover`) | Kills or hurts on touch |
-| Blocks/RisingLava | `Hazard`, `Mover`, `Timer` | Sudden death: the lava starts rising after 30 s |
+| Blocks/TriggerZone | `TriggerZone` | The bare trigger for students' own ideas |
+| Blocks/Lever, Button | `Switch` ← TriggerZone + HitSensor | Flipped by touching or shooting it. The lever toggles; the button turns on and resets after 3 s |
+| Blocks/Door, LockBlock | `Door` | Blocks the way until an event opens it |
+| Blocks/Key | TriggerZone → PlaySound, Disappear.Hide | 0 points. Connect its `TriggerZone.OnEnter` to `LockBlock.Open` |
+| Blocks/MovingPlatform, Elevator | `Mover` | Moving one-way platforms |
+| Blocks/JumpPad | TriggerZone → ForcePush.Push, SwapSprite.ShowFor | Launches players and objects along its up direction (rotate it for a side booster) |
+| Blocks/TeleporterPair | 2 × TriggerZone → Teleporter.Teleport | Two linked portals |
+| Blocks/Mine | TriggerZone (OnEnter → SwapSprite.Show; **OnExit** → Explosive.Explode) + HitSensor → Explode | Stepping on it arms it (blinking light); stepping off or shooting it blows it up |
+| Blocks/TNTBlock | Breakable (`RemoveWhenBroken` off) → Explosive.Explode | Any damage blows it up, so explosions chain |
+| Blocks/Crate, BrickWall | `Breakable` | Breaks after enough damage |
+| Blocks/WeaponCrate | Breakable → Spawner.Spawn | Drops a random weapon |
+| Blocks/Spikes, Saw | TriggerZone → Damager.Hurt (+ `Mover`) | Kills on touch |
+| Blocks/RisingLava | Timer → Mover.MoveToEnd; TriggerZone → Damager.Hurt, Remover.RemoveObject | Sudden death: the lava starts rising after 30 s |
 | Blocks/Spawner | `Spawner` | Spawns prefabs on an interval or on command |
 | Blocks/Timer, Counter | `Timer`, `Counter` | "After X seconds" / "after N times" events |
-| Art/Weapons/* | sprites | 12 weapon sprites (the 4 kit weapons plus Revolver, Blaster, LaserRifle, SMG, SniperRifle, WaterGun, Flamethrower, HandCannon) and 3 projectiles. The pivot is the grip, so swapping the sprite of a weapon variant keeps it in the hand. Drawn by `Tools/weapon_sprites.py` |
+| Art/Weapons/* | sprites | 12 weapon sprites (the 4 kit weapons plus Revolver, Blaster, LaserRifle, SMG, SniperRifle, WaterGun, Flamethrower, HandCannon), 3 projectiles and the mine (`Props/Mine`, `Props/Mine_Armed`). The pivot is the grip, so swapping the sprite of a weapon variant keeps it in the hand. Drawn by `Tools/weapon_sprites.py` |
 | Weapons/* | `Weapon` | Bazooka, Pistol, Shotgun, GrenadeLauncher, Minigun. Projectile, speed, projectiles per shot, spread, fire delay, automatic, recoil, ammo (the weapon drops when empty). It shoots where its `Muzzle` points, so rotating the weapon aims it (the GrenadeLauncher is rotated 25° up) |
 | Projectiles/* | `Projectile` | Damage, explosion radius, push force, gravity, lifetime, explode on impact or bounce |
 | Pickups/* | `WeaponPickup` | A weapon lying in the level (a fixed weapon or a random one), respawns |
+
+The Hazards tilemap of every level has TriggerZone (everything) → Damager.Hurt.
 
 Tilemaps in every level:
 - **Back Decoration** and **Front Decoration**: no collision
@@ -162,10 +202,10 @@ Players always start without a weapon. Use a `SpawnPoint > Start Weapon` to hand
 
   `KitBuilder.BuildShowcaseOnly` rebuilds just the showcase. When you add a new block prefab, also add it to `BuildShowcase`. The builder warns about any block that is missing there.
 - **Kit checksum:** after changing kit files by hand, run `TUMO > Lehrer > Kit-Prüfsumme speichern` so the export check doesn't warn students about your changes.
-- **Tests:** `Window > General > Test Runner > PlayMode`, 25 tests. They cover:
+- **Tests:** `Window > General > Test Runner > PlayMode`, 27 tests. They cover:
   - spawning, both keyboard halves, jumping, quick stop, variable jump height
   - pickups, bazooka kill and round end, empty weapons dropping, rocket rotation, grenade launcher aim
-  - jump pad, explosion with crate drop
+  - jump pad, explosion with crate drop, mine (arms on step, explodes on leaving), TNT chain
   - level rotation, volleyball goal
   - camera: follows living players, drops dead ones, zooms in on the winner, stays inside the level at 16:9, 16:10, 4:3 and 21:9
   - tile collision in every kit scene

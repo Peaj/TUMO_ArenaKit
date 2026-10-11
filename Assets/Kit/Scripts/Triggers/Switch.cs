@@ -5,19 +5,15 @@ using UnityEngine.Events;
 namespace ArenaKit
 {
     /// <summary>
-    /// A lever or button. Players flip it by touching or shooting it.
-    /// Connect the events to doors, movers, explosives, spawners...
+    /// Something that is on or off: a lever, a button, a light...
+    /// Flip it from other events (Toggle, Turn On, Turn Off). The Lever prefab flips it with a
+    /// TriggerZone (walk into it) and a HitSensor (shoot it).
     /// </summary>
-    [RequireComponent(typeof(Collider2D))]
-    public class Switch : MonoBehaviour, IShootable
+    public class Switch : MonoBehaviour
     {
         [Tooltip("Is the switch on at the start?")]
         public bool IsOn = false;
-        [Tooltip("Players flip the switch by walking into it")]
-        public bool FlipOnTouch = true;
-        [Tooltip("Players flip the switch by shooting it")]
-        public bool FlipWhenShot = true;
-        [Tooltip("Flips back by itself after these seconds. 0 = stays")]
+        [Tooltip("Turns off by itself after these seconds. 0 = stays on")]
         [Min(0f)] public float AutoResetTime = 0f;
 
         [Header("Look")]
@@ -32,80 +28,60 @@ namespace ArenaKit
         [Tooltip("Called with the player who flipped it (0 = no player)")]
         public UnityEvent<int> OnTurnedOff = new UnityEvent<int>();
 
-        const float MinTimeBetweenFlips = 0.4f;
-        float lastFlip = -999f;
+        /// <summary>Walking into a lever and shooting it at once should not flip it twice.</summary>
+        const float MinTimeBetweenToggles = 0.4f;
+        float lastToggle = -999f;
         Coroutine resetRoutine;
 
         void Awake()
         {
-            GetComponent<Collider2D>().isTrigger = true;
             UpdateLook();
         }
 
         public void Toggle()
         {
-            SetState(!IsOn, 0);
+            if (Time.time < this.lastToggle + MinTimeBetweenToggles)
+                return;
+            this.lastToggle = Time.time;
+            SetState(!IsOn);
         }
 
         public void TurnOn()
         {
-            SetState(true, 0);
+            SetState(true);
         }
 
         public void TurnOff()
         {
-            SetState(false, 0);
+            SetState(false);
         }
 
-        void OnTriggerEnter2D(Collider2D other)
-        {
-            if (!FlipOnTouch)
-                return;
-
-            var character = other.GetComponentInParent<Character>();
-            if (character != null && !character.IsDead)
-                Flip(character.PlayerNumber);
-        }
-
-        public void OnShot(Projectile projectile)
-        {
-            if (FlipWhenShot)
-                Flip(projectile.Owner);
-        }
-
-        void Flip(int player)
-        {
-            if (Time.time < this.lastFlip + MinTimeBetweenFlips)
-                return;
-            SetState(!IsOn, player);
-        }
-
-        void SetState(bool on, int player)
+        void SetState(bool on)
         {
             if (on == IsOn)
                 return;
 
             IsOn = on;
-            this.lastFlip = Time.time;
             UpdateLook();
             GameManager.PlaySound(Sound);
 
             if (this.resetRoutine != null)
                 StopCoroutine(this.resetRoutine);
-            if (on && AutoResetTime > 0f)
+            if (on && AutoResetTime > 0f && isActiveAndEnabled)
                 this.resetRoutine = StartCoroutine(ResetLater());
 
+            // Runs inside the event that flipped the switch, so the player is passed on.
             if (on)
-                OnTurnedOn.Invoke(player);
+                OnTurnedOn.Invoke(TriggeredBy.Player);
             else
-                OnTurnedOff.Invoke(player);
+                OnTurnedOff.Invoke(TriggeredBy.Player);
         }
 
         IEnumerator ResetLater()
         {
             yield return new WaitForSeconds(AutoResetTime);
             this.resetRoutine = null;
-            SetState(false, 0);
+            SetState(false);
         }
 
         void UpdateLook()

@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 5385154243882626971}
   - component: {fileID: 8684940560216035103}
   - component: {fileID: 3380796869031645670}
+  - component: {fileID: 5616482530053704849}
   m_Layer: 6
   m_Name: WeaponCrate
   m_TagString: Untagged
@@ -152,11 +153,46 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ArenaKit::ArenaKit.Breakable
   Health: 1
-  Drops:
-  - {fileID: 444411234501521631, guid: 1c6efca7ed56a1b4286565ecc5f4b93f, type: 3}
+  RemoveWhenBroken: 1
   DebrisPieces: 4
   HitSound: {fileID: 0}
   BreakSound: {fileID: 8300000, guid: ab17d669b0a600a47b4a2c7f43062087, type: 3}
+  OnDamaged:
+    m_PersistentCalls:
+      m_Calls: []
   OnBroken:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 5616482530053704849}
+        m_TargetAssemblyTypeName: ArenaKit.Spawner, ArenaKit
+        m_MethodName: Spawn
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: 
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+--- !u!114 &5616482530053704849
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7161714339324950058}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 28f016ec38e15da4d9ba35f97a37ce37, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.Spawner
+  Prefabs:
+  - {fileID: 444411234501521631, guid: 1c6efca7ed56a1b4286565ecc5f4b93f, type: 3}
+  Interval: 0
+  SpawnAtStart: 0
+  MaxAlive: 0
+  RandomOffset: {x: 0, y: 0}
+  OnSpawn:
     m_PersistentCalls:
       m_Calls: []

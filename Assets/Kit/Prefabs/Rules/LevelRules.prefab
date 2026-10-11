@@ -50,6 +50,7 @@ MonoBehaviour:
   PointsToWin: 1
   KillsGivePoints: 0
   TimeLimit: 0
+  MaxPlayers: 4
   PlayerPrefab: {fileID: 0}
   PlayerHealth: 0
   RespawnPlayers: 0
