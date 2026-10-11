@@ -17,6 +17,7 @@ namespace ArenaKit.Tests
         const string TemplateScene = "Assets/Kit/Scenes/Template.unity";
         const string ArenaScene = "Assets/Levels/Demo_Arena/Demo_Arena.unity";
         const string VolleyballScene = "Assets/Levels/Demo_RocketVolleyball/Demo_RocketVolleyball.unity";
+        const string ShowcaseScene = "Assets/Kit/Scenes/Showcase.unity";
 
         Keyboard keyboard;
 
@@ -464,7 +465,7 @@ namespace ArenaKit.Tests
         }
 
         [UnityTest]
-        public IEnumerator Levels_AllSolidTilesHaveCollision([Values(TemplateScene, ArenaScene, VolleyballScene)] string scene)
+        public IEnumerator Levels_AllSolidTilesHaveCollision([Values(TemplateScene, ArenaScene, VolleyballScene, ShowcaseScene)] string scene)
         {
             yield return LoadLevel(scene);
             yield return new WaitForFixedUpdate();
@@ -492,7 +493,74 @@ namespace ArenaKit.Tests
             Assert.Greater(checkedTiles, 20, "The level has solid tiles");
         }
 
+        [UnityTest]
+        public IEnumerator Showcase_SwitchesKeysCoinsAndZonesTriggerTheirEvents()
+        {
+            yield return LoadLevel(ShowcaseScene);
+            Character left = Player(1);
+            yield return new WaitForSeconds(0.3f);
+
+            Door leverDoor = NearestTo<Door>(73.5f);
+            Assert.IsFalse(leverDoor.IsOpen);
+            yield return TouchAt(left, 71.5f);
+            Assert.IsTrue(leverDoor.IsOpen, "The lever opens its door");
+
+            Door counterDoor = NearestTo<Door>(94f);
+            foreach (float x in new[] { 88.5f, 90f, 91.5f })
+            {
+                Assert.IsFalse(counterDoor.IsOpen, "The counter door waits for 3 coins");
+                yield return TouchAt(left, x);
+            }
+            Assert.IsTrue(counterDoor.IsOpen, "3 coins open the counter door");
+
+            Door lockBlock = NearestTo<Door>(101.5f);
+            yield return TouchAt(left, 98.5f);
+            Assert.IsTrue(lockBlock.IsOpen, "The key opens the lock block");
+
+            int cratesBefore = Object.FindObjectsByType<Breakable>(FindObjectsSortMode.None).Length;
+            yield return TouchAt(left, 106.5f);
+            Assert.AreEqual(cratesBefore + 1, Object.FindObjectsByType<Breakable>(FindObjectsSortMode.None).Length, "The trigger zone makes the spawner drop a crate");
+        }
+
+        /// <summary>Not a real check: saves pictures of the whole showcase row if ARENA_PREVIEW_DIR is set.</summary>
+        [UnityTest]
+        public IEnumerator Showcase_Preview()
+        {
+            yield return LoadLevel(ShowcaseScene);
+            yield return new WaitForSeconds(1f);
+
+            Camera camera = Camera.main;
+            foreach (Behaviour behaviour in camera.GetComponents<Behaviour>())
+                if (behaviour.GetType().Name == "CinemachineBrain")
+                    behaviour.enabled = false;
+
+            camera.orthographicSize = 7f;
+            for (int i = 0; i < 7; i++)
+            {
+                camera.transform.position = new Vector3(10f + i * 24f, 3f, -10f);
+                yield return null;
+                Capture($"Showcase_{i + 1}");
+            }
+        }
+
         // ---------------------------------------------------------------
+
+        /// <summary>Puts the player on the floor at x and waits a moment so triggers notice it.</summary>
+        static IEnumerator TouchAt(Character character, float x)
+        {
+            character.Teleport(new Vector2(x, 1.2f));
+            character.Body.linearVelocity = Vector2.zero;
+            yield return new WaitForSeconds(0.3f);
+        }
+
+        static T NearestTo<T>(float x) where T : Component
+        {
+            T nearest = null;
+            foreach (T candidate in Object.FindObjectsByType<T>(FindObjectsSortMode.None))
+                if (nearest == null || Mathf.Abs(candidate.transform.position.x - x) < Mathf.Abs(nearest.transform.position.x - x))
+                    nearest = candidate;
+            return nearest;
+        }
 
         static void AssertOnScreen(Character character, string label)
         {

@@ -37,6 +37,8 @@ namespace ArenaKit.EditorTools
         const string Palettes = Kit + "/Palettes";
         const string Scenes = Kit + "/Scenes";
         const string Levels = "Assets/Levels";
+        /// <summary>Every building block in one row, to try them out (TUMO > Alle Bausteine ansehen).</summary>
+        public const string ShowcaseScene = Scenes + "/Showcase.unity";
         const string HeroSource = Platformer + "/Prefabs/Characters/hero.prefab";
         const string RocketSource = Platformer + "/Prefabs/Props/rocket.prefab";
         const string ExplosionSource = Platformer + "/Prefabs/Props/rocketExplosion.prefab";
@@ -99,6 +101,7 @@ namespace ArenaKit.EditorTools
             BuildTemplateScene();
             BuildDemoArena();
             BuildDemoVolleyball();
+            BuildShowcase();
 
             ArenaMenu.SetBuildScenes(new[]
             {
@@ -112,6 +115,7 @@ namespace ArenaKit.EditorTools
             foreach (string scene in new[]
                      {
                          $"{Scenes}/Template.unity",
+                         ShowcaseScene,
                          $"{Levels}/Demo_Arena/Demo_Arena.unity",
                          $"{Levels}/Demo_RocketVolleyball/Demo_RocketVolleyball.unity",
                      })
@@ -453,7 +457,15 @@ namespace ArenaKit.EditorTools
 
         static TileBase TileByKey(string key)
         {
-            return TileLookup.TryGetValue(key, out TileBase tile) ? tile : null;
+            if (!TileLookup.TryGetValue(key, out TileBase tile) || tile == null)
+            {
+                // "Grass" is a ground tile and a decoration tile: the solid one wins.
+                tile = new[] { "Ground", "Platforms", "Hazards", "Decoration" }
+                    .Select(folder => FindAsset<TileBase>(key, "t:TileBase", $"{Tiles}/{folder}"))
+                    .FirstOrDefault(found => found != null);
+                TileLookup[key] = tile;
+            }
+            return tile;
         }
 
         static Tile SimpleTile(string sprite, Tile.ColliderType collider, Color? color = null)
@@ -1522,9 +1534,29 @@ namespace ArenaKit.EditorTools
 
         static GameObject Place(string prefabKey, Vector3 position)
         {
-            var instance = (GameObject)PrefabUtility.InstantiatePrefab(PrefabLookup[prefabKey]);
+            var instance = (GameObject)PrefabUtility.InstantiatePrefab(PrefabByKey(prefabKey));
             instance.transform.position = position;
             return instance;
+        }
+
+        /// <summary>A kit prefab by name. Falls back to the saved asset when the kit was not built in this run.</summary>
+        static GameObject PrefabByKey(string key)
+        {
+            if (!PrefabLookup.TryGetValue(key, out GameObject prefab) || prefab == null)
+            {
+                prefab = FindAsset<GameObject>(key, "t:Prefab", Prefabs);
+                PrefabLookup[key] = prefab;
+            }
+            return prefab;
+        }
+
+        static T FindAsset<T>(string name, string filter, string folder) where T : Object
+        {
+            return AssetDatabase.FindAssets($"{name} {filter}", new[] { folder })
+                .Select(AssetDatabase.GUIDToAssetPath)
+                .Where(path => string.Equals(Path.GetFileNameWithoutExtension(path), name, System.StringComparison.OrdinalIgnoreCase))
+                .Select(AssetDatabase.LoadAssetAtPath<T>)
+                .FirstOrDefault(asset => asset != null);
         }
 
         static SpawnPoint PlaceSpawn(LevelScene level, int player, Vector3 position)
@@ -1757,6 +1789,257 @@ namespace ArenaKit.EditorTools
             Place("NameSign", new Vector3(-14f, -6.2f, 0f));
 
             Save(level, $"{folder}/Demo_RocketVolleyball.unity");
+        }
+
+        /// <summary>Builds only the showcase scene from the saved kit prefabs (batch mode: -executeMethod ...BuildShowcaseOnly).</summary>
+        public static void BuildShowcaseOnly()
+        {
+            BuildShowcase();
+            RebuildTileColliders(ShowcaseScene);
+            KitManifest.Write();
+        }
+
+        /// <summary>
+        /// Every building block in one long row with a label, to try them out and see how they work.
+        /// Players start on the left. Nobody wins here: respawn is on and the points never run out.
+        /// </summary>
+        static void BuildShowcase()
+        {
+            LevelScene level = CreateLevelScene("background_color_hills");
+            LevelRules rules = level.Rules;
+            rules.LevelName = "Alle Bausteine";
+            rules.BuiltBy = "Arena-Kit";
+            rules.LastPlayerStandingWins = false;
+            rules.RespawnPlayers = true;
+            rules.PointsToWin = 999;
+
+            const int right = 169;
+            Transform labels = new GameObject("Labels").transform;
+
+            // Floor (top at y = 0) and two high walls so the camera has room.
+            Fill(level.Ground, "Grass", -2, -2, right, -1);
+            Fill(level.Ground, "Grass", -2, 0, -2, 11);
+            Fill(level.Ground, "Grass", right, 0, right, 11);
+
+            PlaceSpawn(level, 1, new Vector3(1f, 1.2f, 0f));
+            PlaceSpawn(level, 2, new Vector3(2.5f, 1.2f, 0f));
+            PlaceSpawn(level, 3, new Vector3(4f, 1.2f, 0f));
+            PlaceSpawn(level, 4, new Vector3(5.5f, 1.2f, 0f));
+            Label(labels, "SpawnPoint", "Hier starten die Spieler", 3.25f);
+
+            // --- Weapons ---
+            string[] pickups = { "Pickup_Pistol", "Pickup_Shotgun", "Pickup_Minigun", "Pickup_Bazooka", "Pickup_GrenadeLauncher", "Pickup_Random" };
+            for (int i = 0; i < pickups.Length; i++)
+            {
+                float x = 9f + i * 1.5f;
+                Place(pickups[i], new Vector3(x, 0.8f, 0f));
+                // Staggered so the long names do not run into each other.
+                Label(labels, pickups[i].Replace("Pickup_", ""), null, x, i % 2 == 0 ? 2f : 2.6f, 0.55f);
+            }
+            Label(labels, "Pickups", "Waffen zum Aufheben", 12.75f);
+
+            Place("WeaponCrate", new Vector3(20.5f, 2.5f, 0f));
+            Place("WeaponCrate", new Vector3(22f, 0.5f, 0f));
+            Label(labels, "WeaponCrate", "Aufschießen: Waffe drin", 21.25f);
+
+            // --- Breakables and explosives ---
+            Place("Crate", new Vector3(26.5f, 0.5f, 0f));
+            Place("Crate", new Vector3(26.5f, 1.5f, 0f));
+            Place("Crate", new Vector3(27.5f, 0.5f, 0f));
+            Label(labels, "Crate", "Kaputtbare Kiste", 27f);
+
+            for (int y = 0; y < 3; y++)
+                Place("BrickWall", new Vector3(30.5f, y + 0.5f, 0f));
+            Label(labels, "BrickWall", "Hält mehr aus", 30.5f);
+
+            Place("TNTBlock", new Vector3(34.5f, 0.5f, 0f));
+            Label(labels, "TNTBlock", "Draufschießen!", 34.5f);
+            Place("Mine", new Vector3(37.5f, 0.3f, 0f));
+            Label(labels, "Mine", "Explodiert bei Berührung", 37.8f, 3.5f);
+
+            // --- Movement ---
+            Place("JumpPad", new Vector3(41.5f, 0.5f, 0f));
+            GameObject booster = Place("JumpPad", new Vector3(44.5f, 0.5f, 0f));
+            booster.name = "JumpPad (rotated)";
+            booster.transform.rotation = Quaternion.Euler(0f, 0f, -90f);
+            Label(labels, "JumpPad", "Gedreht = Seiten-Booster", 43f);
+
+            Place("MovingPlatform", new Vector3(48f, 2.5f, 0f));
+            Label(labels, "MovingPlatform", "Fährt hin und her", 50f);
+            Place("Elevator", new Vector3(56.5f, 1f, 0f));
+            Label(labels, "Elevator", "Fährt hoch und runter", 56.5f, 7f);
+
+            Place("TeleporterPair", new Vector3(64f, 0.5f, 0f));
+            Label(labels, "TeleporterPair", "Rein und auf der anderen Seite raus", 64f);
+
+            // --- Switches and doors (connected with events) ---
+            var lever = Place("Lever", new Vector3(71.5f, 0.5f, 0f)).GetComponent<Switch>();
+            var leverDoor = Place("Door", new Vector3(73.5f, 0.5f, 0f)).GetComponent<Door>();
+            UnityEventTools.AddVoidPersistentListener(lever.OnTurnedOn, leverDoor.Open);
+            UnityEventTools.AddVoidPersistentListener(lever.OnTurnedOff, leverDoor.Close);
+            Label(labels, "Lever  >  Door", "Hebel öffnet und schließt", 72.5f);
+
+            var button = Place("Button", new Vector3(77.5f, 0.5f, 0f)).GetComponent<Switch>();
+            var buttonDoor = Place("Door", new Vector3(79.5f, 0.5f, 0f)).GetComponent<Door>();
+            UnityEventTools.AddVoidPersistentListener(button.OnTurnedOn, buttonDoor.Open);
+            UnityEventTools.AddVoidPersistentListener(button.OnTurnedOff, buttonDoor.Close);
+            Label(labels, "Button  >  Door", "Offen für 3 Sekunden", 78.5f);
+
+            var timer = Place("Timer", new Vector3(83f, 0.5f, 0f)).GetComponent<Timer>();
+            timer.Seconds = 2f;
+            timer.Repeat = true;
+            var timerDoor = Place("Door", new Vector3(84.5f, 0.5f, 0f)).GetComponent<Door>();
+            UnityEventTools.AddVoidPersistentListener(timer.OnFinished, timerDoor.Toggle);
+            Label(labels, "Timer  >  Door", "Alle 2 Sekunden", 84f);
+
+            var counter = Place("Counter", new Vector3(91f, 0.5f, 0f)).GetComponent<Counter>();
+            counter.Target = 3;
+            counter.ResetWhenReached = true;
+            for (int i = 0; i < 3; i++)
+            {
+                var coin = Place("Coin", new Vector3(88.5f + i * 1.5f, 1f, 0f)).GetComponent<Collectible>();
+                coin.RespawnTime = 5f;
+                UnityEventTools.AddVoidPersistentListener(coin.OnCollected, counter.Add);
+            }
+            var counterDoor = Place("Door", new Vector3(94f, 0.5f, 0f)).GetComponent<Door>();
+            counterDoor.AutoCloseTime = 5f;
+            UnityEventTools.AddVoidPersistentListener(counter.OnReached, counterDoor.Open);
+            Label(labels, "Counter  >  Door", "3 Coins öffnen die Tür", 91f);
+
+            var key = Place("Key", new Vector3(98.5f, 1f, 0f)).GetComponent<Collectible>();
+            key.RespawnTime = 5f;
+            for (int y = 0; y < 2; y++)
+            {
+                var lockBlock = Place("LockBlock", new Vector3(101.5f, y + 0.5f, 0f)).GetComponent<Door>();
+                lockBlock.AutoCloseTime = 5f;
+                UnityEventTools.AddVoidPersistentListener(key.OnCollected, lockBlock.Open);
+            }
+            Label(labels, "Key  >  LockBlock", "Schlüssel öffnet das Schloss", 100f);
+
+            GameObject zoneObject = Place("TriggerZone", new Vector3(106.5f, 1f, 0f));
+            var zone = zoneObject.GetComponent<TriggerZone>();
+            zone.Cooldown = 1f;
+            var area = new GameObject("Area (only in the showcase)");
+            area.transform.SetParent(zoneObject.transform, false);
+            area.transform.localScale = new Vector3(2f, 2f, 1f);
+            AddSprite(area, GeneratedSprite("Square"), OrderBackDecoration + 1, new Color(1f, 0.9f, 0.3f, 0.3f));
+            var spawner = Place("Spawner", new Vector3(106.5f, 5f, 0f)).GetComponent<Spawner>();
+            spawner.Prefabs = new[] { PrefabByKey("Crate") };
+            spawner.Interval = 0f;
+            spawner.SpawnAtStart = false;
+            spawner.MaxAlive = 3;
+            spawner.RandomOffset = new Vector2(1f, 0f);
+            UnityEventTools.AddVoidPersistentListener(zone.OnEnter, spawner.Spawn);
+            Label(labels, "TriggerZone  >  Spawner", "Reinlaufen: eine Kiste fällt", 106.5f, 7f);
+
+            // --- Points ---
+            Place("Coin", new Vector3(111.5f, 1f, 0f)).GetComponent<Collectible>().RespawnTime = 3f;
+            Place("Gem", new Vector3(113f, 1f, 0f)).GetComponent<Collectible>().RespawnTime = 3f;
+            Label(labels, "Coin / Gem", "1 und 3 Punkte", 112.25f);
+
+            // --- Danger ---
+            Place("Spikes", new Vector3(117.5f, 0.5f, 0f));
+            Place("Spikes", new Vector3(118.5f, 0.5f, 0f));
+            Label(labels, "Spikes", "Tödlich", 118f);
+            Place("Saw", new Vector3(122f, 0.6f, 0f));
+            Label(labels, "Saw", "Tödlich und bewegt sich", 123.5f);
+
+            for (int x = 128; x <= 130; x++)
+                level.Ground.SetTile(new Vector3Int(x, -1, 0), null);
+            Fill(level.Hazards, "Lava", 128, -1, 130, -1);
+            Label(labels, "Lava", "Tile Palette: 3 Hazards", 129.5f);
+
+            // --- Game modes ---
+            Place("ScoreZone", new Vector3(135.5f, 1.5f, 0f));
+            Label(labels, "ScoreZone", "Allein drinstehen = Punkte", 135.5f);
+
+            Place("Ball", new Vector3(140f, 3f, 0f));
+            Place("Goal", new Vector3(144.5f, 1.5f, 0f));
+            Label(labels, "Ball  +  Goal", "Ball ins Tor = Punkt", 142.25f);
+
+            Place("FinishFlag", new Vector3(149f, 0.5f, 0f)).GetComponent<FinishFlag>().Points = 1;
+            Label(labels, "FinishFlag", "Punkt und zurück zum Start", 149f);
+
+            Place("NameSign", new Vector3(153f, 0.8f, 0f));
+            Label(labels, "NameSign", "Zeigt deinen Namen", 153f);
+
+            // Rising lava in its own pit, so it does not flood the whole row.
+            const int pitLeft = 159, pitRight = 165;
+            for (int x = pitLeft + 1; x < pitRight; x++)
+                for (int y = -2; y <= -1; y++)
+                    level.Ground.SetTile(new Vector3Int(x, y, 0), null);
+            Fill(level.Ground, "Grass", pitLeft, -12, pitLeft, 3);
+            Fill(level.Ground, "Grass", pitRight, -12, pitRight, 3);
+            Fill(level.Ground, "Grass", pitLeft + 1, -12, pitRight - 1, -12);
+
+            float pitWidth = pitRight - pitLeft - 1;
+            GameObject lava = Place("RisingLava", new Vector3((pitLeft + pitRight + 1) * 0.5f, -6.5f, 0f));
+            lava.GetComponent<SpriteRenderer>().size = new Vector2(pitWidth, 10f);
+            lava.transform.Find("Surface").GetComponent<SpriteRenderer>().size = new Vector2(pitWidth, 1f);
+            lava.GetComponent<BoxCollider2D>().size = new Vector2(pitWidth, 11f);
+            var lavaMover = lava.GetComponent<Mover>();
+            lavaMover.Offset = new Vector2(0f, 4.5f);
+            lavaMover.Speed = 1f;
+            var lavaLever = Place("Lever", new Vector3(157f, 0.5f, 0f)).GetComponent<Switch>();
+            UnityEventTools.AddVoidPersistentListener(lavaLever.OnTurnedOn, lavaMover.MoveToEnd);
+            UnityEventTools.AddVoidPersistentListener(lavaLever.OnTurnedOff, lavaMover.MoveToStart);
+            Label(labels, "RisingLava", "Steigt nach 30 s, oder mit dem Hebel", 161f, 6f);
+
+            GameObject killZone = Object.FindObjectsByType<Hazard>(FindObjectsSortMode.None)
+                .First(hazard => hazard.name == "KillZone").gameObject;
+            killZone.transform.position = new Vector3(right * 0.5f, -16f, 0f);
+            killZone.transform.localScale = new Vector3(3f, 1f, 1f);
+
+            WarnAboutMissingBlocks();
+            Save(level, ShowcaseScene);
+        }
+
+        /// <summary>A name (and a short German hint below it) floating above a showcase station.</summary>
+        static void Label(Transform parent, string title, string hint, float x, float y = 5f, float size = 1f)
+        {
+            var root = new GameObject(title);
+            root.transform.SetParent(parent, false);
+            root.transform.position = new Vector3(x, y, 0f);
+            LabelLine(root.transform, title, 0f, 0.12f * size, new Color(0.13f, 0.15f, 0.25f));
+            if (!string.IsNullOrEmpty(hint))
+                LabelLine(root.transform, hint, -0.65f * size, 0.075f * size, new Color(0.25f, 0.28f, 0.4f));
+        }
+
+        static void LabelLine(Transform parent, string text, float y, float characterSize, Color color)
+        {
+            var line = new GameObject(text, typeof(TextMesh));
+            line.transform.SetParent(parent, false);
+            line.transform.localPosition = new Vector3(0f, y, 0f);
+            var textMesh = line.GetComponent<TextMesh>();
+            var font = AssetDatabase.LoadAssetAtPath<Font>(PlayerFolder + "/ArenaFont.ttf");
+            textMesh.font = font;
+            textMesh.fontSize = 48;
+            textMesh.characterSize = characterSize;
+            textMesh.anchor = TextAnchor.MiddleCenter;
+            textMesh.alignment = TextAlignment.Center;
+            textMesh.color = color;
+            textMesh.text = text;
+            var meshRenderer = line.GetComponent<MeshRenderer>();
+            if (font != null)
+                meshRenderer.sharedMaterial = font.material;
+            meshRenderer.sortingOrder = OrderBackDecoration + 2;
+        }
+
+        /// <summary>Reminds whoever adds a new building block to put it into the showcase too.</summary>
+        static void WarnAboutMissingBlocks()
+        {
+            var placed = new HashSet<string>(Object.FindObjectsByType<Transform>(FindObjectsSortMode.None)
+                .Select(t => PrefabUtility.GetCorrespondingObjectFromSource(t.gameObject))
+                .Where(source => source != null)
+                .Select(source => source.name));
+
+            foreach (string folder in new[] { Prefabs + "/Blocks", Prefabs + "/Rules", Prefabs + "/Pickups" })
+                foreach (string path in AssetDatabase.FindAssets("t:Prefab", new[] { folder }).Select(AssetDatabase.GUIDToAssetPath))
+                {
+                    string name = Path.GetFileNameWithoutExtension(path);
+                    if (name != "LevelRules" && name != "Drop_Random" && !placed.Contains(name))
+                        Debug.LogWarning($"[ArenaKit] Showcase: {name} is missing. Add it in KitBuilder.BuildShowcase.");
+                }
         }
 
         // ---------------------------------------------------------------

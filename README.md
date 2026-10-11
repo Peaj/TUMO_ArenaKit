@@ -15,6 +15,10 @@ Student material in German: [Docs/Spickzettel.md](Docs/Spickzettel.md)
 1. Open the project with Unity 6000.3.25f1 (the first import takes a few minutes).
 2. Open `Assets/Levels/Demo_Arena/Demo_Arena.unity` and press Play.
 3. After every round the next level of the build list loads (Demo_Arena → Demo_RocketVolleyball → ...).
+4. To try every building block, use `TUMO > Alle Bausteine ansehen`. It opens `Assets/Kit/Scenes/Showcase.unity`, where all blocks stand in one row with labels:
+   - Players start on the left.
+   - Respawn is on and nobody wins.
+   - The event examples are already wired: lever → door, button → door, timer → door, 3 coins → counter → door, key → lock block, trigger zone → spawner, lever → rising lava.
 
 | | Move | Jump | Fire | Drop through a platform |
 |---|---|---|---|---|
@@ -150,18 +154,22 @@ Players always start without a weapon. Use a `SpawnPoint > Start Weapon` to hand
 
 - **Kit builder:** `TUMO > Lehrer > Kit neu bauen` (`Assets/Kit/Editor/KitBuilder.cs`) rebuilds everything from the art:
   - tiles, palettes, prefabs, weapons and the player
-  - the template scene and the two demo levels
+  - the template scene, the two demo levels and the showcase
   - the build list and the kit checksum
 
   Student levels are not touched. Batch mode:
   `Unity -batchmode -quit -projectPath . -executeMethod ArenaKit.EditorTools.KitBuilder.BuildAll`
+
+  `KitBuilder.BuildShowcaseOnly` rebuilds just the showcase. When you add a new block prefab, also add it to `BuildShowcase`. The builder warns about any block that is missing there.
 - **Kit checksum:** after changing kit files by hand, run `TUMO > Lehrer > Kit-Prüfsumme speichern` so the export check doesn't warn students about your changes.
-- **Tests:** `Window > General > Test Runner > PlayMode`, 13 tests. They cover:
-  - spawning, both keyboard halves, jumping
-  - pickups, bazooka kill and round end, empty weapons dropping
+- **Tests:** `Window > General > Test Runner > PlayMode`, 24 tests. They cover:
+  - spawning, both keyboard halves, jumping, quick stop, variable jump height
+  - pickups, bazooka kill and round end, empty weapons dropping, rocket rotation, grenade launcher aim
   - jump pad, explosion with crate drop
   - level rotation, volleyball goal
   - camera: follows living players, drops dead ones, zooms in on the winner, stays inside the level at 16:9, 16:10, 4:3 and 21:9
+  - tile collision in every kit scene
+  - showcase events: lever, coins → counter, key, trigger zone → spawner
 
   Batch mode:
   `Unity -batchmode -projectPath . -runTests -testPlatform PlayMode -testFilter ArenaKit.Tests`

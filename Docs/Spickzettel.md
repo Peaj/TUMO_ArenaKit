@@ -67,6 +67,8 @@ Tipp: Die Boden-Tiles setzen Ränder und Ecken automatisch. Du malst einfach dra
 
 Ziehe Prefabs aus **Assets/Kit/Prefabs** in deine Szene. Die Einstellungen änderst du im **Inspector**.
 
+💡 **TUMO > Alle Bausteine ansehen** öffnet eine Szene, in der alle Bausteine nebeneinander stehen. Drück Play und probier sie aus! Danach öffnest du dein Level wieder mit **TUMO > Mein Level öffnen**.
+
 | Baustein | Was er macht |
 |---|---|
 | **SpawnPoint** | Startpunkt für Spieler 1-4. Bei *Start Weapon* bekommt der Spieler gleich eine Waffe |

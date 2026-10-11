@@ -233,6 +233,12 @@ namespace ArenaKit.EditorTools
             return slash > 0 ? LevelsFolder + "/" + rest.Substring(0, slash) : null;
         }
 
+        [MenuItem("TUMO/Alle Bausteine ansehen", priority = 20)]
+        static void OpenShowcase()
+        {
+            OpenScene(KitBuilder.ShowcaseScene);
+        }
+
         static void OpenScene(string path)
         {
             if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
