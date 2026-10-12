@@ -673,7 +673,8 @@ const TAGS = {
   "Coin / Gem": "münze geld punkte sammeln", "Ball + Goal": "tor fußball volleyball punkte", "NameSign": "schild name",
 };
 document.querySelectorAll("#blocks .block").forEach((block) => { block.dataset.tags = TAGS[block.querySelector("h4").textContent] || ""; });
-// Search: show only the building blocks that match.const search = document.getElementById("blockSearch");
+// Search: show only the building blocks that match.
+const search = document.getElementById("blockSearch");
 search.addEventListener("input", () => {
   const words = search.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
   let shown = 0;
