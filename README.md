@@ -73,9 +73,15 @@ Try the export and import once with two test levels before the workshop.
 
 ## Distributing the project to the Macs
 
-- Copy the project **without** the `Library` folder to every Mac and open it once before day 1 (first import takes a few minutes).
-- Alternatively, set up one Mac completely and copy that project folder including `Library` to the other Macs. `Library` can be reused on the same OS and Unity version.
-- Every Mac needs Unity 6000.3.25f1 with the same packages. The kit checksum (`ProjectSettings/ArenaKitManifest.txt`) belongs to the project and must be copied too.
+Step-by-step instructions for the TUMO IT (German): [Docs/Installation.md](Docs/Installation.md). In short:
+
+```bash
+git clone -b arena-kit https://github.com/Peaj/TUMO_ArenaKit.git ~/Documents/TUMO_ArenaKit
+```
+
+- The repo is public, so no GitHub account is needed. Every Mac needs Unity 6000.3.25f1.
+- Open the project once per Mac before day 1 (first import), or set up one Mac and copy the folder including `Library` to the others.
+- **Updates and repairs:** double-click `Kit aktualisieren.command` (Unity closed). It fetches the branch and runs `git reset --hard origin/arena-kit`. That resets every kit file but keeps the students' untracked level folders in `Assets/Levels/<Name>`. Never use `git clean`.
 
 ## Keyboards and gamepads on the Macs
 
