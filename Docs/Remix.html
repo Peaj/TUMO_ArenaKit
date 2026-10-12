@@ -187,8 +187,8 @@ function update() {
   if (rolled) {
     const [mode, twist, theme] = state.values.map((v, n) => DICE[n].faces[v - 1].name);
     document.getElementById("ideaText").textContent = `${mode} + ${twist} im Thema „${theme}“`;
-    // The game idea sheet reads this when it opens.
-    Arena.store.set("remix.idea", { mode, twist, theme });
+    // The idea travels in the link: pages opened from disk (file://) don't always share their saved data.
+    document.getElementById("toSheet").href = "Spielidee.html#remix=" + encodeURIComponent(JSON.stringify({ mode, twist, theme }));
   }
 }
 
@@ -201,7 +201,6 @@ document.getElementById("roll").onclick = async () => {
   button.textContent = "🎲 Nochmal ganz neu würfeln";
   update();
 };
-document.getElementById("toSheet").onclick = () => Arena.store.set("remix.apply", true);
 
 build();
 state.values.forEach((_, n) => showResult(n, false));

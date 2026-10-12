@@ -130,10 +130,16 @@ document.querySelectorAll("[data-key]").forEach((field) => {
   field.addEventListener("input", () => { data[field.dataset.key] = field.value; save(); });
 });
 
-// Coming from the remix dice: take over the rolled idea.
-const idea = Arena.store.get("remix.idea", null);
-if (Arena.store.get("remix.apply", false) && idea) {
-  Arena.store.remove("remix.apply");
+// Coming from the remix dice: the rolled idea is in the link (Spielidee.html#remix=...).
+let idea = null;
+if (location.hash.startsWith("#remix=")) {
+  try {
+    idea = JSON.parse(decodeURIComponent(location.hash.slice("#remix=".length)));
+  } catch (e) { /* broken link: ignore */ }
+  // Remove it from the address, so reloading does not overwrite later changes.
+  history.replaceState(null, "", location.pathname + location.search);
+}
+if (idea) {
   if (idea.mode in REMIX_MODES) data.mode = String(REMIX_MODES[idea.mode]);
   data.twist = idea.twist;
   data.theme = idea.theme;
