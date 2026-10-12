@@ -8,10 +8,16 @@ At the end, all levels are merged into one "arcade" project that plays one level
 - Based on `Games-Academy/BirdGame_GD1_25` (bean man character, bazooka, force-based movement)
 - Tiles and props: [Kenney New Platformer Pack](https://kenney.nl/assets/new-platformer-pack) (CC0)
 
-Workshop material in German, with screenshots and kit sprites, printable on A4 (open in a browser; print with background graphics on):
-- [Docs/Spickzettel.html](Docs/Spickzettel.html): cheat sheet for students (also as [Markdown](Docs/Spickzettel.md))
-- [Docs/Workshop.html](Docs/Workshop.html): 3-day time plan, arcade finale, material and preparation checklists
-- [Docs/Karten.html](Docs/Karten.html): print templates: feedback cards, game idea sheet, challenge cards, remix dice
+Workshop material in German: interactive web pages in `Docs/` that ship with the project, so they're on every student Mac. They work offline straight from the file system (fonts are bundled). Students open them with `TUMO > Spickzettel öffnen` / `TUMO > Workshop-Material öffnen`.
+- [Docs/index.html](Docs/index.html): start page
+- [Docs/Spickzettel.html](Docs/Spickzettel.html): cheat sheet with a building block search. Printing it gives a one-page, nearly black-and-white quick reference to keep next to the keyboard (also as [Markdown](Docs/Spickzettel.md))
+- [Docs/Challenges.html](Docs/Challenges.html): challenge card deck (draw, filter by level, mark as done)
+- [Docs/Remix.html](Docs/Remix.html): remix dice for a game idea (mode × twist × theme)
+- [Docs/Spielidee.html](Docs/Spielidee.html): game idea sheet with a paintable level sketch
+- [Docs/Feedback.html](Docs/Feedback.html): feedback box; playtesters leave their feedback on the builder's Mac
+- [Docs/Workshop.html](Docs/Workshop.html): for the teacher. 3-day time plan with a live timer (click a block to jump there, projector view, short timer for the playtest rotation), arcade finale, material and preparation
+
+Progress, the game idea and feedback are saved in the browser's local storage of that Mac. That suits the 3-day holiday workshop (same Mac every day). The daily backup of the level itself is the exported `.unitypackage` uploaded to Google Classroom.
 
 ## Quick start
 

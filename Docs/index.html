@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arena-Baukasten</title>
+<link rel="stylesheet" href="arena.css">
+<style>
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 16px; }
+  .tile { display: flex; flex-direction: column; gap: 6px; text-decoration: none; color: var(--ink); transition: transform 0.1s; }
+  .tile:hover { transform: translateY(-3px); background: var(--yellow-soft); }
+  .tile .pic { height: 80px; display: flex; align-items: center; gap: 10px; }
+  .tile .pic img { max-height: 70px; max-width: 110px; object-fit: contain; }
+  .tile .pic .emoji { font-size: 3rem; }
+  .tile h3 { margin: 0; }
+  .tile p { margin: 0; font-size: 0.95rem; color: var(--ink-soft); font-weight: 700; }
+  .teacher { margin-top: 28px; text-align: center; }
+  .hero img.shot { max-height: 320px; object-fit: cover; object-position: center 70%; }
+</style>
+</head>
+<body>
+<nav class="topbar" data-page="start"></nav>
+<div class="page">
+  <div class="hero">
+    <img class="shot" src="img/shot_rocket.png" alt="Zwei Spieler in der Arena">
+    <div class="title">
+      <h1>Arena-Baukasten</h1>
+      <p>Bau deine eigene Arena, erfinde deinen eigenen Spielmodus und spiel ihn im großen Finale mit allen anderen!</p>
+    </div>
+  </div>
+
+  <div class="tiles">
+    <a class="card tile" href="Spickzettel.html">
+      <div class="pic"><img src="img/lever_left.png" alt=""><img src="img/spring.png" alt=""></div>
+      <h3>📖 Spickzettel</h3>
+      <p>Steuerung, Unity, alle Bausteine, Auslöser und Aktionen, Rezepte</p>
+    </a>
+    <a class="card tile" href="Challenges.html">
+      <div class="pic"><span class="emoji">🃏</span></div>
+      <h3>🏅 Challenge-Karten</h3>
+      <p>Zieh eine Karte und probier sie aus. Drei Stufen: 🟢 🟡 🔴</p>
+    </a>
+    <a class="card tile" href="Remix.html">
+      <div class="pic"><span class="emoji">🎲</span></div>
+      <h3>🎲 Remix-Würfel</h3>
+      <p>Würfle Modus, Twist und Thema für deine Spielidee</p>
+    </a>
+    <a class="card tile" href="Spielidee.html">
+      <div class="pic"><span class="emoji">💡</span></div>
+      <h3>✏️ Spielidee</h3>
+      <p>Dein Steckbrief mit Skizze, wird auf diesem Mac gespeichert</p>
+    </a>
+    <a class="card tile" href="Feedback.html">
+      <div class="pic"><img src="img/star.png" alt=""></div>
+      <h3>📝 Feedback-Box</h3>
+      <p>Beim Playtest hinterlassen die Tester hier ihr Feedback für dich</p>
+    </a>
+  </div>
+
+  <div class="callout info" style="margin-top:24px">
+    <span class="emoji">☁️</span>
+    <p>Am Ende jedes Tages: <b>TUMO &gt; Level exportieren</b> und die Datei in <b>Google Classroom</b> hochladen. Das ist dein Backup!</p>
+  </div>
+
+  <p class="teacher"><a class="btn small" href="Workshop.html">👩‍🏫 Für Lehrkräfte: Workshop-Plan</a></p>
+  <footer>Arena-Baukasten · TUMO Ferienworkshop · Grafiken: Kenney (CC0)</footer>
+</div>
+<script src="arena.js"></script>
+</body>
+</html>

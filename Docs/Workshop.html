@@ -63,14 +63,73 @@
   .checklists h3 { display: flex; gap: 8px; align-items: center; }
   .checklists .when { display: inline-block; font-size: 0.8rem; font-family: var(--heading); background: var(--yellow-soft); border: 2px solid var(--ink); border-radius: 8px; padding: 0 8px; }
 
+  @media print { .day-card img { display: none; } .slot .card { cursor: auto; } }
   @media (max-width: 560px) {
     .timeline::before { left: 70px; }
     .slot { grid-template-columns: 56px 1fr; gap: 0 26px; }
     .slot::before { left: 62px; }
   }
+
+  /* ---- Live timer ---- */
+  .clock {
+    position: sticky; top: 0; z-index: 60;
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px;
+    padding: 10px 16px;
+    background: var(--ink); color: #fff;
+    border-bottom: 3px solid var(--ink);
+  }
+  .clock .days { display: flex; gap: 4px; }
+  .clock .btn { box-shadow: 0 3px 0 #000; }
+  .clock .days .btn[aria-pressed="true"] { background: var(--yellow); }
+  .clock .time { font-family: var(--heading); font-weight: 700; font-size: 1.7rem; line-height: 1; min-width: 92px; }
+  .clock .time small { display: block; font-size: 0.75rem; font-weight: 600; color: #cfcbe0; margin-top: 2px; }
+  .clock .now-box { flex: 1; min-width: 220px; }
+  .clock .now-title { font-family: var(--heading); font-weight: 600; font-size: 1.15rem; }
+  .clock .now-left { color: #cfcbe0; font-weight: 700; font-size: 0.9rem; }
+  .clock .short-chip { font-family: var(--heading); font-weight: 600; background: var(--yellow); color: var(--ink); border-radius: 8px; padding: 2px 10px; }
+  .clock a.home { color: var(--yellow); font-family: var(--heading); font-weight: 700; text-decoration: none; }
+
+  .slot .card { position: relative; overflow: hidden; cursor: pointer; transition: transform 0.1s; }
+  .slot, section { scroll-margin-top: 150px; }
+  .slot .card:hover { transform: translateX(3px); }
+  .slot .bar { position: absolute; left: 0; bottom: 0; height: 6px; width: 0; background: var(--ink); }
+  .slot.now .card { background: var(--yellow-soft); outline: 4px solid var(--yellow); outline-offset: -1px; }
+  .slot.now::before { width: 26px; height: 26px; left: 81px; top: 11px; animation: pulse 1.2s ease-in-out infinite; }
+  .slot.now h4::after { content: "JETZT"; font-family: var(--heading); font-size: 0.75rem; background: var(--red); color: #fff; border-radius: 6px; padding: 1px 8px; }
+  .slot.past .card { opacity: 0.55; }
+  @keyframes pulse { 50% { transform: scale(1.18); } }
+
+  .overlay { position: fixed; inset: 0; z-index: 200; background: var(--ink); color: #fff; display: grid; place-items: center; text-align: center; padding: 24px; }
+  .overlay[hidden] { display: none; }
+  .overlay .close { position: absolute; top: 16px; right: 16px; }
+  .overlay .label { font-family: var(--heading); font-weight: 600; font-size: clamp(1rem, 2.4vw, 1.8rem); color: var(--yellow); }
+  .overlay .big-title { font-family: var(--heading); font-weight: 700; font-size: clamp(2rem, 6vw, 5rem); line-height: 1.1; margin: 8px 0; }
+  .overlay .count { font-family: var(--heading); font-weight: 700; font-size: clamp(4rem, 17vw, 14rem); line-height: 1; font-variant-numeric: tabular-nums; }
+  .overlay .track { width: min(900px, 80vw); height: 22px; border: 3px solid #fff; border-radius: 999px; margin: 18px auto; overflow: hidden; }
+  .overlay .track div { height: 100%; width: 0; background: var(--yellow); }
+  .overlay .next { font-size: clamp(1rem, 2.2vw, 1.6rem); color: #cfcbe0; font-weight: 700; }
+  .overlay .btn-row { justify-content: center; margin-top: 22px; }
+  .overlay .alarm { animation: blink 0.5s steps(2) 6; }
+  @keyframes blink { 50% { color: var(--yellow); } }
 </style>
 </head>
 <body>
+<div class="clock no-print" id="clock">
+  <a class="home" href="index.html" title="Zum Workshop-Material">Arena-Baukasten</a>
+  <div class="days" role="group" aria-label="Tag">
+    <button class="btn small" data-day="0">Tag 1</button>
+    <button class="btn small" data-day="1">Tag 2</button>
+    <button class="btn small" data-day="2">Tag 3</button>
+  </div>
+  <button class="btn small primary" id="playBtn">▶ Start</button>
+  <button class="btn small" id="resetBtn" title="Zurück auf 0:00">⟲</button>
+  <div class="time" id="timeNow">0:00<small>von 4:00</small></div>
+  <div class="now-box"><div class="now-title" id="nowTitle">Klick auf Start oder auf einen Programmpunkt</div><div class="now-left" id="nowLeft"></div></div>
+  <span class="short-chip" id="shortChip" hidden></span>
+  <button class="btn small" id="shortBtn">⏱ Kurz-Timer</button>
+  <button class="btn small" id="beamerBtn">📽 Beamer</button>
+  <button class="btn small" id="soundBtn" title="Ton an/aus">🔊</button>
+</div>
 <div class="page">
 
   <div class="hero">
@@ -101,7 +160,7 @@
   <!-- Überblick -->
   <section id="ueberblick">
     <h2><span class="num icon">🗺️</span>Überblick</h2>
-    <p class="lead">Die Jugendlichen programmieren kein Spiel von null. Sie bekommen ein fertiges, spielbares 2D-Arena-Spiel im Stil von <i>Duck Game</i> und bauen daraus ihr eigenes Level mit eigenem Spielmodus: Tiles malen, Bausteine platzieren, Werte tunen und Auslöser mit Aktionen verbinden.</p>
+    <p class="lead">Die Teens programmieren kein Spiel von null. Sie bekommen ein fertiges, spielbares 2D-Arena-Spiel im Stil von <a class="duck" href="https://www.youtube.com/watch?v=71X1pl_524Q" target="_blank" rel="noopener"><i>Duck Game</i> ▶</a> und bauen daraus ihr eigenes Level mit eigenem Spielmodus: Tiles malen, Bausteine platzieren, Werte tunen und Auslöser mit Aktionen verbinden.</p>
     <div class="grid days">
       <div class="card day-card">
         <img src="img/shot_rocket.png" alt="">
@@ -141,7 +200,7 @@
           <tr><td>Eigene Spielidee als einfacher Prototyp</td><td class="plain">Tag 3: Spielidee-Steckbrief, zwei Bau-Sprints, eigene Spielregeln über <i>Level Rules</i></td></tr>
           <tr><td>Level Design</td><td class="plain">Tag 2: Arena-Regeln, Papier-Prototyp, Tile Palette, Bausteine</td></tr>
           <tr><td>Welten bauen</td><td class="plain">Tag 2 und 3: Tilemaps, Deko, Hintergründe, Kamera passt sich jeder Levelgröße an</td></tr>
-          <tr><td>Testen</td><td class="plain">Jeden Tag: Duelle am eigenen Mac, Tag 2 Playtest-Rotation mit Feedback-Karten, Tag 3 Arcade-Finale</td></tr>
+          <tr><td>Testen</td><td class="plain">Jeden Tag: Duelle am eigenen Mac, Tag 2 Playtest-Rotation mit der Feedback-Box, Tag 3 Arcade-Finale</td></tr>
         </tbody>
       </table>
     </div>
@@ -162,14 +221,15 @@
       <div><h2>Spiele verstehen &amp; Unity-Führerschein</h2><p>Ziel: Unity bedienen können und merken, wie Zahlen das Spielgefühl verändern.</p></div>
     </div>
     <ol class="timeline">
-      <li class="slot input"><time>0:00<small>20 min</small></time><div class="card"><h4>Kennenlernen &amp; Genre-Wand <span class="t input">Input</span></h4><p>Jede Person schreibt ihr Lieblingsspiel auf einen Zettel, gemeinsam an der Wand nach Genres sortieren.</p><div class="needs">📦 Post-its, Stifte, Wandfläche</div></div></li>
+      <li class="slot input"><time>0:00<small>20 min</small></time><div class="card"><h4>Kennenlernen &amp; Genre-Wand <span class="t input">Input</span></h4><p>Jede Person schreibt ihr Lieblingsspiel auf einen Zettel, gemeinsam an der Wand nach Genres sortieren. Die Lehrkraft hängt <a class="duck" href="https://www.youtube.com/watch?v=71X1pl_524Q" target="_blank" rel="noopener">Duck Game ▶</a> mit dazu, darauf wird später verwiesen.</p><div class="needs">📦 Post-its, Stifte, Wandfläche</div></div></li>
       <li class="slot input"><time>0:20<small>25 min</small></time><div class="card"><h4>Was macht ein Spiel aus? <span class="t input">Input</span></h4><p>Genres, Core Loop, Ziel, Herausforderung, Feedback (TUMO-Folie 3). Beispiele von der Genre-Wand nehmen.</p><div class="needs">📦 Beamer, TUMO-Folien</div></div></li>
-      <li class="slot test"><time>0:45<small>30 min</small></time><div class="card"><h4>Anspielen <span class="t test">Testen</span></h4><p>Zu zweit an einem Mac: <i>Demo_Arena</i> und <i>Demo_RocketVolleyball</i> spielen. Danach an der Tafel sammeln: Welche Mechaniken, Regeln und Ziele hat das Spiel?</p><div class="needs">📦 Spickzettel (Steuerung), Tafel</div></div></li>
+      <li class="slot test"><time>0:45<small>30 min</small></time><div class="card"><h4>Anspielen <span class="t test">Testen</span></h4><p>Zuerst den <a class="duck" href="https://www.youtube.com/watch?v=71X1pl_524Q" target="_blank" rel="noopener">Duck-Game-Trailer ▶</a> zeigen: daran ist unser Spiel angelehnt. Dann zu zweit an einem Mac: <i>Demo_Arena</i> und <i>Demo_RocketVolleyball</i> spielen. Danach an der Tafel sammeln: Welche Mechaniken, Regeln und Ziele hat das Spiel?</p><div class="needs">📦 Spickzettel (Steuerung), Tafel</div></div></li>
       <li class="slot pause"><time>1:15<small>20 min</small></time><div class="card"><h4>Pause <span class="t pause">Pause</span></h4></div></li>
       <li class="slot input"><time>1:35<small>35 min</small></time><div class="card"><h4>Unity-Führerschein <span class="t input">Input</span> <span class="t build">Mitmachen</span></h4><p>Live vormachen, alle machen mit: Fenster, Navigieren, Auswählen, Inspector, Play-Modus. Dann <b>TUMO &gt; Alle Bausteine ansehen</b> öffnen und die Bausteine-Szene erkunden.</p><div class="needs">📦 Spickzettel „Unity in einer Minute“</div></div></li>
       <li class="slot build"><time>2:10<small>50 min</small></time><div class="card"><h4>Tuning-Werkstatt <span class="t build">Selber bauen</span> <span class="t test">Testen</span></h4><ul><li><b>TUMO &gt; Neues Level erstellen</b></li><li>Eigenen Spieler tunen: Max Speed, Jump Height, Fall Gravity, Extra Jumps, Braking</li><li>Level Rules: Gravity (Mondlevel!)</li><li>Mit dem Platz nebenan duellieren und die spaßigsten Werte finden</li></ul><div class="needs">💬 Hier steckt Balancing und Game Feel drin: Was fühlt sich gut an, was ist unfair?</div></div></li>
-      <li class="slot build"><time>3:00<small>40 min</small></time><div class="card"><h4>Eigene Waffe <span class="t build">Selber bauen</span></h4><p>Prefab-Variante einer Waffe, neues Sprite, eigene Werte (Schrotflinte mit 12 Kugeln, Raketen-Minigun ...). Im Duell testen.</p><div class="needs">📦 Spickzettel „Eigene Waffe“, Challenge-Karten 🟢</div></div></li>
-      <li class="slot show"><time>3:40<small>20 min</small></time><div class="card"><h4>Show &amp; Tell <span class="t show">Präsentieren</span></h4><p>Drei Freiwillige zeigen am Beamer ihre verrückteste Waffe oder ihr bestes Movement. Speichern!</p></div></li>
+      <li class="slot build"><time>3:00<small>40 min</small></time><div class="card"><h4>Eigene Waffe <span class="t build">Selber bauen</span></h4><p>Prefab-Variante einer Waffe, neues Sprite, eigene Werte (Schrotflinte mit 12 Kugeln, Raketen-Minigun ...). Im Duell testen.</p><div class="needs">📦 Spickzettel „Eigene Waffe“, <a href="Challenges.html">Challenge-Karten</a> 🟢</div></div></li>
+      <li class="slot show"><time>3:40<small>10 min</small></time><div class="card"><h4>Show &amp; Tell <span class="t show">Präsentieren</span></h4><p>Drei Freiwillige zeigen am Beamer ihre verrückteste Waffe oder ihr bestes Movement.</p></div></li>
+      <li class="slot build"><time>3:50<small>10 min</small></time><div class="card"><h4>☁️ Sichern <span class="t build">Selber machen</span></h4><p><b>TUMO &gt; Level exportieren</b> und die Datei vom Schreibtisch in <b>Google Classroom</b> hochladen. Das ist das Backup des Tages.</p></div></li>
     </ol>
   </section>
 
@@ -184,9 +244,10 @@
       <li class="slot build"><time>0:25<small>25 min</small></time><div class="card"><h4>Papier-Arena <span class="t build">Selber bauen</span></h4><p>Arena auf Karopapier skizzieren (1 Kästchen = 1 Tile): Boden, Plattformen, Gefahren, Startpunkte, Waffen. Mit dem Platz nebenan Feedback austauschen.</p><div class="needs">📦 Karopapier, Buntstifte</div></div></li>
       <li class="slot build"><time>0:50<small>50 min</small></time><div class="card"><h4>Arena malen <span class="t build">Selber bauen</span></h4><p>Tile Palette: Ground, Platforms, Hazards, Deko. SpawnPoints, Waffen-Pickups und das Namensschild platzieren.</p><div class="needs">📦 Spickzettel Kapitel 2 und 3</div></div></li>
       <li class="slot pause"><time>1:40<small>20 min</small></time><div class="card"><h4>Pause <span class="t pause">Pause</span></h4></div></li>
-      <li class="slot input"><time>2:00<small>45 min</small></time><div class="card"><h4>Auslöser &amp; Aktionen <span class="t input">Input</span> <span class="t build">Selber bauen</span></h4><p>Live vormachen: Hebel → Tür, dann eine eigene Falle (TriggerZone → Explosive). Zeigen, dass jeder Baustein so zusammengesteckt ist (Mine, Sprungfeder ...). Danach Bausteine einbauen und kombinieren.</p><div class="needs">📦 Spickzettel Kapitel 5 und 6, Challenge-Karten 🟢 🟡</div></div></li>
-      <li class="slot test"><time>2:45<small>45 min</small></time><div class="card"><h4>Playtest-Rotation <span class="t test">Testen</span></h4><p>Alle 10 Minuten zwei Plätze weiterrücken und dort zu zweit spielen. Pro Level eine Feedback-Karte ausfüllen. Wer gebaut hat, schaut nur zu und sagt nichts!</p><div class="needs">📦 Feedback-Karten, Timer am Beamer</div></div></li>
-      <li class="slot build"><time>3:30<small>30 min</small></time><div class="card"><h4>Feedback einarbeiten <span class="t build">Selber bauen</span></h4><p>Feedback-Karten lesen, die zwei wichtigsten Punkte verbessern, als „Version 1“ speichern.</p></div></li>
+      <li class="slot input"><time>2:00<small>45 min</small></time><div class="card"><h4>Auslöser &amp; Aktionen <span class="t input">Input</span> <span class="t build">Selber bauen</span></h4><p>Live vormachen: Hebel → Tür, dann eine eigene Falle (TriggerZone → Explosive). Zeigen, dass jeder Baustein so zusammengesteckt ist (Mine, Sprungfeder ...). Danach Bausteine einbauen und kombinieren.</p><div class="needs">📦 Spickzettel Kapitel 5 und 6, <a href="Challenges.html">Challenge-Karten</a> 🟢 🟡</div></div></li>
+      <li class="slot test"><time>2:45<small>45 min</small></time><div class="card"><h4>Playtest-Rotation <span class="t test">Testen</span></h4><p>Alle 10 Minuten zwei Plätze weiterrücken und dort zu zweit spielen. Auf jedem Mac ist die <a href="Feedback.html">Feedback-Box</a> im Browser offen: pro getestetem Level eine Karte ausfüllen. Wer gebaut hat, schaut nur zu und sagt nichts!</p><div class="needs">📦 Feedback-Box im Browser, <b>Kurz-Timer „Rotation“</b> oben in diesem Plan</div></div></li>
+      <li class="slot build"><time>3:30<small>20 min</small></time><div class="card"><h4>Feedback einarbeiten <span class="t build">Selber bauen</span></h4><p>Die eigene Feedback-Box lesen, die zwei wichtigsten Punkte verbessern, als „Version 1“ speichern.</p></div></li>
+      <li class="slot build"><time>3:50<small>10 min</small></time><div class="card"><h4>☁️ Sichern <span class="t build">Selber machen</span></h4><p><b>TUMO &gt; Level exportieren</b> und die Datei in <b>Google Classroom</b> hochladen.</p></div></li>
     </ol>
   </section>
 
@@ -197,11 +258,11 @@
       <div><h2>Eigene Spielidee &amp; Arcade-Finale</h2><p>Ziel: ein eigener Spielmodus als Prototyp und ein gemeinsames Finale.</p></div>
     </div>
     <ol class="timeline">
-      <li class="slot input"><time>0:00<small>30 min</small></time><div class="card"><h4>Spielidee finden <span class="t input">Input</span> <span class="t build">Planen</span></h4><p>Remix-Würfel: Modus × Twist × Thema. Jede Person füllt einen Spielidee-Steckbrief aus. Kurz mit der Lehrkraft prüfen: In 2 Stunden machbar?</p><div class="needs">📦 Remix-Würfel, Steckbriefe, Würfel</div></div></li>
-      <li class="slot build"><time>0:30<small>60 min</small></time><div class="card"><h4>Bau-Sprint 1 <span class="t build">Selber bauen</span></h4><p>Spielregeln (Level Rules) einstellen, Kern-Mechanik bauen, früh testen.</p><div class="needs">📦 Challenge-Karten 🟢 🟡 🔴, Spickzettel Rezepte</div></div></li>
+      <li class="slot input"><time>0:00<small>30 min</small></time><div class="card"><h4>Spielidee finden <span class="t input">Input</span> <span class="t build">Planen</span></h4><p>Im Browser die <a href="Remix.html">Remix-Würfel</a> werfen: Modus × Twist × Thema. Die Idee mit einem Klick in den <a href="Spielidee.html">Spielidee-Steckbrief</a> übernehmen, ausfüllen und die Arena skizzieren. Kurz mit der Lehrkraft prüfen: In 2 Stunden machbar?</p><div class="needs">📦 Remix-Würfel und Steckbrief im Browser</div></div></li>
+      <li class="slot build"><time>0:30<small>60 min</small></time><div class="card"><h4>Bau-Sprint 1 <span class="t build">Selber bauen</span></h4><p>Spielregeln (Level Rules) einstellen, Kern-Mechanik bauen, früh testen.</p><div class="needs">📦 <a href="Challenges.html">Challenge-Karten</a> 🟢 🟡 🔴, Spickzettel Rezepte</div></div></li>
       <li class="slot pause"><time>1:30<small>20 min</small></time><div class="card"><h4>Pause <span class="t pause">Pause</span></h4></div></li>
       <li class="slot build"><time>1:50<small>50 min</small></time><div class="card"><h4>Bau-Sprint 2 &amp; Feinschliff <span class="t build">Selber bauen</span></h4><p>Deko, Balancing, Namensschild. <b>Feature-Freeze um 2:40:</b> ab dann nur noch Fehler beheben.</p></div></li>
-      <li class="slot test"><time>2:40<small>20 min</small></time><div class="card"><h4>Exportieren &amp; Arcade aufbauen <span class="t test">Testen</span></h4><p>Alle: <b>TUMO &gt; Level exportieren</b> und die Datei abgeben. Während die Lehrkraft die Arcade aufbaut, spielen alle die Level ihrer Nachbarn.</p><div class="needs">📦 USB-Stick oder Netzwerkordner</div></div></li>
+      <li class="slot test"><time>2:40<small>20 min</small></time><div class="card"><h4>Exportieren &amp; Arcade aufbauen <span class="t test">Testen</span></h4><p>Alle: <b>TUMO &gt; Level exportieren</b>, die Datei abgeben und in <b>Google Classroom</b> hochladen. Während die Lehrkraft die Arcade aufbaut, spielen alle die Level ihrer Nachbarn.</p><div class="needs">📦 USB-Stick oder Netzwerkordner</div></div></li>
       <li class="slot show"><time>3:00<small>40 min</small></time><div class="card"><h4>Arcade-Finale <span class="t show">Präsentieren</span></h4><p>Am Beamer mit 4 Gamepads: alle Level laufen nacheinander. Wer eine Runde gewinnt, bekommt einen Punkt, dann kommt das nächste Level. Am Anfang jedes Levels steht, wer es gebaut hat.</p><div class="needs">📦 Beamer, Lautsprecher, 4 Xbox-Controller</div></div></li>
       <li class="slot show"><time>3:40<small>20 min</small></time><div class="card"><h4>Siegerehrung &amp; Reflexion <span class="t show">Präsentieren</span></h4><p>Sticker-Voting (lustigstes Level, kreativste Idee, schönste Arena). Was habe ich gelernt? Wie geht es bei TUMO weiter?</p><div class="needs">📦 Klebepunkte, Urkunden (optional)</div></div></li>
     </ol>
@@ -260,11 +321,8 @@
       <div class="card">
         <h3>🖨️ Ausdrucke</h3>
         <ul class="check">
-          <li><a href="Spickzettel.html">Spickzettel</a>, 1 pro Person</li>
-          <li><a href="Karten.html">Feedback-Karten</a>, ca. 4 pro Person</li>
-          <li><a href="Karten.html#steckbrief">Spielidee-Steckbrief</a>, 1 pro Person</li>
-          <li><a href="Karten.html#challenges">Challenge-Karten</a>, 1 Satz pro Tisch</li>
-          <li><a href="Karten.html#remix">Remix-Würfel</a>, 1 pro Tisch</li>
+          <li><a href="Spickzettel.html">Kurzreferenz</a>: im Spickzettel auf „drucken“ klicken (1 Seite, fast schwarz-weiß), 1 pro Person</li>
+          <li>Alles andere ist digital auf jedem Mac. Bei Bedarf lässt sich jede Seite drucken (Challenge-Karten, Steckbrief ...)</li>
           <li>Karopapier, ein paar Blätter pro Person</li>
         </ul>
       </div>
@@ -273,7 +331,6 @@
         <ul class="check">
           <li>Post-its und dicke Stifte (Genre-Wand)</li>
           <li>Buntstifte für die Papier-Arena</li>
-          <li>Würfel (1 pro Tisch)</li>
           <li>Klebepunkte für das Voting</li>
           <li>Namensschilder für die Teilnehmenden</li>
           <li>TUMO-Folien „Game Development“</li>
@@ -294,14 +351,15 @@
           <li>Projekt einmal auf einem TUMO-Mac öffnen und durchspielen</li>
           <li>Tastatur testen: im Spiel <kbd>H</kbd> drücken, beide Spieler gleichzeitig laufen, springen, schießen</li>
           <li>Gamepads per Bluetooth mit dem Lehrer-Mac verbinden</li>
-          <li>Ausdrucke machen</li>
+          <li>Google Classroom: Kurs mit einer Abgabe pro Tag für die Level-Pakete anlegen</li>
+          <li>Kurzreferenz drucken</li>
         </ul>
       </div>
       <div class="card">
         <h3><span class="when">Am Tag vorher</span></h3>
         <ul class="check">
           <li>Projekt mit Library-Ordner auf alle Macs kopieren (spart den langen ersten Import)</li>
-          <li>Auf jedem Mac einmal öffnen</li>
+          <li>Auf jedem Mac einmal öffnen und <b>TUMO &gt; Spickzettel öffnen</b> testen: Startet der Browser? Ist ein Eintrag in der Feedback-Box nach dem Neuladen noch da?</li>
           <li>Play-Modus-Farbe einstellen: <i>Unity &gt; Settings &gt; Colors &gt; Playmode tint</i>, damit man den Play-Modus sofort sieht</li>
           <li>Controller laden</li>
         </ul>
@@ -323,7 +381,7 @@
     <div class="grid grid-2">
       <div class="callout warn" style="margin:0"><span class="emoji">⏯️</span><p>Änderungen im Play-Modus gehen verloren. Am ersten Tag einmal bewusst „reinfallen lassen“, dann merken es sich alle.</p></div>
       <div class="callout warn" style="margin:0"><span class="emoji">⌘</span><p><kbd>⌘</kbd>+<kbd>Q</kbd> beendet Unity sofort. Beim Spielen nur die linke Shift-Taste und die rechte Wahltaste zum Schießen benutzen.</p></div>
-      <div class="callout info" style="margin:0"><span class="emoji">🎚️</span><p>Große Altersspanne: Mit den Challenge-Karten in drei Stufen (🟢 🟡 🔴) können alle in ihrem Tempo weitermachen.</p></div>
+      <div class="callout info" style="margin:0"><span class="emoji">🎚️</span><p>Große Altersspanne: Mit den <a href="Challenges.html">Challenge-Karten</a> in drei Stufen (🟢 🟡 🔴) können alle in ihrem Tempo weitermachen.</p></div>
       <div class="callout info" style="margin:0"><span class="emoji">🧩</span><p>Fortgeschrittene können eigene Scripts schreiben. Wichtig: Dateiname beginnt mit dem eigenen Namen, sonst gibt es im Finale Konflikte.</p></div>
       <div class="callout tip" style="margin:0"><span class="emoji">📁</span><p>Nur im eigenen Ordner arbeiten. Der Export warnt, wenn Kit-Dateien verändert wurden, denn diese Änderungen kämen im Finale nicht mit.</p></div>
       <div class="callout tip" style="margin:0"><span class="emoji">🔎</span><p>Die Szene <b>TUMO &gt; Alle Bausteine ansehen</b> zeigt unter jedem Baustein, aus welchen Auslösern und Aktionen er gebaut ist. Gut zum Nachbauen.</p></div>
@@ -332,5 +390,235 @@
 
   <footer>Arena-Baukasten · TUMO Ferienworkshop · Grafiken: Kenney (CC0)</footer>
 </div>
+
+<div class="overlay" id="beamer" hidden>
+  <button class="btn small close" data-close>✕ Schließen</button>
+  <div>
+    <div class="label" id="bLabel"></div>
+    <div class="big-title" id="bTitle"></div>
+    <div class="count" id="bCount"></div>
+    <div class="track"><div id="bBar"></div></div>
+    <div class="next" id="bNext"></div>
+  </div>
+</div>
+
+<div class="overlay" id="short" hidden>
+  <button class="btn small close" data-close>✕ Schließen</button>
+  <div>
+    <div class="label" id="sLabel">Kurz-Timer</div>
+    <div class="count" id="sCount">10:00</div>
+    <div class="track"><div id="sBar"></div></div>
+    <div class="big-title" id="sMsg" style="font-size:clamp(1.5rem,4vw,3rem)"></div>
+    <div class="btn-row">
+      <button class="btn small" data-min="5">5 min</button>
+      <button class="btn small" data-min="10">10 min</button>
+      <button class="btn small" data-min="15">15 min</button>
+      <button class="btn small" data-rotation="10">🔁 Rotation 10 min</button>
+    </div>
+    <div class="btn-row">
+      <button class="btn primary" id="sPlay">▶ Start</button>
+      <button class="btn" id="sStop">■ Stopp</button>
+    </div>
+  </div>
+</div>
+
+<script src="arena.js"></script>
+<script>
+(function () {
+  const S = Arena.store;
+  const pad = (n) => String(n).padStart(2, "0");
+  const mmss = (ms) => { const s = Math.max(0, Math.ceil(ms / 1000)); return `${Math.floor(s / 60)}:${pad(s % 60)}`; };
+  const hmm = (min) => `${Math.floor(min / 60)}:${pad(Math.floor(min % 60))}`;
+
+  // Read the plan from the timeline itself, so changing the HTML is all it takes.
+  const DAYS = ["tag1", "tag2", "tag3"].map((id) => {
+    const section = document.getElementById(id);
+    const slots = [...section.querySelectorAll("li.slot")].map((li) => {
+      const time = li.querySelector("time");
+      const [h, m] = time.firstChild.textContent.trim().split(":").map(Number);
+      const dur = parseInt(time.querySelector("small").textContent, 10);
+      const title = li.querySelector("h4").firstChild.textContent.trim();
+      const bar = document.createElement("div");
+      bar.className = "bar";
+      li.querySelector(".card").appendChild(bar);
+      return { li, bar, start: h * 60 + m, dur, title, type: li.classList[1] };
+    });
+    const end = Math.max(...slots.map((s) => s.start + s.dur));
+    return { section, slots, end, name: section.querySelector("h2").textContent };
+  });
+
+  let clock = S.get("workshop.clock", { day: 0, running: false, startedAt: 0, elapsed: 0 });
+  let sound = S.get("workshop.sound", true);
+  let lastSlot = null;
+
+  const elapsedMs = () => (clock.running ? Date.now() - clock.startedAt : clock.elapsed);
+  const save = () => S.set("workshop.clock", clock);
+
+  function setElapsed(ms) {
+    if (clock.running) clock.startedAt = Date.now() - ms; else clock.elapsed = ms;
+    save();
+  }
+
+  function selectDay(day) {
+    if (clock.day !== day) { clock.day = day; clock.running = false; clock.elapsed = 0; lastSlot = null; save(); }
+    render();
+  }
+
+  function render() {
+    const day = DAYS[clock.day];
+    const ms = elapsedMs();
+    const min = ms / 60000;
+    document.querySelectorAll(".clock .days .btn").forEach((b) => b.setAttribute("aria-pressed", Number(b.dataset.day) === clock.day));
+    document.getElementById("playBtn").textContent = clock.running ? "⏸ Pause" : (ms > 0 ? "▶ Weiter" : "▶ Start");
+    document.getElementById("timeNow").innerHTML = `${hmm(min)}<small>von ${hmm(day.end)} · ${clock.running ? "läuft" : "pausiert"}</small>`;
+
+    let current = null;
+    DAYS.forEach((d, n) => d.slots.forEach((slot) => {
+      const active = n === clock.day && (ms > 0 || clock.running);
+      const isNow = active && min >= slot.start && min < slot.start + slot.dur;
+      slot.li.classList.toggle("now", isNow);
+      slot.li.classList.toggle("past", active && min >= slot.start + slot.dur);
+      slot.bar.style.width = isNow ? `${(100 * (min - slot.start)) / slot.dur}%` : "0";
+      if (isNow) current = slot;
+    }));
+
+    const title = document.getElementById("nowTitle");
+    const left = document.getElementById("nowLeft");
+    if (current) {
+      const remaining = (current.start + current.dur) * 60000 - ms;
+      const dayLeft = day.end * 60000 - ms;
+      const endsAt = new Date(Date.now() + dayLeft);
+      title.textContent = current.title;
+      left.textContent = `noch ${mmss(remaining)} · Tagesende ca. ${pad(endsAt.getHours())}:${pad(endsAt.getMinutes())} Uhr`;
+    } else if (min >= day.end) {
+      title.textContent = "Geschafft für heute! 🎉";
+      left.textContent = "";
+      if (clock.running) { clock.running = false; clock.elapsed = day.end * 60000; save(); }
+    } else {
+      title.textContent = "Klick auf Start oder auf einen Programmpunkt";
+      left.textContent = "";
+    }
+
+    if (current !== lastSlot) {
+      if (lastSlot && current && clock.running) {
+        if (sound) Arena.chime(2);
+        current.li.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      lastSlot = current;
+    }
+    renderBeamer(current, ms);
+    renderShort();
+  }
+
+  function renderBeamer(current, ms) {
+    if (document.getElementById("beamer").hidden) return;
+    const day = DAYS[clock.day];
+    const next = current ? day.slots[day.slots.indexOf(current) + 1] : null;
+    document.getElementById("bLabel").textContent = `${day.name} · ${hmm(ms / 60000)}`;
+    document.getElementById("bTitle").textContent = current ? current.title : "Geschafft für heute! 🎉";
+    document.getElementById("bCount").textContent = current ? mmss((current.start + current.dur) * 60000 - ms) : "";
+    document.getElementById("bBar").style.width = current ? `${(100 * (ms / 60000 - current.start)) / current.dur}%` : "100%";
+    document.getElementById("bNext").textContent = next ? `Als Nächstes: ${next.title}` : "";
+  }
+
+  // Click a block in the plan: jump there (and switch the day if needed).
+  DAYS.forEach((d, n) => d.slots.forEach((slot) => {
+    slot.li.querySelector(".card").title = "Hierhin springen";
+    slot.li.querySelector(".card").addEventListener("click", (event) => {
+      if (event.target.closest("a")) return;
+      if (clock.day !== n) selectDay(n);
+      lastSlot = slot;
+      setElapsed(slot.start * 60000);
+      render();
+    });
+  }));
+
+  document.querySelectorAll(".clock .days .btn").forEach((b) => (b.onclick = () => {
+    selectDay(Number(b.dataset.day));
+    DAYS[clock.day].section.scrollIntoView({ behavior: "smooth" });
+  }));
+  document.getElementById("playBtn").onclick = () => {
+    const ms = elapsedMs();
+    if (clock.running) { clock.running = false; clock.elapsed = ms; }
+    else { clock.running = true; clock.startedAt = Date.now() - (ms >= DAYS[clock.day].end * 60000 ? 0 : ms); }
+    save();
+    render();
+  };
+  document.getElementById("resetBtn").onclick = () => {
+    if (!confirm("Den Timer für diesen Tag auf 0:00 zurücksetzen?")) return;
+    clock.running = false; clock.elapsed = 0; lastSlot = null; save(); render();
+  };
+  const soundBtn = document.getElementById("soundBtn");
+  const paintSound = () => (soundBtn.textContent = sound ? "🔊" : "🔇");
+  soundBtn.onclick = () => { sound = !sound; S.set("workshop.sound", sound); paintSound(); if (sound) Arena.chime(1); };
+  paintSound();
+
+  // ---- Overlays ----
+  function open(id) {
+    document.getElementById(id).hidden = false;
+    const element = document.documentElement;
+    if (element.requestFullscreen && !document.fullscreenElement) element.requestFullscreen().catch(() => {});
+    render();
+  }
+  function closeAll() {
+    document.querySelectorAll(".overlay").forEach((o) => (o.hidden = true));
+    if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(() => {});
+  }
+  document.getElementById("beamerBtn").onclick = () => open("beamer");
+  document.getElementById("shortBtn").onclick = () => open("short");
+  document.querySelectorAll("[data-close]").forEach((b) => (b.onclick = closeAll));
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeAll(); });
+
+  // ---- Short timer (e.g. the playtest rotation) ----
+  let short = S.get("workshop.short", { duration: 600000, end: 0, remaining: 600000, running: false, repeat: false, rounds: 0 });
+  const saveShort = () => S.set("workshop.short", short);
+
+  function setShort(minutes, repeat) {
+    short = { duration: minutes * 60000, remaining: minutes * 60000, end: 0, running: false, repeat, rounds: 0 };
+    document.getElementById("sMsg").textContent = "";
+    saveShort();
+    renderShort();
+  }
+  document.querySelectorAll("#short [data-min]").forEach((b) => (b.onclick = () => setShort(Number(b.dataset.min), false)));
+  document.querySelectorAll("#short [data-rotation]").forEach((b) => (b.onclick = () => setShort(Number(b.dataset.rotation), true)));
+  document.getElementById("sPlay").onclick = () => {
+    if (short.running) { short.running = false; short.remaining = short.end - Date.now(); }
+    else { short.running = true; short.end = Date.now() + (short.remaining > 0 ? short.remaining : short.duration); document.getElementById("sMsg").textContent = ""; }
+    saveShort();
+    renderShort();
+  };
+  document.getElementById("sStop").onclick = () => setShort(short.duration / 60000, short.repeat);
+
+  function renderShort() {
+    let left = short.running ? short.end - Date.now() : short.remaining;
+    if (short.running && left <= 0) {
+      const message = document.getElementById("sMsg");
+      if (short.repeat) {
+        short.rounds++;
+        short.end = Date.now() + short.duration;
+        message.textContent = `🔁 Wechseln! Zwei Plätze weiter (Runde ${short.rounds + 1})`;
+      } else {
+        short.running = false;
+        short.remaining = 0;
+        message.textContent = "⏰ Zeit ist um!";
+      }
+      message.classList.remove("alarm"); void message.offsetWidth; message.classList.add("alarm");
+      if (sound) Arena.chime(3);
+      saveShort();
+      left = short.running ? short.end - Date.now() : 0;
+    }
+    document.getElementById("sCount").textContent = mmss(left);
+    document.getElementById("sBar").style.width = `${100 - (100 * Math.max(0, left)) / short.duration}%`;
+    document.getElementById("sLabel").textContent = short.repeat ? `Rotation alle ${short.duration / 60000} min` : "Kurz-Timer";
+    document.getElementById("sPlay").textContent = short.running ? "⏸ Pause" : "▶ Start";
+    const chip = document.getElementById("shortChip");
+    chip.hidden = !short.running;
+    chip.textContent = `⏱ ${mmss(left)}`;
+  }
+
+  render();
+  setInterval(render, 500);
+})();
+</script>
 </body>
 </html>

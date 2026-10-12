@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spielidee-Steckbrief</title>
+<link rel="stylesheet" href="arena.css">
+<style>
+  .sheet { background: var(--card); border: 3px solid var(--ink); border-radius: 18px; padding: 20px 22px; box-shadow: var(--shadow); }
+  .row2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 0 18px; }
+  .modes { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; margin: 6px 0; }
+  .modes label { display: flex; align-items: center; gap: 8px; font-weight: 700; border: 2.5px solid var(--ink); border-radius: 10px; padding: 6px 10px; cursor: pointer; background: var(--card); }
+  .modes input { width: 18px; height: 18px; accent-color: var(--ink); }
+  .modes label:has(input:checked) { background: var(--yellow); }
+  h3 { margin-top: 18px; }
+
+  .painter { margin-top: 6px; }
+  .tools { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+  .tools .btn[aria-pressed="true"] { background: var(--ink); color: #fff; }
+  .tools .swatch { width: 18px; height: 18px; border: 2px solid var(--ink); border-radius: 4px; display: inline-block; }
+  canvas { width: 100%; height: auto; border: 3px solid var(--ink); border-radius: 12px; background: #eaf3fc; touch-action: none; cursor: crosshair; display: block; }
+  .saved { font-weight: 800; color: var(--grass-dark); }
+
+  @media print {
+    .sheet { box-shadow: none; border-width: 2px; padding: 10px 12px; }
+    input[type="text"], input[type="number"], textarea, select { border: none; border-bottom: 1.5px solid var(--ink); border-radius: 0; padding: 2px 0; }
+    textarea { min-height: 0; }
+    .modes label { border-width: 1.5px; background: #fff !important; }
+    .modes label:has(input:checked) { border-width: 3px; }
+    h3 { margin-top: 10px; }
+  }
+</style>
+</head>
+<body>
+<nav class="topbar" data-page="spielidee"></nav>
+<div class="page">
+  <div class="sheet">
+    <h1 style="font-size:2rem">💡 Mein Spielidee-Steckbrief</h1>
+    <p class="muted no-print">Alles wird automatisch auf diesem Mac gespeichert. <span class="saved" id="saved"></span></p>
+
+    <div class="row2">
+      <div><label class="field" for="name">Name</label><input type="text" id="name" data-key="name"></div>
+      <div><label class="field" for="level">Name des Levels</label><input type="text" id="level" data-key="level"></div>
+    </div>
+
+    <h3>🏁 Wie gewinnt man?</h3>
+    <div class="modes" id="modes"></div>
+    <input type="text" id="modeOwn" data-key="modeOwn" placeholder="Eigene Idee ...">
+
+    <div class="row2">
+      <div><h3>🌀 Mein Twist (das Besondere)</h3><textarea id="twist" data-key="twist"></textarea></div>
+      <div><h3>🎨 Thema und Look</h3><textarea id="theme" data-key="theme"></textarea></div>
+    </div>
+
+    <h3>✏️ Skizze</h3>
+    <div class="painter">
+      <div class="tools no-print" id="tools"></div>
+      <canvas id="sketch" width="960" height="540" aria-label="Levelskizze zum Malen"></canvas>
+    </div>
+
+    <div class="row2">
+      <div><h3>🧱 Diese Bausteine brauche ich</h3><textarea id="blocks" data-key="blocks"></textarea></div>
+      <div>
+        <h3>⚙️ Level Rules</h3>
+        <div class="row2" style="gap:0 12px">
+          <div><label class="field" for="points">Points To Win</label><input type="number" id="points" data-key="points" min="1"></div>
+          <div><label class="field" for="time">Time Limit (s)</label><input type="number" id="time" data-key="time" min="0"></div>
+          <div><label class="field" for="gravity">Gravity</label><input type="number" id="gravity" data-key="gravity" step="0.1"></div>
+          <div><label class="field" for="respawn">Respawn Players</label>
+            <select id="respawn" data-key="respawn"><option value=""></option><option>ja</option><option>nein</option></select></div>
+        </div>
+      </div>
+    </div>
+
+    <h3>✅ Machbar? (Lehrkraft)</h3>
+    <input type="text" id="ok" data-key="ok">
+  </div>
+
+  <div class="btn-row no-print" style="margin-top:18px">
+    <a class="btn" href="Remix.html">🎲 Zu den Remix-Würfeln</a>
+    <button class="btn" onclick="window.print()">🖨️ Drucken</button>
+    <button class="btn" id="clear">🗑️ Alles löschen</button>
+  </div>
+</div>
+
+<script src="arena.js"></script>
+<script>
+const MODES = ["Wer als Letzter lebt", "Wer zuerst im Ziel ist", "Wer zuerst X Punkte hat", "Wer die Zone hält", "Ball ins Tor", "Eigene Idee"];
+// Which win condition a remix mode stands for.
+const REMIX_MODES = { "Letzter überlebt": 0, "Parkour-Rennen": 1, "Münzjagd": 2, "König des Hügels": 3, "Ballspiel": 4, "Freie Wahl": 5 };
+
+const COLS = 32, ROWS = 18, CELL = 30;
+const TOOLS = [
+  { id: "G", label: "Boden", color: "#c97b4f", top: "#45c66b" },
+  { id: "P", label: "Plattform", color: "#7fd69a" },
+  { id: "L", label: "Lava", color: "#f28a2e" },
+  { id: "S", label: "Start", emoji: "🧍" },
+  { id: "W", label: "Waffe", emoji: "🔫" },
+  { id: "C", label: "Münze", emoji: "🪙" },
+  { id: "X", label: "Gefahr", emoji: "⚠️" },
+  { id: "F", label: "Ziel", emoji: "🏁" },
+  { id: ".", label: "Radierer", emoji: "🧽" },
+];
+
+let data = Arena.store.get("spielidee", {});
+let tool = "G";
+let grid = (data.grid && data.grid.length === COLS * ROWS) ? data.grid.split("") : new Array(COLS * ROWS).fill(".");
+
+function save() {
+  data.grid = grid.join("");
+  if (Arena.store.set("spielidee", data)) {
+    const saved = document.getElementById("saved");
+    saved.textContent = "✓ gespeichert";
+    clearTimeout(save.timer);
+    save.timer = setTimeout(() => (saved.textContent = ""), 1500);
+  }
+}
+
+// --- Form fields ---
+const modes = document.getElementById("modes");
+MODES.forEach((mode, i) => {
+  const label = document.createElement("label");
+  label.innerHTML = `<input type="radio" name="mode" value="${i}"> ${mode}`;
+  modes.appendChild(label);
+});
+modes.addEventListener("change", (e) => { data.mode = e.target.value; save(); });
+
+document.querySelectorAll("[data-key]").forEach((field) => {
+  if (data[field.dataset.key] !== undefined) field.value = data[field.dataset.key];
+  field.addEventListener("input", () => { data[field.dataset.key] = field.value; save(); });
+});
+
+// Coming from the remix dice: take over the rolled idea.
+const idea = Arena.store.get("remix.idea", null);
+if (Arena.store.get("remix.apply", false) && idea) {
+  Arena.store.remove("remix.apply");
+  if (idea.mode in REMIX_MODES) data.mode = String(REMIX_MODES[idea.mode]);
+  data.twist = idea.twist;
+  data.theme = idea.theme;
+  document.getElementById("twist").value = data.twist;
+  document.getElementById("theme").value = data.theme;
+  save();
+  Arena.toast("Remix-Idee übernommen!");
+}
+if (data.mode !== undefined) {
+  const radio = modes.querySelector(`input[value="${data.mode}"]`);
+  if (radio) radio.checked = true;
+}
+
+// --- Sketch painter ---
+const canvas = document.getElementById("sketch");
+canvas.width = COLS * CELL;
+canvas.height = ROWS * CELL;
+const ctx = canvas.getContext("2d");
+
+function draw() {
+  ctx.fillStyle = "#eaf3fc";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = "#c9d6e6";
+  ctx.lineWidth = 1;
+  for (let x = 0; x <= COLS; x++) { ctx.beginPath(); ctx.moveTo(x * CELL + 0.5, 0); ctx.lineTo(x * CELL + 0.5, canvas.height); ctx.stroke(); }
+  for (let y = 0; y <= ROWS; y++) { ctx.beginPath(); ctx.moveTo(0, y * CELL + 0.5); ctx.lineTo(canvas.width, y * CELL + 0.5); ctx.stroke(); }
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = `${CELL * 0.7}px "Apple Color Emoji", "Segoe UI Emoji", sans-serif`;
+  for (let y = 0; y < ROWS; y++) {
+    for (let x = 0; x < COLS; x++) {
+      const id = grid[y * COLS + x];
+      if (id === ".") continue;
+      const t = TOOLS.find((tool) => tool.id === id);
+      const px = x * CELL, py = y * CELL;
+      if (t.color) {
+        const above = y > 0 ? grid[(y - 1) * COLS + x] : ".";
+        ctx.fillStyle = t.color;
+        if (id === "P") ctx.fillRect(px, py, CELL, CELL * 0.45);
+        else ctx.fillRect(px, py, CELL, CELL);
+        if (t.top && above !== id) { ctx.fillStyle = t.top; ctx.fillRect(px, py, CELL, CELL * 0.25); }
+      } else {
+        ctx.fillText(t.emoji, px + CELL / 2, py + CELL / 2 + 1);
+      }
+    }
+  }
+}
+
+function cellAt(event) {
+  const rect = canvas.getBoundingClientRect();
+  const x = Math.floor(((event.clientX - rect.left) / rect.width) * COLS);
+  const y = Math.floor(((event.clientY - rect.top) / rect.height) * ROWS);
+  return x >= 0 && y >= 0 && x < COLS && y < ROWS ? y * COLS + x : -1;
+}
+
+let painting = false;
+function paint(event) {
+  const index = cellAt(event);
+  if (index < 0 || grid[index] === tool) return;
+  grid[index] = tool;
+  draw();
+}
+canvas.addEventListener("pointerdown", (e) => { painting = true; canvas.setPointerCapture(e.pointerId); paint(e); });
+canvas.addEventListener("pointermove", (e) => { if (painting) paint(e); });
+canvas.addEventListener("pointerup", () => { painting = false; save(); });
+
+const tools = document.getElementById("tools");
+TOOLS.forEach((t) => {
+  const button = document.createElement("button");
+  button.className = "btn small";
+  button.setAttribute("aria-pressed", t.id === tool);
+  button.innerHTML = t.color ? `<span class="swatch" style="background:${t.color}"></span>${t.label}` : `${t.emoji} ${t.label}`;
+  button.onclick = () => {
+    tool = t.id;
+    tools.querySelectorAll(".btn").forEach((b) => b.setAttribute("aria-pressed", b === button));
+  };
+  tools.appendChild(button);
+});
+const clearSketch = document.createElement("button");
+clearSketch.className = "btn small";
+clearSketch.textContent = "Skizze leeren";
+clearSketch.onclick = () => { if (confirm("Skizze leeren?")) { grid.fill("."); draw(); save(); } };
+tools.appendChild(clearSketch);
+
+document.getElementById("clear").onclick = () => {
+  if (!confirm("Den ganzen Steckbrief löschen?")) return;
+  data = {};
+  grid.fill(".");
+  Arena.store.remove("spielidee");
+  document.querySelectorAll("[data-key]").forEach((field) => (field.value = ""));
+  modes.querySelectorAll("input").forEach((radio) => (radio.checked = false));
+  draw();
+};
+
+draw();
+</script>
+</body>
+</html>

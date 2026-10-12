@@ -1,5 +1,12 @@
-/* Shared look of the Arena-Baukasten documents: thick outlines and flat colors like the Kenney art. */
-@import url("https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700;800&display=swap");
+/* Shared look of the Arena-Baukasten documents: thick outlines and flat colors like the Kenney art.
+   Fonts are bundled (SIL Open Font License, see fonts/), so everything works offline from the file system. */
+@font-face { font-family: "Fredoka"; font-weight: 500; font-display: swap; src: url("fonts/fredoka-latin-500-normal.woff2") format("woff2"); }
+@font-face { font-family: "Fredoka"; font-weight: 600; font-display: swap; src: url("fonts/fredoka-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Fredoka"; font-weight: 700; font-display: swap; src: url("fonts/fredoka-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Nunito"; font-weight: 400; font-display: swap; src: url("fonts/nunito-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Nunito"; font-weight: 600; font-display: swap; src: url("fonts/nunito-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Nunito"; font-weight: 700; font-display: swap; src: url("fonts/nunito-latin-700-normal.woff2") format("woff2"); }
+@font-face { font-family: "Nunito"; font-weight: 800; font-display: swap; src: url("fonts/nunito-latin-800-normal.woff2") format("woff2"); }
 
 :root {
   --ink: #34313d;
@@ -227,18 +234,87 @@ footer { margin-top: 48px; text-align: center; color: var(--ink-soft); font-size
 .toc a { text-decoration: none; color: var(--ink); }
 .toc a:hover .badge { background: var(--yellow); }
 
-/* ---- Print: A4 ---- */
+.grid.align-start { align-items: start; }
+
+/* ---- Navigation between the pages ---- */
+.topbar {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 8px;
+  padding: 8px 16px;
+  background: var(--ink);
+  border-bottom: 3px solid var(--ink);
+}
+.topbar .brand { font-family: var(--heading); font-weight: 700; color: var(--yellow); margin-right: 8px; text-decoration: none; font-size: 1.1rem; }
+.topbar a.nav {
+  font-family: var(--heading); font-weight: 600; font-size: 0.95rem;
+  color: #fff; text-decoration: none;
+  padding: 3px 12px; border-radius: 999px; border: 2px solid transparent;
+}
+.topbar a.nav:hover { border-color: #fff; }
+.topbar a.nav[aria-current="page"] { background: var(--yellow); color: var(--ink); border-color: var(--ink); }
+.topbar .spacer { flex: 1; }
+
+/* ---- Buttons ---- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 8px 18px;
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--ink);
+  font-family: var(--heading); font-weight: 600; font-size: 1.05rem;
+  box-shadow: 0 4px 0 var(--ink);
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.06s, box-shadow 0.06s;
+}
+.btn:hover { background: var(--yellow-soft); }
+.btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--ink); }
+.btn.primary { background: var(--yellow); }
+.btn.primary:hover { background: #ffd95e; }
+.btn.green { background: var(--grass); color: #fff; }
+.btn.small { padding: 3px 12px; font-size: 0.9rem; border-width: 2px; box-shadow: 0 3px 0 var(--ink); border-radius: 9px; }
+.btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+
+input[type="text"], input[type="number"], textarea, select {
+  width: 100%;
+  font: inherit;
+  padding: 7px 10px;
+  border: 2.5px solid var(--ink);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--ink);
+}
+textarea { min-height: 80px; resize: vertical; }
+label.field { display: block; font-weight: 800; margin: 10px 0 4px; }
+
+.toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(120px);
+  background: var(--ink); color: #fff; padding: 10px 18px; border-radius: 12px;
+  font-family: var(--heading); font-weight: 600; z-index: 100;
+  transition: transform 0.25s;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+.only-print { display: none; }
+
+/* ---- Print: A4, ink-saving ---- */
 @page { size: A4; margin: 11mm; }
 @media print {
-  body { background: #fff; font-size: 11pt; }
+  html { -webkit-print-color-adjust: economy; print-color-adjust: economy; }
+  body { background: #fff; font-size: 10.5pt; }
   .page { max-width: none; padding: 0; }
-  .no-print { display: none !important; }
+  .no-print, .topbar, .toast, .hero img.shot { display: none !important; }
+  .only-print { display: block; }
   .page-break { break-before: page; }
   section, .card, .callout, tr, .avoid-break { break-inside: avoid; }
-  .hero { box-shadow: none; }
-  .card { box-shadow: none; }
-  section { margin: 18px 0; }
+  section { margin: 14px 0; }
+  .hero, .card, .callout, .num, .btn { box-shadow: none !important; }
+  .hero .title, .card, .callout, .num, .badge, .chip, .fact { background: #fff !important; }
+  .hero { border-width: 2px; }
+  .card, .callout { border-width: 2px; }
+  th { background: #fff; color: var(--ink); border-bottom: 2px solid var(--ink); }
+  tbody tr:nth-child(even) td { background: #fff; }
   a { color: inherit; text-decoration: none; }
 }
-
-.grid.align-start { align-items: start; }

@@ -239,12 +239,13 @@ Die Zahl bei Events ist die **Spielernummer**. Funktionen unter **Dynamic int** 
 | **Extra Jumps** | Sprünge in der Luft (1 = Doppelsprung) |
 | **Health** | Wie viel er aushält |
 
-## 7. Abgeben
+## 7. Sichern & Abgeben (am Ende jedes Tages)
 
 1. **Built By** in den Level Rules ausfüllen, das Schild zeigt deinen Namen.
 2. Speichern (**⌘ + S**).
 3. **TUMO > Level exportieren**. Die Datei **DeinName.unitypackage** liegt dann auf dem Schreibtisch.
-4. Gib die Datei deiner Lehrerin oder deinem Lehrer. Im Finale spielen alle Level nacheinander! 🎉
+4. Die Datei in **Google Classroom** hochladen. Das ist dein Backup!
+5. Am letzten Tag kommt deine Datei ins Finale: alle Level werden nacheinander gespielt! 🎉
 
 ## Regeln, damit das Finale klappt
 

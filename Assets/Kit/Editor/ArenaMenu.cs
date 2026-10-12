@@ -239,6 +239,30 @@ namespace ArenaKit.EditorTools
             OpenScene(KitBuilder.ShowcaseScene);
         }
 
+        [MenuItem("TUMO/Spickzettel öffnen", priority = 21)]
+        static void OpenCheatSheet()
+        {
+            OpenDoc("Spickzettel.html");
+        }
+
+        [MenuItem("TUMO/Workshop-Material öffnen", priority = 22)]
+        static void OpenMaterial()
+        {
+            OpenDoc("index.html");
+        }
+
+        /// <summary>Opens one of the workshop pages in Docs/ (next to Assets) in the browser.</summary>
+        static void OpenDoc(string file)
+        {
+            string path = Path.GetFullPath(Path.Combine(Application.dataPath, "..", "Docs", file));
+            if (!File.Exists(path))
+            {
+                EditorUtility.DisplayDialog("Nicht gefunden", $"Die Datei {path} gibt es nicht.", "OK");
+                return;
+            }
+            Application.OpenURL(new Uri(path).AbsoluteUri);
+        }
+
         static void OpenScene(string path)
         {
             if (EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())

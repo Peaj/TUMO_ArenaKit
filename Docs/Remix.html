@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Remix-Würfel</title>
+<link rel="stylesheet" href="arena.css">
+<style>
+  .dice { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-top: 20px; }
+  .die { text-align: center; padding: 18px; }
+  .die h3 { justify-content: center; display: flex; gap: 8px; }
+  .cube {
+    width: 96px; height: 96px; margin: 8px auto 14px;
+    border: 4px solid var(--ink); border-radius: 20px; background: var(--card);
+    box-shadow: 0 5px 0 var(--ink);
+    display: grid; grid-template: repeat(3, 1fr) / repeat(3, 1fr); padding: 10px; gap: 2px;
+  }
+  .cube i { width: 16px; height: 16px; border-radius: 50%; background: var(--ink); place-self: center; visibility: hidden; }
+  .cube.rolling { animation: shake 0.12s infinite; }
+  @keyframes shake { 0% { transform: rotate(-12deg) translateY(-4px); } 50% { transform: rotate(10deg) translateY(2px); } 100% { transform: rotate(-12deg) translateY(-4px); } }
+  .result { min-height: 128px; border: 3px solid var(--ink); border-radius: 14px; padding: 10px; display: grid; place-items: center; align-content: center; gap: 4px; background: var(--gray-soft); }
+  .result img, .result .emoji { height: 54px; max-width: 90px; object-fit: contain; font-size: 2.6rem; line-height: 1; }
+  .result b { font-family: var(--heading); font-size: 1.3rem; }
+  .result small { color: var(--ink-soft); font-weight: 700; }
+  .result.pop { animation: pop 0.3s ease-out; }
+  @keyframes pop { from { transform: scale(0.8); } to { transform: scale(1); } }
+  .reroll { margin-top: 12px; }
+
+  .roll-area { text-align: center; margin: 26px 0 8px; }
+  .roll-area .btn { font-size: 1.5rem; padding: 12px 34px; }
+  .tokens { margin-top: 10px; font-weight: 800; color: var(--ink-soft); }
+
+  .idea { margin-top: 26px; background: var(--yellow); text-align: center; padding: 22px; }
+  .idea h2 { justify-content: center; }
+  .idea p { font-size: 1.3rem; font-weight: 800; margin: 6px 0 14px; }
+
+  .lists { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  .lists ol { list-style: none; padding: 0; margin: 0; }
+  .lists li { display: grid; grid-template-columns: 30px 40px 1fr; align-items: center; gap: 8px; padding: 5px 0; border-top: 2px dashed #d3d0da; }
+  .lists li:first-child { border-top: none; }
+  .pip { width: 28px; height: 28px; border: 2.5px solid var(--ink); border-radius: 7px; display: grid; place-items: center; font-family: var(--heading); font-weight: 700; font-size: 0.9rem; }
+  .lists li img, .lists li .emoji { height: 32px; width: 40px; object-fit: contain; font-size: 1.5rem; text-align: center; }
+  .lists li b { display: block; font-family: var(--heading); font-weight: 600; }
+  .lists li small { color: var(--ink-soft); font-weight: 700; }
+</style>
+</head>
+<body>
+<nav class="topbar" data-page="remix"></nav>
+<div class="page">
+  <h1>🎲 Remix-Würfel</h1>
+  <p class="lead">Würfle einen Modus, einen Twist und ein Thema. Das ist deine Spielidee! Einmal darfst du einen Würfel neu werfen.</p>
+
+  <div class="roll-area no-print">
+    <button class="btn primary" id="roll">🎲 Würfeln!</button>
+    <div class="tokens" id="tokens"></div>
+  </div>
+
+  <div class="dice no-print" id="dice"></div>
+
+  <div class="card idea no-print" id="idea" hidden>
+    <h2>💡 Deine Spielidee</h2>
+    <p id="ideaText"></p>
+    <div class="btn-row" style="justify-content:center">
+      <a class="btn" href="Spielidee.html" id="toSheet">✏️ In den Steckbrief übernehmen</a>
+    </div>
+  </div>
+
+  <section>
+    <h2><span class="num icon">📋</span>Alle Möglichkeiten</h2>
+    <div class="lists" id="lists"></div>
+    <div class="callout tip">
+      <span class="emoji">🖼️</span>
+      <p>Den Hintergrund änderst du im Objekt <b>CameraRig &gt; Background</b>: dort ein anderes Bild aus <i>Assets/Kit/Art/Kenney/Backgrounds</i> eintragen.</p>
+    </div>
+  </section>
+</div>
+
+<script src="arena.js"></script>
+<script>
+const DICE = [
+  { id: "mode", title: "🏁 Modus", faces: [
+    { emoji: "💥", name: "Letzter überlebt", hint: "Last Player Standing Wins" },
+    { img: "img/flag_yellow_a.png", name: "Parkour-Rennen", hint: "FinishFlag" },
+    { emoji: "👑", name: "König des Hügels", hint: "ScoreZone" },
+    { img: "img/coin_gold.png", name: "Münzjagd", hint: "Coins, Points To Win" },
+    { img: "img/ball.png", name: "Ballspiel", hint: "Ball + Goal" },
+    { emoji: "⭐", name: "Freie Wahl", hint: "du entscheidest" },
+  ] },
+  { id: "twist", title: "🌀 Twist", faces: [
+    { emoji: "🌙", name: "Mond", hint: "Gravity 0.3" },
+    { img: "img/lava_top.png", name: "Lava steigt", hint: "RisingLava" },
+    { img: "img/mine_armed.png", name: "Alles explodiert", hint: "Minen, TNT, Bombenregen" },
+    { emoji: "⛸️", name: "Eisboden", hint: "Braking 0" },
+    { img: "img/teleporter.png", name: "Teleporter-Chaos", hint: "TeleporterPair" },
+    { img: "img/weapons/WaterGun.png", name: "Eine Waffe für alle", hint: "Start Weapon am SpawnPoint" },
+  ] },
+  { id: "theme", title: "🎨 Thema", faces: [
+    { img: "img/terrain_sand.png", name: "Wüste", hint: "Sand" },
+    { img: "img/terrain_snow.png", name: "Winter", hint: "Snow" },
+    { img: "img/terrain_stone.png", name: "Burg", hint: "Stone, Bricks, Fackeln" },
+    { img: "img/terrain_purple.png", name: "Zauberwald", hint: "Purple, Pilze" },
+    { img: "img/terrain_grass_cloud_middle.png", name: "Himmelsinseln", hint: "nur Platforms" },
+    { img: "img/terrain_dirt.png", name: "Höhle", hint: "Dirt, wenig Licht" },
+  ] },
+];
+// Which of the 9 grid cells show a pip, for 1-6.
+const PIPS = { 1: [4], 2: [0, 8], 3: [0, 4, 8], 4: [0, 2, 6, 8], 5: [0, 2, 4, 6, 8], 6: [0, 2, 3, 5, 6, 8] };
+
+let state = Arena.store.get("remix", { values: [0, 0, 0], rerolls: 1 });
+
+function icon(face) {
+  return face.img ? `<img src="${face.img}" alt="">` : `<span class="emoji">${face.emoji}</span>`;
+}
+
+function setCube(cube, value) {
+  cube.querySelectorAll("i").forEach((pip, index) => {
+    pip.style.visibility = value && PIPS[value].includes(index) ? "visible" : "hidden";
+  });
+}
+
+function build() {
+  const box = document.getElementById("dice");
+  DICE.forEach((die, n) => {
+    const card = document.createElement("div");
+    card.className = "card die";
+    card.innerHTML = `<h3>${die.title}</h3><div class="cube">${"<i></i>".repeat(9)}</div>
+      <div class="result"><span class="muted">noch nicht gewürfelt</span></div>
+      <button class="btn small reroll">🔁 Neu würfeln</button>`;
+    card.querySelector(".reroll").onclick = () => {
+      if (state.rerolls <= 0) return;
+      state.rerolls--;
+      rollDie(n).then(update);
+    };
+    box.appendChild(card);
+  });
+
+  const lists = document.getElementById("lists");
+  DICE.forEach((die) => {
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `<h3>${die.title}</h3><ol>${die.faces.map((face, i) =>
+      `<li><span class="pip">${i + 1}</span>${icon(face)}<span><b>${face.name}</b><small>${face.hint}</small></span></li>`).join("")}</ol>`;
+    lists.appendChild(card);
+  });
+}
+
+function showResult(n, animate) {
+  const card = document.querySelectorAll("#dice .die")[n];
+  const value = state.values[n];
+  setCube(card.querySelector(".cube"), value);
+  const result = card.querySelector(".result");
+  if (!value) return;
+  const face = DICE[n].faces[value - 1];
+  result.innerHTML = `${icon(face)}<b>${face.name}</b><small>${face.hint}</small>`;
+  result.classList.remove("pop");
+  if (animate) { void result.offsetWidth; result.classList.add("pop"); }
+}
+
+function rollDie(n) {
+  const cube = document.querySelectorAll("#dice .cube")[n];
+  cube.classList.add("rolling");
+  return new Promise((resolve) => {
+    let ticks = 0;
+    const timer = setInterval(() => {
+      setCube(cube, 1 + Math.floor(Math.random() * 6));
+      if (++ticks >= 10 + n * 4) {
+        clearInterval(timer);
+        cube.classList.remove("rolling");
+        state.values[n] = 1 + Math.floor(Math.random() * 6);
+        showResult(n, true);
+        resolve();
+      }
+    }, 70);
+  });
+}
+
+function update() {
+  Arena.store.set("remix", state);
+  const rolled = state.values.every((v) => v > 0);
+  document.querySelectorAll("#dice .reroll").forEach((button) => {
+    button.disabled = !rolled || state.rerolls <= 0;
+    button.hidden = !rolled;
+  });
+  document.getElementById("tokens").textContent = rolled ? (state.rerolls > 0 ? "Du darfst noch 1 Würfel neu werfen." : "Neu würfeln aufgebraucht.") : "";
+  const idea = document.getElementById("idea");
+  idea.hidden = !rolled;
+  if (rolled) {
+    const [mode, twist, theme] = state.values.map((v, n) => DICE[n].faces[v - 1].name);
+    document.getElementById("ideaText").textContent = `${mode} + ${twist} im Thema „${theme}“`;
+    // The game idea sheet reads this when it opens.
+    Arena.store.set("remix.idea", { mode, twist, theme });
+  }
+}
+
+document.getElementById("roll").onclick = async () => {
+  const button = document.getElementById("roll");
+  button.disabled = true;
+  state = { values: [0, 0, 0], rerolls: 1 };
+  await Promise.all(DICE.map((_, n) => rollDie(n)));
+  button.disabled = false;
+  button.textContent = "🎲 Nochmal ganz neu würfeln";
+  update();
+};
+document.getElementById("toSheet").onclick = () => Arena.store.set("remix.apply", true);
+
+build();
+state.values.forEach((_, n) => showResult(n, false));
+update();
+</script>
+</body>
+</html>

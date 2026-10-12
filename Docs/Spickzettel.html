@@ -92,16 +92,40 @@
   .weapons { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
   .weapon { background: var(--sky); border: 2.5px solid var(--ink); border-radius: 12px; padding: 8px; text-align: center; font-family: var(--heading); font-weight: 600; font-size: 0.9rem; }
   .weapon img { height: 50px; width: 100%; object-fit: contain; display: block; margin-bottom: 4px; }
+  /* Search */
+  .search { margin: 0 0 14px; max-width: 520px; }
+  .search input { font-size: 1.05rem; }
+
+  /* Print: only the quick reference */
+  .quickref { font-size: 11pt; line-height: 1.4; }
+  .quickref .qr-head { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 2px solid var(--ink); margin-bottom: 6px; }
+  .quickref h1 { font-size: 19pt; margin: 0; }
+  .quickref h3 { font-size: 13pt; margin: 12px 0 4px; }
+  .quickref p { margin: 0 0 4px; }
+  .quickref .qr-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 9mm; }
+  .quickref table.qr { margin: 2px 0 5px; }
+  .quickref table.qr th, .quickref table.qr td { padding: 2px 5px; border-bottom: 1px solid #bbb; font-weight: 400; background: #fff !important; color: var(--ink); }
+  .quickref table.qr th { font-weight: 700; border-bottom: 1.5px solid var(--ink); }
+  .quickref table.qr td:first-child { font-weight: 700; white-space: nowrap; }
+  .quickref kbd { border-width: 1px; border-bottom-width: 2px; padding: 0 4px; font-size: 0.9em; }
+  @media print {
+    .screen-only { display: none !important; }
+  }
 </style>
 </head>
 <body>
+<nav class="topbar" data-page="spickzettel"></nav>
 <div class="page">
+<div class="screen-only">
 
   <div class="hero">
     <img class="shot" src="img/shot_rocket.png" alt="Zwei Spieler in der Arena, der rote schießt eine Rakete">
     <div class="title">
       <h1>Spickzettel: Arena-Baukasten</h1>
       <p>Bau deine eigene Arena, erfinde deinen eigenen Spielmodus und spiel ihn im großen Finale mit allen anderen!</p>
+      <div class="btn-row" style="margin:12px 0 4px">
+        <button class="btn small" onclick="window.print()">🖨️ Kurzreferenz drucken (1 Seite)</button>
+      </div>
       <ul class="toc no-print">
         <li><a href="#steuerung"><span class="badge">🎮 Steuerung</span></a></li>
         <li><a href="#unity"><span class="badge">🧭 Unity</span></a></li>
@@ -111,7 +135,7 @@
         <li><a href="#regeln"><span class="badge">4 Spielregeln</span></a></li>
         <li><a href="#events"><span class="badge">5 Auslöser &amp; Aktionen</span></a></li>
         <li><a href="#rezepte"><span class="badge">6 Rezepte</span></a></li>
-        <li><a href="#abgeben"><span class="badge">7 Abgeben</span></a></li>
+        <li><a href="#abgeben"><span class="badge">7 Sichern &amp; Abgeben</span></a></li>
       </ul>
     </div>
   </div>
@@ -251,7 +275,11 @@
   <section id="bausteine" class="page-break">
     <h2><span class="num">3</span>Bausteine einbauen</h2>
     <p class="lead">Ziehe Prefabs aus <b>Assets/Kit/Prefabs</b> in deine Szene. Die Einstellungen änderst du im <b>Inspector</b>.</p>
-    <div class="grid blocks">
+    <div class="search no-print">
+      <input type="text" id="blockSearch" placeholder="🔍 Baustein suchen, z.B. „Tür“, „Lava“ oder „Punkte“" aria-label="Baustein suchen">
+    </div>
+    <p class="muted" id="noBlocks" hidden>Kein Baustein gefunden.</p>
+    <div class="grid blocks" id="blocks">
       <div class="card block"><div class="pic"><span class="emoji">📍</span></div><div><h4>SpawnPoint</h4><p>Startpunkt für Spieler 1-4. Bei <i>Start Weapon</i> gibt's gleich eine Waffe</p></div></div>
       <div class="card block"><div class="pic"><img src="img/weapons/Bazooka.png" alt=""></div><div><h4>Pickups</h4><p>Waffe zum Aufheben. <i>Pickup_Random</i> = Zufallswaffe</p></div></div>
       <div class="card block"><div class="pic"><img src="img/block_exclamation.png" alt=""></div><div><h4>WeaponCrate</h4><p>Aufschießen: eine Waffe fällt raus</p></div></div>
@@ -530,14 +558,16 @@
 
   <!-- 7 -->
   <section id="abgeben">
-    <h2><span class="num">7</span>Abgeben</h2>
+    <h2><span class="num">7</span>Sichern &amp; Abgeben</h2>
     <div class="grid grid-2">
       <div class="card">
+        <h3>☁️ Am Ende jedes Tages</h3>
         <ol class="steps">
           <li><b>Built By</b> in den Level Rules ausfüllen, das Schild zeigt deinen Namen.</li>
           <li>Speichern: <kbd>⌘</kbd>+<kbd>S</kbd></li>
           <li><b>TUMO &gt; Level exportieren</b>. Die Datei <b>DeinName.unitypackage</b> liegt dann auf dem Schreibtisch.</li>
-          <li>Gib die Datei deiner Lehrerin oder deinem Lehrer. Im Finale spielen alle Level nacheinander! 🎉</li>
+          <li>Die Datei in <b>Google Classroom</b> hochladen. Das ist dein Backup!</li>
+          <li>Am letzten Tag kommt deine Datei ins Finale: alle Level werden nacheinander gespielt! 🎉</li>
         </ol>
       </div>
       <div class="card" style="background: var(--green-soft)">
@@ -554,5 +584,107 @@
 
   <footer>Arena-Baukasten · TUMO Ferienworkshop · Grafiken: Kenney (CC0)</footer>
 </div>
+
+<!-- Printed version: a compact, ink-saving one-page quick reference to keep next to the keyboard. -->
+<div class="only-print quickref">
+  <div class="qr-head"><h1>Arena-Baukasten: Kurzreferenz</h1><span>Alles andere: <b>TUMO &gt; Spickzettel öffnen</b></span></div>
+
+  <div class="qr-cols">
+    <div>
+      <h3>🎮 Steuerung</h3>
+      <table class="qr">
+        <tr><th></th><th>Laufen</th><th>Springen</th><th>Schießen</th></tr>
+        <tr><td>Spieler 1</td><td><kbd>A</kbd> <kbd>D</kbd></td><td><kbd>W</kbd></td><td><kbd>⇧</kbd> links</td></tr>
+        <tr><td>Spieler 2</td><td><kbd>←</kbd> <kbd>→</kbd></td><td><kbd>↑</kbd></td><td><kbd>⌥</kbd> rechts</td></tr>
+        <tr><td>Gamepad</td><td>Stick</td><td><kbd>A</kbd></td><td><kbd>X</kbd> / <kbd>RT</kbd></td></tr>
+      </table>
+      <p>Durch Plattform fallen: runter + springen · <kbd>H</kbd> Hilfe · <kbd>R</kbd> Neustart<br><b>Nie <kbd>⌘</kbd> beim Spielen!</b> <kbd>⌘</kbd>+<kbd>Q</kbd> beendet Unity.</p>
+
+      <h3>🧭 Unity</h3>
+      <table class="qr">
+        <tr><td><kbd>Q</kbd> <kbd>W</kbd> <kbd>E</kbd> <kbd>R</kbd></td><td>Hand, verschieben, drehen, skalieren</td></tr>
+        <tr><td><kbd>F</kbd></td><td>Zum ausgewählten Objekt</td></tr>
+        <tr><td><kbd>⌘</kbd>+<kbd>P</kbd></td><td>Play an / aus</td></tr>
+        <tr><td><kbd>⌘</kbd>+<kbd>S</kbd></td><td>Speichern, oft!</td></tr>
+        <tr><td><kbd>⌘</kbd>+<kbd>Z</kbd> / <kbd>⌘</kbd>+<kbd>D</kbd></td><td>Rückgängig / verdoppeln</td></tr>
+      </table>
+      <p><b>⏯️ Änderungen im Play-Modus sind danach weg!</b></p>
+
+      <h3>🖌️ Tile Palette</h3>
+      <p><i>Window &gt; 2D &gt; Tile Palette</i> · <b>Active Tilemap</b> passend wählen: Ground, Platforms, Hazards, Back/Front Decoration · <kbd>B</kbd> malen, <kbd>D</kbd> radieren, <kbd>U</kbd> Rechteck</p>
+
+      <h3>📁 Dein Level</h3>
+      <p><b>TUMO &gt; Neues Level erstellen</b> · <b>TUMO &gt; Mein Level öffnen</b> · Nur in <i>Assets/Levels/DeinName</i> arbeiten · Eigene Waffen und Spieler als Prefab-Variante in deinem Ordner</p>
+
+      <h3>☁️ Am Ende jedes Tages</h3>
+      <p><kbd>⌘</kbd>+<kbd>S</kbd> → <b>TUMO &gt; Level exportieren</b> → Datei vom Schreibtisch in <b>Google Classroom</b> hochladen</p>
+    </div>
+
+    <div>
+      <h3>🔌 Auslöser → Aktion verbinden</h3>
+      <p>Beim Event des Auslösers <kbd>+</kbd> klicken → Objekt mit der Aktion ins Feld ziehen → rechts die Aktion wählen. <b>Aktionen wirken auf den, der sie ausgelöst hat.</b></p>
+      <table class="qr">
+        <tr><th>Auslöser</th><th>Event</th></tr>
+        <tr><td>TriggerZone</td><td>On Enter / On Exit</td></tr>
+        <tr><td>HitSensor</td><td>On Hit (angeschossen)</td></tr>
+        <tr><td>Breakable</td><td>On Broken</td></tr>
+        <tr><td>Switch</td><td>On Turned On / Off</td></tr>
+        <tr><td>Timer / Counter</td><td>On Finished / On Reached</td></tr>
+      </table>
+      <table class="qr">
+        <tr><th>Aktion</th><th>Funktion</th></tr>
+        <tr><td>Explosive</td><td>Explode</td></tr>
+        <tr><td>ForcePush</td><td>Push</td></tr>
+        <tr><td>Damager</td><td>Hurt / Kill</td></tr>
+        <tr><td>Teleporter</td><td>Teleport</td></tr>
+        <tr><td>Score</td><td>AddPoints / WinRound / SendToStart</td></tr>
+        <tr><td>Disappear / Remover</td><td>Hide / RemoveObject / RemoveSelf</td></tr>
+        <tr><td>Door / Mover</td><td>Open, Close, Toggle / MoveToEnd, MoveToStart</td></tr>
+        <tr><td>Spawner / Counter / Timer</td><td>Spawn / Add / StartTimer</td></tr>
+      </table>
+
+      <h3>⚙️ Level Rules</h3>
+      <table class="qr">
+        <tr><td>Last Player Standing Wins</td><td>Letzter lebt = Sieg</td></tr>
+        <tr><td>Points To Win</td><td>Punkte zum Sieg</td></tr>
+        <tr><td>Respawn Players</td><td>Tote kommen zurück</td></tr>
+        <tr><td>Time Limit / Gravity</td><td>Sekunden / 0.3 = Mond</td></tr>
+        <tr><td>Player Health</td><td>1000 = fast unverwundbar</td></tr>
+      </table>
+
+      <h3>🏃 Dein Spieler</h3>
+      <p>Max Speed · Braking (0 = Eis) · Jump Height · Fall Gravity · Extra Jumps (1 = Doppelsprung) · Health</p>
+    </div>
+  </div>
+</div>
+
+</div>
+<script src="arena.js"></script>
+<script>
+// German words students might search for.
+const TAGS = {
+  "SpawnPoint": "start spieler anfang", "Pickups": "waffe gun aufheben", "WeaponCrate": "kiste waffe",
+  "Crate / BrickWall": "kiste mauer wand kaputt", "JumpPad": "sprung feder trampolin boost springen",
+  "MovingPlatform / Elevator": "plattform aufzug fahren bewegen", "TeleporterPair": "portal beamen",
+  "Mine": "bombe explosion falle", "TNTBlock": "bombe explosion sprengen", "Spikes / Saw": "stacheln säge tödlich gefahr falle",
+  "RisingLava": "lava sudden death steigen", "Door / LockBlock": "tür schloss", "Lever / Button": "hebel schalter knopf",
+  "Key": "schlüssel", "TriggerZone": "auslöser zone unsichtbar", "Timer / Counter": "zeit uhr zählen sekunden",
+  "Spawner": "erzeugen regen", "FinishFlag": "ziel flagge rennen parkour gewinnen", "ScoreZone": "punkte könig hügel zone",
+  "Coin / Gem": "münze geld punkte sammeln", "Ball + Goal": "tor fußball volleyball punkte", "NameSign": "schild name",
+};
+document.querySelectorAll("#blocks .block").forEach((block) => { block.dataset.tags = TAGS[block.querySelector("h4").textContent] || ""; });
+// Search: show only the building blocks that match.const search = document.getElementById("blockSearch");
+search.addEventListener("input", () => {
+  const words = search.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
+  let shown = 0;
+  document.querySelectorAll("#blocks .block").forEach((block) => {
+    const text = block.textContent.toLowerCase() + " " + (block.dataset.tags || "");
+    const match = words.every((word) => text.includes(word));
+    block.hidden = !match;
+    if (match) shown++;
+  });
+  document.getElementById("noBlocks").hidden = shown > 0;
+});
+</script>
 </body>
 </html>

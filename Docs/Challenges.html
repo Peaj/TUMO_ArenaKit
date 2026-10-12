@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Challenge-Karten</title>
+<link rel="stylesheet" href="arena.css">
+<style>
+  .deck-area { display: grid; grid-template-columns: 300px 1fr; gap: 28px; align-items: start; }
+  @media (max-width: 760px) { .deck-area { grid-template-columns: 1fr; } }
+
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+  .filters .btn[aria-pressed="true"] { background: var(--ink); color: #fff; }
+
+  .progress { display: grid; gap: 8px; margin: 18px 0; }
+  .bar { display: grid; grid-template-columns: 70px 1fr 48px; align-items: center; gap: 8px; font-family: var(--heading); font-weight: 600; }
+  .bar .track { height: 16px; border: 2.5px solid var(--ink); border-radius: 999px; background: var(--card); overflow: hidden; }
+  .bar .fill { height: 100%; width: 0; transition: width 0.4s; }
+  .bar.green .fill { background: var(--grass); }
+  .bar.yellow .fill { background: var(--yellow); }
+  .bar.red .fill { background: var(--red); }
+
+  /* The stack you draw from */
+  .stack { position: relative; height: 220px; margin: 8px 0 18px; cursor: pointer; }
+  .stack .back {
+    position: absolute; inset: 0;
+    border: 3px solid var(--ink); border-radius: 18px;
+    background: var(--purple) repeating-linear-gradient(45deg, rgba(255,255,255,0.12) 0 12px, transparent 12px 24px);
+    box-shadow: var(--shadow);
+    display: grid; place-items: center;
+    color: #fff; font-family: var(--heading); font-weight: 700; font-size: 1.4rem; text-align: center;
+  }
+  .stack .back:nth-child(1) { transform: translate(8px, 8px) rotate(3deg); }
+  .stack .back:nth-child(2) { transform: translate(4px, 4px) rotate(1.5deg); }
+  .stack:hover .back:nth-child(3) { transform: translateY(-4px); }
+  .stack .back span { display: block; font-size: 3rem; }
+
+  /* The drawn card */
+  .stage { min-height: 420px; perspective: 1200px; }
+  .empty { border: 3px dashed var(--ink-soft); border-radius: 22px; min-height: 420px; display: grid; place-items: center; text-align: center; color: var(--ink-soft); font-family: var(--heading); font-size: 1.3rem; padding: 20px; }
+  .big { animation: flip 0.45s ease-out; transform-origin: center; }
+  @keyframes flip { from { transform: rotateY(90deg) scale(0.9); opacity: 0.2; } to { transform: rotateY(0) scale(1); opacity: 1; } }
+
+  .ch { background: var(--card); border: 3px solid var(--ink); border-radius: var(--radius); padding: 12px 14px 14px; position: relative; }
+  .ch.green { background: var(--green-soft); }
+  .ch.yellow { background: var(--yellow-soft); }
+  .ch.red { background: var(--red-soft); }
+  .ch .level { display: inline-block; margin-bottom: 6px; padding: 0 10px; border: 2px solid var(--ink); border-radius: 8px; font-family: var(--heading); font-weight: 600; font-size: 0.8rem; background: var(--card); }
+  .ch.green .level { background: var(--grass); color: #fff; }
+  .ch.yellow .level { background: var(--yellow); }
+  .ch.red .level { background: var(--red); color: #fff; }
+  .ch h4 { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; font-size: 1.1rem; }
+  .ch h4 img { height: 32px; max-width: 60px; object-fit: contain; }
+  .ch h4 .emoji { font-size: 1.4rem; }
+  .ch p { margin: 0 0 6px; }
+  .ch .how { font-size: 0.92rem; background: rgba(255,255,255,0.75); border: 2px solid var(--ink); border-radius: 10px; padding: 6px 9px; }
+  .ch .how b { font-family: var(--heading); font-weight: 600; }
+  .ch code { font-size: 0.88em; word-break: break-word; }
+  .ch .done-mark { position: absolute; top: 10px; right: 12px; font-family: var(--heading); font-weight: 700; color: var(--grass-dark); display: none; }
+  .ch.is-done .done-mark { display: block; }
+  .ch.is-done { opacity: 0.7; }
+
+  .big.ch { padding: 22px 26px 24px; border-radius: 22px; box-shadow: 0 6px 0 var(--ink); }
+  .big.ch h4 { font-size: 2rem; }
+  .big.ch h4 img { height: 54px; max-width: 110px; }
+  .big.ch h4 .emoji { font-size: 2.4rem; }
+  .big.ch p { font-size: 1.2rem; }
+  .big.ch .how { font-size: 1.05rem; padding: 10px 14px; }
+  .big.ch .done-mark { font-size: 1.3rem; }
+
+  pre.code { margin: 8px 0 0; padding: 10px 12px; background: #2f2d38; color: #f3f2f6; border-radius: 10px; font-size: 0.85rem; line-height: 1.45; overflow-x: auto; white-space: pre; }
+  .btn.copy { margin-top: 10px; }
+
+  .actions { margin-top: 18px; }
+
+  .all { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+  .all .ch { cursor: pointer; }
+  .all .ch:hover { transform: translateY(-2px); }
+  .all pre.code, .all .btn.copy { display: none; }
+
+  @media print {
+    .all { grid-template-columns: repeat(3, 1fr); }
+    .all .ch { background: #fff !important; border-width: 2px; opacity: 1; }
+    .all .ch .level { background: #fff !important; color: var(--ink) !important; }
+    .all pre.code { display: block; background: #fff; color: var(--ink); border: 1px solid var(--ink); font-size: 7.5pt; }
+    .all .ch.wide { grid-column: span 2; }
+    .ch .done-mark { display: none !important; }
+  }
+</style>
+</head>
+<body>
+<nav class="topbar" data-page="challenges"></nav>
+<div class="page">
+  <h1>🏅 Challenge-Karten</h1>
+  <p class="lead">Zieh eine Karte und probier sie in deinem Level aus! 🟢 Werte einstellen und Bausteine platzieren, 🟡 Bausteine verbinden, 🔴 eigene Scripts schreiben.</p>
+
+  <div class="deck-area no-print">
+    <div>
+      <div class="filters" role="group" aria-label="Welche Karten?">
+        <button class="btn small" data-filter="all" aria-pressed="true">Alle</button>
+        <button class="btn small" data-filter="green" aria-pressed="false">🟢 Start</button>
+        <button class="btn small" data-filter="yellow" aria-pressed="false">🟡 Profi</button>
+        <button class="btn small" data-filter="red" aria-pressed="false">🔴 Code</button>
+      </div>
+      <div class="stack" id="stack" role="button" tabindex="0" aria-label="Karte ziehen">
+        <div class="back"></div>
+        <div class="back"></div>
+        <div class="back"><div><span>🃏</span>Karte ziehen</div></div>
+      </div>
+      <div class="progress" id="progress"></div>
+      <button class="btn small" id="reset">Fortschritt zurücksetzen</button>
+    </div>
+    <div class="stage" id="stage">
+      <div class="empty">Klick auf den Stapel,<br>um eine Karte zu ziehen!</div>
+    </div>
+  </div>
+
+  <section>
+    <h2 class="no-print"><span class="num icon">📚</span>Alle Karten</h2>
+    <div class="all" id="all"></div>
+  </section>
+</div>
+
+<script src="arena.js"></script>
+<script>
+const CARDS = [
+  { id: "mond", level: "green", emoji: "🌙", title: "Mondlandung", text: "Mach dein Level zum Mondlevel. Wie verändert sich das Spiel?", how: "<b>So geht's:</b> Level Rules &gt; Gravity = 0.3" },
+  { id: "springer", level: "green", emoji: "🦘", title: "Superspringer", text: "Dein Spieler kann in der Luft noch zweimal springen.", how: "<b>So geht's:</b> DeinNamePlayer &gt; Extra Jumps = 2" },
+  { id: "eis", level: "green", emoji: "⛸️", title: "Eisbahn", text: "Alle rutschen! Baue eine Arena, in der das lustig ist.", how: "<b>So geht's:</b> DeinNamePlayer &gt; Braking = 0" },
+  { id: "schrot", level: "green", img: "img/weapons/Shotgun.png", title: "Schrot-Party", text: "Baue eine Waffe, die 12 Kugeln auf einmal schießt.", how: "<b>So geht's:</b> Prefab Variant der Shotgun &gt; Projectiles Per Shot = 12, Spread = 60" },
+  { id: "burg", level: "green", img: "img/block_planks.png", title: "Kistenburg", text: "Baue eine Burg aus Kisten und Mauern, die man erst wegschießen muss.", how: "<b>So geht's:</b> Crate und BrickWall stapeln. Bei Breakable &gt; Health stellst du ein, wie viel sie aushalten." },
+  { id: "risiko", level: "green", img: "img/weapons/HandCannon.png", title: "Risiko!", text: "Die stärkste Waffe liegt an der gefährlichsten Stelle deiner Arena.", how: "<b>So geht's:</b> Pickup_Bazooka zwischen Stacheln oder über Lava legen" },
+  { id: "saege", level: "green", img: "img/saw.png", title: "Rasende Säge", text: "Lass eine Säge einen langen Weg fahren, schnell oder langsam.", how: "<b>So geht's:</b> Saw &gt; Mover &gt; Offset (wohin) und Speed (wie schnell)" },
+  { id: "feder", level: "green", img: "img/spring.png", title: "Raketenfeder", text: "Eine Sprungfeder, die dich bis an die Decke schießt.", how: "<b>So geht's:</b> JumpPad &gt; ForcePush &gt; Speed = 25" },
+
+  { id: "hebel", level: "yellow", img: "img/lever_left.png", title: "Hebel-Tür", text: "Ein Hebel öffnet und schließt eine Tür.", how: "<b>Lever</b> &gt; On Turned On → <b>Door</b> &gt; Open<br><b>Lever</b> &gt; On Turned Off → <b>Door</b> &gt; Close" },
+  { id: "schluessel", level: "yellow", img: "img/key_red.png", title: "Schlüsselrätsel", text: "Versteck einen Schlüssel. Er öffnet den Weg zur besten Waffe.", how: "<b>Key</b> &gt; TriggerZone &gt; On Enter → <b>LockBlock</b> &gt; Open" },
+  { id: "muenzen", level: "yellow", img: "img/coin_gold.png", title: "Münz-Tür", text: "Erst wenn 3 Münzen gesammelt sind, geht die Tür auf.", how: "Jede <b>Coin</b> &gt; TriggerZone &gt; On Enter → <b>Counter</b> &gt; Add<br><b>Counter</b> (Target 3) &gt; On Reached → <b>Door</b> &gt; Open" },
+  { id: "bomben", level: "yellow", img: "img/block_strong_danger.png", title: "Bombenregen", text: "Alle paar Sekunden fällt TNT vom Himmel.", how: "<b>Spawner</b> oben in die Arena: Prefabs = TNTBlock, Interval = 3, Max Alive = 5, Random Offset x = 10" },
+  { id: "zeitbombe", level: "yellow", emoji: "⏰", title: "Zeitbombe", text: "Nach 20 Sekunden explodiert eine Kiste in der Mitte.", how: "Crate &gt; <b>Add Component</b> &gt; Explosive<br><b>Timer</b> (20 s) &gt; On Finished → <b>Explosive</b> &gt; Explode" },
+  { id: "falle", level: "yellow", img: "img/switch_red.png", title: "Fallen-Knopf", text: "Wer auf den Knopf drückt, wird über die Lava gebeamt.", how: "Leeres Objekt als Ziel, <b>Teleporter</b> mit Target = Ziel<br><b>Button</b> &gt; On Turned On → <b>Teleporter</b> &gt; Teleport" },
+  { id: "aufzug", level: "yellow", img: "img/terrain_grass_cloud_middle.png", title: "Aufzug auf Knopfdruck", text: "Der Aufzug fährt nur, wenn jemand den Knopf drückt.", how: "Elevator &gt; Mover &gt; Move Automatically aus<br><b>Button</b> &gt; On Turned On → <b>Mover</b> &gt; MoveToEnd<br>On Turned Off → MoveToStart" },
+  { id: "geheimgang", level: "yellow", img: "img/bricks_brown.png", title: "Geheimgang", text: "Ein versteckter Hebel lässt eine Mauer verschwinden.", how: "BrickWall &gt; <b>Add Component</b> &gt; Disappear<br><b>Lever</b> &gt; On Turned On → <b>Disappear</b> &gt; Hide" },
+
+  { id: "script", level: "red", wide: true, emoji: "🧑‍💻", title: "Dein erstes Script", text: "Eine TriggerZone, die dich höher springen lässt. Rechtsklick in deinem Ordner &gt; <b>Create &gt; Scripting &gt; MonoBehaviour Script</b>. Der Name beginnt mit deinem Namen, die Klasse heißt genauso wie die Datei.",
+    code: "using ArenaKit;\nusing UnityEngine;\n\npublic class LenaSuperJump : MonoBehaviour\n{\n    public float ExtraHeight = 3f;\n\n    // TriggerZone > On Enter → LenaSuperJump > Apply\n    public void Apply()\n    {\n        Character player = TriggeredBy.Character;\n        if (player != null)\n            player.JumpHeight += ExtraHeight;\n    }\n}" },
+  { id: "turbo", level: "red", emoji: "👟", title: "Turbo-Schuhe", text: "Wie „Dein erstes Script“, aber der Spieler wird schneller.", how: "<b>Tipp:</b> <code>player.MaxSpeed += 5f;</code><br>Lege das Script auf einen Coin, dann ist es ein Power-up." },
+  { id: "schleuder", level: "red", emoji: "🚀", title: "Schleudersitz", text: "Wer in die Zone läuft, wird senkrecht nach oben geschossen.", how: "<b>Tipp:</b> <code>player.Body.linearVelocity = new Vector2(0f, 25f);</code><br>Was passiert mit 0 statt 25? Und mit -25?" },
+  { id: "ausgleich", level: "red", emoji: "⚖️", title: "Ausgleich", text: "Wer gerade hinten liegt, bekommt einen Extrapunkt.", how: "<b>Tipp:</b> <code>LevelRules.Current.GetPoints(1)</code> liefert die Punkte von Spieler 1, <code>LevelRules.Current.AddPoint(2)</code> gibt Spieler 2 einen Punkt." },
+];
+const LEVELS = { green: "🟢 Start", yellow: "🟡 Profi", red: "🔴 Code" };
+
+let filter = "all";
+let current = null;
+let done = new Set(Arena.store.get("challenges.done", []));
+
+function cardHtml(card) {
+  const icon = card.img ? `<img src="${card.img}" alt="">` : `<span class="emoji">${card.emoji}</span>`;
+  const code = card.code ? `<pre class="code">${Arena.escapeHtml(card.code)}</pre>` : "";
+  const how = card.how ? `<div class="how">${card.how}</div>` : "";
+  return `<span class="level">${LEVELS[card.level]}</span><span class="done-mark">✓ geschafft</span>
+    <h4>${icon}${card.title}</h4><p>${card.text}</p>${how}${code}`;
+}
+
+function makeCard(card, big) {
+  const element = document.createElement("div");
+  element.className = `ch ${card.level}${big ? " big" : ""}${card.wide ? " wide" : ""}${done.has(card.id) ? " is-done" : ""}`;
+  element.innerHTML = cardHtml(card);
+  return element;
+}
+
+function pool() {
+  return CARDS.filter((card) => (filter === "all" || card.level === filter) && !done.has(card.id));
+}
+
+function draw() {
+  let options = pool().filter((card) => !current || card.id !== current.id);
+  if (options.length === 0) options = pool();
+  if (options.length === 0) {
+    current = null;
+    document.getElementById("stage").innerHTML = `<div class="empty">🎉 Alle Karten hier geschafft!<br>Wähl oben eine andere Farbe.</div>`;
+    return;
+  }
+  current = options[Math.floor(Math.random() * options.length)];
+  show(current);
+}
+
+function show(card) {
+  current = card;
+  const stage = document.getElementById("stage");
+  stage.innerHTML = "";
+  stage.appendChild(makeCard(card, true));
+  const actions = document.createElement("div");
+  actions.className = "btn-row actions";
+  const isDone = done.has(card.id);
+  actions.innerHTML = `
+    <button class="btn green" id="done">${isDone ? "↩ Doch nicht geschafft" : "✓ Geschafft!"}</button>
+    <button class="btn" id="other">🔀 Andere Karte</button>`;
+  stage.appendChild(actions);
+  document.getElementById("done").onclick = () => {
+    if (done.has(card.id)) done.delete(card.id); else { done.add(card.id); Arena.toast("Stark! Karte geschafft 🎉"); }
+    save();
+    show(card);
+  };
+  document.getElementById("other").onclick = draw;
+  // Copy button for the code card.
+  stage.querySelectorAll("pre.code").forEach((pre) => {
+    const button = document.createElement("button");
+    button.className = "btn small copy";
+    button.textContent = "Code kopieren";
+    button.onclick = () => Arena.copyText(pre.innerText);
+    pre.insertAdjacentElement("afterend", button);
+  });
+}
+
+function save() {
+  Arena.store.set("challenges.done", [...done]);
+  renderAll();
+  renderProgress();
+}
+
+function renderAll() {
+  const all = document.getElementById("all");
+  all.innerHTML = "";
+  CARDS.forEach((card) => {
+    const element = makeCard(card, false);
+    element.title = "Karte ansehen";
+    element.onclick = () => { show(card); window.scrollTo({ top: 0, behavior: "smooth" }); };
+    all.appendChild(element);
+  });
+}
+
+function renderProgress() {
+  const box = document.getElementById("progress");
+  box.innerHTML = "";
+  ["green", "yellow", "red"].forEach((level) => {
+    const total = CARDS.filter((c) => c.level === level).length;
+    const count = CARDS.filter((c) => c.level === level && done.has(c.id)).length;
+    const row = document.createElement("div");
+    row.className = "bar " + level;
+    row.innerHTML = `<span>${LEVELS[level].split(" ")[0]} ${LEVELS[level].split(" ")[1]}</span><div class="track"><div class="fill" style="width:${(100 * count) / total}%"></div></div><span>${count}/${total}</span>`;
+    box.appendChild(row);
+  });
+}
+
+document.querySelectorAll(".filters .btn").forEach((button) => {
+  button.onclick = () => {
+    filter = button.dataset.filter;
+    document.querySelectorAll(".filters .btn").forEach((b) => b.setAttribute("aria-pressed", b === button));
+  };
+});
+const stack = document.getElementById("stack");
+stack.onclick = draw;
+stack.onkeydown = (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); draw(); } };
+document.getElementById("reset").onclick = () => {
+  if (confirm("Alle Karten wieder als „nicht geschafft“ markieren?")) { done = new Set(); save(); if (current) show(current); }
+};
+
+renderAll();
+renderProgress();
+</script>
+</body>
+</html>
