@@ -3,7 +3,7 @@
 # Holt die neueste Version des Kits von GitHub und setzt alle Kit-Dateien darauf zurück.
 # Die Level der Teens (Assets/Levels/<Name>, von git nicht verfolgt) bleiben erhalten.
 
-BRANCH="arena-kit"
+BRANCH="main"
 cd "$(dirname "$0")" || exit 1
 
 pause() {

@@ -76,12 +76,13 @@ Try the export and import once with two test levels before the workshop.
 Step-by-step instructions for the TUMO IT (German): [Docs/Installation.md](Docs/Installation.md). In short:
 
 ```bash
-git clone -b arena-kit https://github.com/Peaj/TUMO_ArenaKit.git ~/Documents/TUMO_ArenaKit
+git clone https://github.com/Peaj/TUMO_ArenaKit.git ~/Documents/TUMO_ArenaKit
 ```
 
 - The repo is public, so no GitHub account is needed. Every Mac needs Unity 6000.3.25f1.
-- Open the project once per Mac before day 1 (first import), or set up one Mac and copy the folder including `Library` to the others.
-- **Updates and repairs:** double-click `Kit aktualisieren.command` (Unity closed). It fetches the branch and runs `git reset --hard origin/arena-kit`. That resets every kit file but keeps the students' untracked level folders in `Assets/Levels/<Name>`. Never use `git clean`.
+- Optional: open the project once per Mac before day 1, so the first import is done. Or set up one Mac and copy the folder including `Library` to the others.
+- `main` is what the Macs get. Work happens on `arena-kit`, and `main` is fast-forwarded to it once a change is tested.
+- **Updates and repairs:** double-click `Kit aktualisieren.command` (Unity closed). It fetches `main` and runs `git reset --hard origin/main`. That resets every kit file but keeps the students' untracked level folders in `Assets/Levels/<Name>`. Never use `git clean`.
 
 ## Keyboards and gamepads on the Macs
 
