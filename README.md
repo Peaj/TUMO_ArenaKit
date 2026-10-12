@@ -9,6 +9,8 @@ At the end, all levels are merged into one "arcade" project that plays one level
 - Tiles and props: [Kenney New Platformer Pack](https://kenney.nl/assets/new-platformer-pack) (CC0)
 
 Workshop material in German: interactive web pages in `Docs/` that ship with the project, so they're on every student Mac. They work offline straight from the file system (fonts are bundled). Students open them with `TUMO > Spickzettel öffnen` / `TUMO > Workshop-Material öffnen`.
+
+Online (GitHub Pages, served from `main`): **https://www.peaj.de/TUMO_ArenaKit/Docs/**. The workshop plan is at https://www.peaj.de/TUMO_ArenaKit/Docs/Workshop.html.
 - [Docs/index.html](Docs/index.html): start page
 - [Docs/Spickzettel.html](Docs/Spickzettel.html): cheat sheet with a building block search. Printing it gives a one-page, nearly black-and-white quick reference to keep next to the keyboard (also as [Markdown](Docs/Spickzettel.md))
 - [Docs/Challenges.html](Docs/Challenges.html): challenge card deck (draw, filter by level, mark as done)
