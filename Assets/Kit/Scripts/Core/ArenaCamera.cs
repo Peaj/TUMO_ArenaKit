@@ -44,7 +44,7 @@ namespace ArenaKit
         public CinemachineTargetGroup TargetGroup;
         public CinemachinePositionComposer Composer;
         public CinemachineGroupFraming GroupFraming;
-        public CinemachineConfiner2D Confiner;
+        public ArenaConfiner Confiner;
         public CinemachineImpulseSource Impulse;
         [Tooltip("The camera looks here (at the whole level) while no player is alive")]
         public Transform LevelCenter;
@@ -226,6 +226,9 @@ namespace ArenaKit
                 GroupFraming.OrthoSizeRange = range;
         }
 
+        /// <summary>The area the camera may show, in world units.</summary>
+        public Rect LevelRect => BoundsRect();
+
         Rect BoundsRect()
         {
             if (Bounds == null)
@@ -259,16 +262,11 @@ namespace ArenaKit
                 {
                     Bounds.offset = offset;
                     Bounds.size = tiles.size;
-                    if (Confiner != null)
-                        Confiner.InvalidateBoundingShapeCache();
                 }
             }
 
-            if (Confiner != null && Confiner.BoundingShape2D != Bounds)
-            {
-                Confiner.BoundingShape2D = Bounds;
-                Confiner.InvalidateBoundingShapeCache();
-            }
+            if (Confiner != null && Confiner.Rig != this)
+                Confiner.Rig = this;
 
             if (LevelCenter != null)
             {

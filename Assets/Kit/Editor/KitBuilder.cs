@@ -1340,9 +1340,8 @@ namespace ArenaKit.EditorTools
 
             // Order matters: frame the group first, then keep the result inside the level.
             var framing = virtualObject.AddComponent<Unity.Cinemachine.CinemachineGroupFraming>();
-            var confiner = virtualObject.AddComponent<Unity.Cinemachine.CinemachineConfiner2D>();
-            confiner.BoundingShape2D = bounds;
-            confiner.Damping = 0f;
+            // Our own box confiner: Cinemachine's Confiner2D jumped at the zoom where the view stops fitting the level.
+            var confiner = virtualObject.AddComponent<ArenaConfiner>();
 
             var listener = virtualObject.AddComponent<Unity.Cinemachine.CinemachineImpulseListener>();
             listener.Gain = 1f;
@@ -1370,6 +1369,7 @@ namespace ArenaKit.EditorTools
             arena.Composer = composer;
             arena.GroupFraming = framing;
             arena.Confiner = confiner;
+            confiner.Rig = arena;
             arena.Impulse = impulse;
             arena.Bounds = bounds;
             arena.LevelCenter = levelCenter.transform;

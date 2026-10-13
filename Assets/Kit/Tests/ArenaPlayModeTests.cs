@@ -516,6 +516,69 @@ namespace ArenaKit.Tests
         }
 
         [UnityTest]
+        public IEnumerator Camera_DoesNotJumpWhilePlayersComeCloser([Values(TemplateScene, ArenaScene, "flat")] string scene)
+        {
+            yield return LoadLevel(scene == "flat" ? TemplateScene : scene);
+            if (scene == "flat")
+                yield return MakeLevelFlat();
+            // Without smoothing, a jump of the camera target shows up as one big step instead of a quick glide.
+            ArenaCamera rig = ArenaCamera.Current;
+            rig.Smoothing = 0f;
+            rig.Composer.Damping = Vector3.zero;
+            rig.GroupFraming.Damping = 0f;
+            Camera camera = Camera.main;
+            camera.aspect = 16f / 9f;
+            Character left = Player(1);
+            Character right = Player(2);
+            Rect level = LevelRect(ArenaCamera.Current);
+            float floorY = right.transform.position.y;
+
+            try
+            {
+                // Far apart: zoomed out as far as the level allows. Then player 1 walks over to player 2,
+                // through the zoom where the view stops being wider than the level.
+                left.Teleport(new Vector2(level.xMin + 5f, floorY));
+                right.Teleport(new Vector2(level.xMax - 5f, floorY));
+                yield return new WaitForSeconds(2.5f);
+
+                float largestStep = 0f, atX = 0f;
+                Vector3 previous = camera.transform.position;
+                for (float x = level.xMin + 5f; x < level.xMax - 8f; x += 0.06f)
+                {
+                    left.Teleport(new Vector2(x, floorY));
+                    left.Body.linearVelocity = Vector2.zero;
+                    yield return null;
+                    float step = Vector2.Distance(camera.transform.position, previous);
+                    if (step > largestStep) { largestStep = step; atX = x; }
+                    previous = camera.transform.position;
+                }
+
+                Assert.Less(largestStep, 0.3f, $"The camera moves smoothly (largest step per frame at player x = {atX:0.0})");
+            }
+            finally
+            {
+                camera.ResetAspect();
+            }
+        }
+
+        /// <summary>
+        /// A wide, low level box (34 x 14, like a one-floor arena): when zooming out, the view gets
+        /// taller than the level first. That is where Cinemachine's Confiner2D made the camera jump.
+        /// </summary>
+        static IEnumerator MakeLevelFlat()
+        {
+            ArenaCamera rig = ArenaCamera.Current;
+            rig.AutoBounds = false;
+            rig.Bounds.offset = new Vector2(0f, -2f) - (Vector2)rig.Bounds.transform.position;
+            rig.Bounds.size = new Vector2(34f, 14f);
+            rig.UpdateBounds();
+            // Works with any confiner: a Cinemachine confiner has to forget its baked shape.
+            object confiner = rig.GetType().GetField("Confiner").GetValue(rig);
+            confiner?.GetType().GetMethod("InvalidateBoundingShapeCache")?.Invoke(confiner, null);
+            yield return null;
+        }
+
+        [UnityTest]
         public IEnumerator Levels_AllSolidTilesHaveCollision([Values(TemplateScene, ArenaScene, VolleyballScene, ShowcaseScene)] string scene)
         {
             yield return LoadLevel(scene);

@@ -312,7 +312,7 @@ GameObject:
   - component: {fileID: 4305715716866751210}
   - component: {fileID: 1516665948697748577}
   - component: {fileID: 4016816487833213607}
-  - component: {fileID: 4250639156685904536}
+  - component: {fileID: 9052537446594086684}
   - component: {fileID: 690861110842995506}
   m_Layer: 0
   m_Name: Virtual Camera
@@ -431,7 +431,7 @@ MonoBehaviour:
   FovRange: {x: 1, y: 100}
   DollyRange: {x: -100, y: 100}
   OrthoSizeRange: {x: 6, y: 12.75}
---- !u!114 &4250639156685904536
+--- !u!114 &9052537446594086684
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -440,17 +440,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 4965162288184844299}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f453f694addf4275988fac205bc91968, type: 3}
+  m_Script: {fileID: 11500000, guid: abb0be83314deb245a7d24c5bf4e853f, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachineConfiner2D
-  BoundingShape2D: {fileID: 2834390064152761198}
-  Damping: 0
-  SlowingDistance: 5
-  OversizeWindow:
-    Enabled: 0
-    MaxWindowSize: 0
-    Padding: 0
-  m_LegacyMaxWindowSize: -2
+  m_EditorClassIdentifier: ArenaKit::ArenaKit.ArenaConfiner
+  Rig: {fileID: 1053617561696954044}
 --- !u!114 &690861110842995506
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -697,7 +690,7 @@ MonoBehaviour:
   TargetGroup: {fileID: 549964229549250835}
   Composer: {fileID: 1516665948697748577}
   GroupFraming: {fileID: 4016816487833213607}
-  Confiner: {fileID: 4250639156685904536}
+  Confiner: {fileID: 9052537446594086684}
   Impulse: {fileID: 5722557578487929605}
   LevelCenter: {fileID: 8591191614912794660}
 --- !u!1 &8256171713078783802
