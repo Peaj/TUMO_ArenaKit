@@ -110,7 +110,7 @@ Every level contains the **CameraRig** prefab (`Assets/Kit/Prefabs/Rules/CameraR
 How it works:
 - **Following:** players are added to a Cinemachine Target Group when they spawn and removed when they die. Balls are followed too.
 - **Nobody alive:** the camera shows the whole level.
-- **Framing:** Position Composer + Group Framing (zoom only) + Confiner2D, all on one Cinemachine camera.
+- **Framing:** Position Composer + Group Framing (zoom only) + `ArenaConfiner`, all on one Cinemachine camera. `ArenaConfiner` clamps the view to the level box (and centers it where the view is larger). It replaces Cinemachine's Confiner2D, which made the camera jump in wide, low levels.
 - **Level bounds:** with *Auto Bounds*, the bounds are recalculated from the painted **Ground** and **Platforms** tiles (plus padding), in the editor as well. Students can build levels of any size and never have to set up the camera.
 - **Zoom limit:** the camera zooms out at most until the whole level is visible. If the screen shape doesn't match the level, a bit of background shows above/below or left/right. Players never leave the screen.
 - **Background:** it always fills the screen (`CameraBackground`).
