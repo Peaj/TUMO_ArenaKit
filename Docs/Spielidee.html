@@ -202,7 +202,7 @@ function paint(event) {
   grid[index] = tool;
   draw();
 }
-canvas.addEventListener("pointerdown", (e) => { painting = true; canvas.setPointerCapture(e.pointerId); paint(e); });
+canvas.addEventListener("pointerdown", (e) => { painting = true; try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* not available */ } paint(e); });
 canvas.addEventListener("pointermove", (e) => { if (painting) paint(e); });
 canvas.addEventListener("pointerup", () => { painting = false; save(); });
 
