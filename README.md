@@ -18,6 +18,7 @@ Online (GitHub Pages, served from `main`): **https://www.peaj.de/TUMO_ArenaKit/D
 - [Docs/Spielidee.html](Docs/Spielidee.html): game idea sheet with a paintable level sketch
 - [Docs/Feedback.html](Docs/Feedback.html): feedback box; playtesters leave their feedback on the builder's Mac
 - [Docs/Workshop.html](Docs/Workshop.html): for the teacher. 3-day time plan with a live timer (click a block to jump there, projector view, short timer for the playtest rotation), arcade finale, material and preparation
+- [Docs/Learnings.md](Docs/Learnings.md): learnings from the first run and ideas for the next one
 
 Progress, the game idea and feedback are saved in the browser's local storage of that Mac. That suits the 3-day holiday workshop (same Mac every day). The daily backup of the level itself is the exported `.unitypackage` uploaded to Google Classroom.
 

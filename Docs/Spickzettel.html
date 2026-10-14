@@ -220,6 +220,10 @@
       <span class="emoji">⏯️</span>
       <p>Alles, was du im <b>Play-Modus</b> änderst, ist danach wieder weg! Erst Play stoppen, dann ändern.</p>
     </div>
+    <div class="callout warn">
+      <span class="emoji">🛟</span>
+      <p>Aus Versehen etwas kaputt gemacht? Spiel ist schwarz, Kamera gelöscht oder das Level verzerrt? Menü <b>TUMO &gt; Level reparieren</b>. Und mit <kbd>⌘</kbd>+<kbd>Z</kbd> machst du den letzten Schritt rückgängig.</p>
+    </div>
   </section>
 
   <!-- 1 -->
@@ -516,7 +520,7 @@
           <li>Die Variante in <b>deinen Ordner</b> schieben und umbenennen.</li>
           <li>Werte ändern: <i>Projectiles Per Shot</i>, <i>Spread</i>, <i>Fire Delay</i>, <i>Recoil</i>, <i>Ammo</i> (-1 = unendlich) ...</li>
           <li>Neues Aussehen: ein Bild aus <b>Assets/Kit/Art/Weapons</b> ins Feld <i>Sprite</i> des <i>Sprite Renderer</i> ziehen. Dann das Kind-Objekt <b>Muzzle</b> an die Mündung schieben: dort kommen die Schüsse raus, in Richtung des gelben Pfeils.</li>
-          <li>Zum Benutzen: ein Pickup ins Level ziehen und bei <i>Weapon</i> deine Waffe eintragen, oder sie beim <i>SpawnPoint</i> als <i>Start Weapon</i> eintragen.</li>
+          <li>Zum Benutzen: ein <b>Pickup</b> aus <i>Prefabs/Pickups</i> ins Level ziehen und bei <i>Weapon</i> deine Waffe eintragen, oder sie beim <i>SpawnPoint</i> als <i>Start Weapon</i> eintragen. <b>Eine Waffe direkt ins Level gezogen kann man nicht aufheben!</b></li>
         </ol>
       </div>
       <div>
@@ -612,6 +616,9 @@
 
       <h3>🖌️ Tile Palette</h3>
       <p><i>Window &gt; 2D &gt; Tile Palette</i> · <b>Active Tilemap</b> passend wählen: Ground, Platforms, Hazards, Back/Front Decoration · <kbd>B</kbd> malen, <kbd>D</kbd> radieren, <kbd>U</kbd> Rechteck</p>
+
+      <h3>🛟 Kaputt?</h3>
+      <p><b>TUMO &gt; Level reparieren</b> · <kbd>⌘</kbd>+<kbd>Z</kbd> macht rückgängig · Waffen immer über ein <b>Pickup</b> ins Level</p>
 
       <h3>📁 Dein Level</h3>
       <p><b>TUMO &gt; Neues Level erstellen</b> · <b>TUMO &gt; Mein Level öffnen</b> · Nur in <i>Assets/Levels/DeinName</i> arbeiten · Eigene Waffen und Spieler als Prefab-Variante in deinem Ordner</p>

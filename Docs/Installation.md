@@ -50,28 +50,37 @@ Beim allerersten Öffnen importiert Unity alle Dateien, das dauert einige Minute
 
 **Schneller bei vielen Macs:** Ist ein Mac fertig importiert, kann der ganze Ordner `TUMO_ArenaKit` (inklusive `Library`) auf die anderen Macs kopiert werden, z.B. per USB-Stick, AirDrop oder Netzlaufwerk. Dann entfällt dort der lange Import. Danach dort trotzdem Schritt 3 (im Hub eintragen) machen.
 
-## 5. Aktualisieren (Korrekturen in letzter Minute)
+## 5. Aktualisieren und reparieren
 
 Im Projektordner liegt **`Kit aktualisieren.command`**:
 
 1. Unity beenden.
 2. `Kit aktualisieren.command` doppelklicken. Ein Terminalfenster zeigt, was passiert.
 
-Das Skript holt die neueste Version von GitHub und setzt alle Dateien des Baukastens darauf zurück. Damit lassen sich auch Dateien reparieren, die Teens aus Versehen außerhalb ihres Ordners verändert haben.
+Das Skript holt die neueste Version von GitHub und ersetzt damit alle Dateien des Baukastens. Damit lassen sich auch Dateien reparieren, die Teens aus Versehen gelöscht oder verändert haben (z.B. „Missing Prefab“ im Level).
 
-**Bleibt erhalten:** die Level der Teens in `Assets/Levels/<Name>` und die exportierten `.unitypackage`-Dateien auf dem Schreibtisch.
+Es funktioniert mit einer git-Kopie **und** mit einem entpackten ZIP-Download von GitHub.
 
-Falls macOS das Skript nicht startet:
+**Bleibt erhalten:** die Level der Teens in `Assets/Levels/<Name>`, ihre Level-Liste, der Unity-Cache und die exportierten `.unitypackage`-Dateien auf dem Schreibtisch. Eigene Dateien, die Teens in `Assets/Kit` gespeichert haben (z.B. eine Waffen-Variante), werden vorher in ihren Ordner verschoben: `Assets/Levels/<Name>/Gerettet`.
+
+**ZIP-Installation mit altem Projektstand** (dort kann das alte `Kit aktualisieren.command` noch kein ZIP): einmal im Terminal ausführen, das Skript sucht das Projekt selbst (Schreibtisch, Dokumente, Benutzerordner):
+
+```bash
+curl -fsSL https://www.peaj.de/TUMO_ArenaKit/Tools/kit-update.sh | bash
+```
+
+Danach klappt auf diesem Mac auch der Doppelklick.
+
+Falls macOS das Skript beim Doppelklick nicht startet:
 - „kann nicht geöffnet werden“: Rechtsklick auf die Datei > **Öffnen** > **Öffnen**.
 - „keine Berechtigung“: im Terminal `chmod +x ~/Documents/TUMO_ArenaKit/*.command`
-- Oder direkt im Terminal:
-  ```bash
-  cd ~/Documents/TUMO_ArenaKit && git fetch origin main && git reset --hard origin/main
-  ```
+- Oder einfach den `curl`-Befehl oben benutzen.
 
 ⚠️ **Niemals `git clean` verwenden!** Das würde die Level der Teens löschen, weil sie nicht in git sind.
 
 ⚠️ Auf dem **Lehrer-Mac** am letzten Tag nach „Arcade vorbereiten“ nicht mehr aktualisieren, sonst ist die Level-Liste für das Finale wieder zurückgesetzt.
+
+**Im Level selbst kaputt** (Kamera gelöscht, Spiel schwarz, Tilemap verzerrt): in Unity **TUMO > Level reparieren**.
 
 ## Probleme?
 

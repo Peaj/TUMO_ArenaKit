@@ -38,6 +38,8 @@
 
 ⚠️ **Alles, was du im Play-Modus änderst, ist danach wieder weg!** Erst Play stoppen, dann ändern.
 
+🛟 **Aus Versehen etwas kaputt gemacht?** Spiel schwarz, Kamera gelöscht, Level verzerrt: **TUMO > Level reparieren**. Mit **⌘ + Z** machst du den letzten Schritt rückgängig.
+
 ## 1. Dein Level anlegen
 
 1. Menü **TUMO > Neues Level erstellen...**
@@ -224,7 +226,7 @@ Die Zahl bei Events ist die **Spielernummer**. Funktionen unter **Dynamic int** 
 2. Die Variante in **deinen Ordner** schieben und umbenennen.
 3. Werte ändern: *Projectiles Per Shot*, *Spread*, *Fire Delay*, *Recoil*, *Ammo* (-1 = unendlich) ...
 4. Neues Aussehen: Zieh ein Bild aus **Assets/Kit/Art/Weapons** (z.B. *Blaster*, *WaterGun*, *HandCannon*) in das Feld *Sprite* des *Sprite Renderer*. Dann schiebst du das Kind-Objekt **Muzzle** an die Mündung, denn dort kommen die Schüsse raus. Sie fliegen in die Richtung, in die der Muzzle zeigt (gelber Pfeil in der Scene). Drehst du die Waffe, schießt sie schräg, wie der *GrenadeLauncher*. Bilder für passende Geschosse (Laser, Wassertropfen, Kanonenkugel) liegen in *Weapons/Projectiles*. Setz eines in eine Prefab-Variante von *Bullet* ein und trag sie bei *Projectile* ein.
-5. Zum Benutzen: ein Pickup (z.B. *Pickup_Bazooka*) ins Level ziehen und bei *Weapon* deine Waffe eintragen, oder deine Waffe beim *SpawnPoint* als *Start Weapon* eintragen.
+5. Zum Benutzen: ein Pickup (z.B. *Pickup_Bazooka*) ins Level ziehen und bei *Weapon* deine Waffe eintragen, oder deine Waffe beim *SpawnPoint* als *Start Weapon* eintragen. **Eine Waffe direkt ins Level gezogen kann man nicht aufheben!**
 
 **🏃 Eigener Spieler**
 - Öffne *DeinNamePlayer* in deinem Ordner und ändere:
