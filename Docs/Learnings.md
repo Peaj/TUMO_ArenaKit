@@ -30,7 +30,7 @@ Small fixes were made during the workshop; the bigger items are for an overhaul 
 
 ## Changes made during the workshop
 - **Break at the 2:00 mark** on all days.
-- **Day 2 now starts with the game idea:** level design input (what each mode needs), a tour of the Bausteine scene, then remix dice and the game idea sheet. The level is built for that idea from the start, so nobody has to rebuild an arena on day 3 for a race or a ball game. No paper arena (it wasn't paper anymore anyway). Triggers and actions come after the break.
+- **Day 2 now goes tools first, reasoning second:** the tools (Tile Palette, prefabs, Inspector, Level reparieren) and a tour of the Bausteine scene, then 30 minutes of free exploring. Only then comes level design (why place things where, what each mode needs), the game idea (remix dice, game idea sheet) and building the level for it. The level is built for the idea from the start, so nobody has to rebuild an arena on day 3 for a race or a ball game. No paper arena. Triggers and actions come after the break.
 - **Day 3** is for mechanics and polish: plan, two build sprints with a test at the neighbour's Mac in between, feature freeze, finale.
 - **Day 1, for the next run:** "Neues Level erstellen" and painting a few tiles come right after the Unity driver's licence. Then the Teens know how to change the level before they try on their own.
 - **`Kit aktualisieren.command` works without git.** It downloads the ZIP and replaces the kit parts. Teen files found in `Assets/Kit` are moved to `Assets/Levels/<Name>/Gerettet`. On a Mac with an old ZIP copy, run it once from Terminal: `curl -fsSL https://www.peaj.de/TUMO_ArenaKit/Tools/kit-update.sh | bash`.
