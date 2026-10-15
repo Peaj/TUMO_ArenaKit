@@ -77,8 +77,11 @@ namespace ArenaKit.EditorTools
             AssetDatabase.ExportPackage(folder, packagePath, ExportPackageOptions.Recurse);
 
             EditorUtility.RevealInFinder(packagePath);
+            List<string> levels = AssetDatabase.FindAssets("t:Scene", new[] { folder }).Select(AssetDatabase.GUIDToAssetPath).Select(Path.GetFileNameWithoutExtension).ToList();
             EditorUtility.DisplayDialog("Level exportiert",
-                $"Fertig! Die Datei \"{levelName}.unitypackage\" liegt auf deinem Schreibtisch.\n\nGib sie deiner Lehrerin oder deinem Lehrer.", "Super");
+                $"Fertig! Die Datei \"{levelName}.unitypackage\" liegt auf deinem Schreibtisch.\n\n" +
+                (levels.Count > 1 ? $"Darin sind alle {levels.Count} Level aus deinem Ordner: {string.Join(", ", levels)}\n\n" : "") +
+                "Gib sie deiner Lehrerin oder deinem Lehrer.", "Super");
         }
 
         static bool CheckBeforeExport(string folder, Scene scene)
@@ -96,14 +99,23 @@ namespace ArenaKit.EditorTools
                 return false;
             }
 
-            // Changed kit files are not part of the export.
-            List<string> kitChanges = KitManifest.FindChanges();
-            if (kitChanges.Count > 0)
+            // Changed kit files would stay behind on this Mac: the level gets its own copies of them.
+            KitCopies.Result copies = KitCopies.Adopt(folder);
+            if (copies.Any)
             {
-                string list = string.Join("\n", kitChanges.Take(12)) + (kitChanges.Count > 12 ? $"\n... und {kitChanges.Count - 12} weitere" : "");
-                if (!EditorUtility.DisplayDialog("Achtung: Kit-Dateien verändert",
-                        "Du hast Dateien im Ordner Assets/Kit verändert. Diese Änderungen kommen NICHT mit in den Export:\n\n" + list +
-                        "\n\nTipp: Mach eine Prefab-Variante in deinem eigenen Ordner, statt das Original zu ändern.",
+                EditorSceneManager.OpenScene(scene.path);
+                List<string> files = copies.Copied.Concat(copies.Moved).Select(Path.GetFileName).ToList();
+                EditorUtility.DisplayDialog("Kit-Dateien kopiert",
+                    "Du hast Dateien aus dem Kit verändert, die dein Level benutzt. Damit deine Änderungen mitkommen, " +
+                    $"liegen sie jetzt als Kopie in deinem Ordner ({KitCopies.CopiesFolderName}), und dein Level benutzt die Kopien:\n\n" +
+                    ShortList(files) + "\n\nWillst du daran weiterarbeiten? Dann ändere ab jetzt die Kopien, nicht die Originale im Kit.", "OK");
+            }
+
+            if (copies.Scripts.Count > 0)
+            {
+                if (!EditorUtility.DisplayDialog("Achtung: Kit-Scripts verändert",
+                        "Du hast Scripts im Kit verändert oder dort angelegt. Diese Scripts kommen NICHT mit in den Export:\n\n" + ShortList(copies.Scripts) +
+                        "\n\nTipp: Eigene Scripts gehören in deinen Ordner und fangen mit deinem Namen an.",
                         "Trotzdem exportieren", "Abbrechen"))
                     return false;
             }
@@ -148,6 +160,11 @@ namespace ArenaKit.EditorTools
             }
 
             return true;
+        }
+
+        static string ShortList(List<string> items)
+        {
+            return string.Join("\n", items.Take(12)) + (items.Count > 12 ? $"\n... und {items.Count - 12} weitere" : "");
         }
 
         // ---------------------------------------------------------------
@@ -281,26 +298,36 @@ namespace ArenaKit.EditorTools
             return safe;
         }
 
-        /// <summary>Creates the level folder, the scene and a player variant for one student.</summary>
+        /// <summary>
+        /// Creates the level folder, the scene and a player variant for one student.
+        /// If the folder exists already, another level is added to it: export and arcade take all levels of a folder.
+        /// </summary>
         public static string CreateLevel(string studentName, string levelTitle)
         {
             string safeName = ToSafeName(studentName);
             string folder = LevelsFolder + "/" + safeName;
+
+            string scenePath;
             if (AssetDatabase.IsValidFolder(folder))
-                throw new InvalidOperationException($"Den Ordner {folder} gibt es schon.");
+            {
+                string suffix = ToSafeName(levelTitle ?? "");
+                scenePath = AssetDatabase.GenerateUniqueAssetPath($"{folder}/{safeName}{(suffix.Length > 0 ? "_" + suffix : "2")}.unity");
+            }
+            else
+            {
+                if (!AssetDatabase.IsValidFolder(LevelsFolder))
+                    AssetDatabase.CreateFolder("Assets", "Levels");
+                AssetDatabase.CreateFolder(LevelsFolder, safeName);
+                scenePath = $"{folder}/{safeName}.unity";
+            }
 
-            if (!AssetDatabase.IsValidFolder(LevelsFolder))
-                AssetDatabase.CreateFolder("Assets", "Levels");
-            AssetDatabase.CreateFolder(LevelsFolder, safeName);
-
-            string scenePath = $"{folder}/{safeName}.unity";
             if (!AssetDatabase.CopyAsset(TemplateScene, scenePath))
                 throw new InvalidOperationException("Die Vorlage " + TemplateScene + " fehlt.");
 
-            // A player variant, so speed, jump etc. can be changed without touching the kit.
+            // A player variant, so speed, jump etc. can be changed without touching the kit. A second level shares it.
             string variantPath = $"{folder}/{safeName}Player.prefab";
             var basePlayer = AssetDatabase.LoadAssetAtPath<GameObject>(PlayerPrefabPath);
-            if (basePlayer != null)
+            if (basePlayer != null && AssetDatabase.LoadAssetAtPath<GameObject>(variantPath) == null)
             {
                 var instance = (GameObject)PrefabUtility.InstantiatePrefab(basePlayer);
                 PrefabUtility.SaveAsPrefabAsset(instance, variantPath);
@@ -352,7 +379,11 @@ namespace ArenaKit.EditorTools
 
             string safeName = ArenaMenu.ToSafeName(this.studentName);
             EditorGUILayout.Space(4f);
-            EditorGUILayout.LabelField(safeName.Length > 0 ? $"Ordner: {ArenaMenu.LevelsFolder}/{safeName}" : " ", EditorStyles.miniLabel);
+            string folder = $"{ArenaMenu.LevelsFolder}/{safeName}";
+            string hint = safeName.Length == 0 ? " "
+                : AssetDatabase.IsValidFolder(folder) ? $"Den Ordner {folder} gibt es schon: das neue Level kommt dazu."
+                : $"Ordner: {folder}";
+            EditorGUILayout.LabelField(hint, EditorStyles.miniLabel);
 
             EditorGUILayout.Space(8f);
             using (new EditorGUI.DisabledScope(safeName.Length == 0))

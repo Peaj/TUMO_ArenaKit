@@ -374,6 +374,7 @@
           <li>Bei Bedarf Kit reparieren und aktualisieren (Unity geschlossen): Doppelklick auf <b>Kit aktualisieren.command</b> im Projektordner. Ohne git (ZIP-Installation) beim ersten Mal stattdessen im Terminal: <code>curl -fsSL https://www.peaj.de/TUMO_ArenaKit/Tools/kit-update.sh | bash</code></li>
           <li>Unity auf den Macs starten, bevor die Gruppe kommt</li>
           <li>Tag 3: Ordner für die Level-Pakete auf dem Lehrer-Mac anlegen</li>
+          <li>Tag 3 (einmalig, auf allen Macs, Unity geschlossen): im Terminal <code>curl -fsSL https://www.peaj.de/TUMO_ArenaKit/Tools/kit-update.sh | bash</code> und bei der Frage nach veränderten Kit-Dateien <b>Enter</b> (behalten). Das bringt den neuen Export, der veränderte Kit-Prefabs mitnimmt.</li>
         </ul>
       </div>
     </div>
@@ -387,7 +388,7 @@
       <div class="callout warn" style="margin:0"><span class="emoji">⌘</span><p><kbd>⌘</kbd>+<kbd>Q</kbd> beendet Unity sofort. Beim Spielen nur die linke Shift-Taste und die rechte Wahltaste zum Schießen benutzen.</p></div>
       <div class="callout info" style="margin:0"><span class="emoji">🎚️</span><p>Große Altersspanne: Mit den <a href="Challenges.html">Challenge-Karten</a> in drei Stufen (🟢 🟡 🔴) können alle in ihrem Tempo weitermachen.</p></div>
       <div class="callout info" style="margin:0"><span class="emoji">🧩</span><p>Fortgeschrittene können eigene Scripts schreiben. Wichtig: Dateiname beginnt mit dem eigenen Namen, sonst gibt es im Finale Konflikte.</p></div>
-      <div class="callout tip" style="margin:0"><span class="emoji">📁</span><p>Nur im eigenen Ordner arbeiten. Der Export warnt, wenn Kit-Dateien verändert wurden, denn diese Änderungen kämen im Finale nicht mit.</p></div>
+      <div class="callout tip" style="margin:0"><span class="emoji">📁</span><p>Nur im eigenen Ordner arbeiten. Wurden Kit-Prefabs direkt verändert, legt der Export Kopien davon in <i>Kit-Kopien</i> im eigenen Ordner an und stellt das Level darauf um. Nur Änderungen an Kit-Scripts kommen nicht mit.</p></div>
       <div class="callout tip" style="margin:0"><span class="emoji">🔎</span><p>Die Szene <b>TUMO &gt; Alle Bausteine ansehen</b> zeigt unter jedem Baustein, aus welchen Auslösern und Aktionen er gebaut ist. Gut zum Nachbauen.</p></div>
     </div>
   </section>

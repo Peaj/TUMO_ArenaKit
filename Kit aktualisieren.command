@@ -5,16 +5,19 @@
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
 SCRIPT="$DIR/Tools/kit-update.sh"
+URL="https://www.peaj.de/TUMO_ArenaKit/Tools/kit-update.sh"
 
-if [ ! -f "$SCRIPT" ]; then
-  echo "Tools/kit-update.sh fehlt. Im Terminal stattdessen ausführen:"
-  echo "  curl -fsSL https://www.peaj.de/TUMO_ArenaKit/Tools/kit-update.sh | bash"
-  read -r -p "Enter drücken zum Schließen ..."
-  exit 1
-fi
-
-# Run a copy: the update replaces Tools/kit-update.sh itself.
+# Run a copy of the newest script (the update replaces Tools/kit-update.sh itself).
+# Without internet the local one is used.
 COPY="$(mktemp)"
-cp "$SCRIPT" "$COPY"
+if ! curl -fsSL "$URL" -o "$COPY" 2>/dev/null || [ ! -s "$COPY" ]; then
+  if [ ! -f "$SCRIPT" ]; then
+    echo "Tools/kit-update.sh fehlt und GitHub ist nicht erreichbar. Internet prüfen und im Terminal ausführen:"
+    echo "  curl -fsSL $URL | bash"
+    read -r -p "Enter drücken zum Schließen ..."
+    exit 1
+  fi
+  cp "$SCRIPT" "$COPY"
+fi
 bash "$COPY" "$DIR"
 rm -f "$COPY"

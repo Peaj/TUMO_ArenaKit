@@ -28,33 +28,57 @@ namespace ArenaKit.EditorTools
         /// <summary>Kit files that were changed, added or deleted since the manifest was written.</summary>
         public static List<string> FindChanges()
         {
-            var changes = new List<string>();
+            Compare(out List<string> changed, out List<string> added, out List<string> deleted);
+            var changes = changed.Select(path => path + "  (geändert)")
+                .Concat(added.Select(path => path + "  (neu)"))
+                .Concat(deleted.Select(path => path + "  (gelöscht)"))
+                .ToList();
+            changes.Sort();
+            return changes;
+        }
+
+        /// <summary>Kit files whose content differs from the manifest.</summary>
+        public static List<string> FindChangedFiles()
+        {
+            Compare(out List<string> changed, out _, out _);
+            return changed;
+        }
+
+        /// <summary>Files in the kit folder that are not part of the kit (e.g. made by a Teen).</summary>
+        public static List<string> FindNewFiles()
+        {
+            Compare(out _, out List<string> added, out _);
+            return added;
+        }
+
+        static void Compare(out List<string> changed, out List<string> added, out List<string> deleted)
+        {
+            changed = new List<string>();
+            added = new List<string>();
+            deleted = new List<string>();
             if (!Exists)
-                return changes;
+                return;
 
             var expected = new Dictionary<string, string>();
             foreach (string line in File.ReadAllLines(ManifestPath))
             {
-                int tab = line.IndexOf('\t');
+                int tab = line.IndexOf('	');
                 if (tab > 0)
-                    expected[line.Substring(0, tab)] = line.Substring(tab + 1);
+                    expected[line.Substring(0, tab)] = line.Substring(tab + 1).Trim();
             }
 
             SortedDictionary<string, string> current = ComputeHashes();
             foreach (KeyValuePair<string, string> entry in current)
             {
                 if (!expected.TryGetValue(entry.Key, out string hash))
-                    changes.Add(entry.Key + "  (neu)");
+                    added.Add(entry.Key);
                 else if (hash != entry.Value)
-                    changes.Add(entry.Key + "  (geändert)");
+                    changed.Add(entry.Key);
             }
 
             foreach (string path in expected.Keys)
                 if (!current.ContainsKey(path))
-                    changes.Add(path + "  (gelöscht)");
-
-            changes.Sort();
-            return changes;
+                    deleted.Add(path);
         }
 
         static SortedDictionary<string, string> ComputeHashes()

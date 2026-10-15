@@ -46,6 +46,7 @@
 2. Deinen Vornamen und einen Namen für dein Level eintragen und auf **Level erstellen** klicken.
 3. Jetzt hast du einen eigenen Ordner **Assets/Levels/DeinName**. **Arbeite nur in diesem Ordner!**
 4. Später öffnest du dein Level wieder mit **TUMO > Mein Level öffnen**.
+5. Noch ein Level? Nochmal **TUMO > Neues Level erstellen...** mit **demselben Vornamen**. Das neue Level kommt in deinen Ordner, und beim Exportieren sind alle deine Level dabei.
 
 ## 2. Malen mit der Tile Palette
 

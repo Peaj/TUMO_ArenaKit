@@ -47,23 +47,57 @@ while pgrep -xq Unity; do
   ask "Unity läuft noch. Bitte in Unity speichern (Cmd+S), Unity beenden und dann Enter drücken."
 done
 
+# --- Kit files a Teen changed instead of making a variant (compared with the kit checksums). ---
+# They are put back after the update, so the changes are not lost: "Level exportieren" then copies
+# them into the Teen's own folder. Scripts are always replaced, an old script could break the kit.
+DOWNLOAD=""  # set in the ZIP part; never use $TMP, it can be a system variable
+KEEP="$(mktemp -d)"
+trap 'rm -rf "$KEEP"; [ -n "$DOWNLOAD" ] && rm -rf "$DOWNLOAD"' EXIT
+if command -v md5 >/dev/null 2>&1; then
+  checksum() { LC_ALL=C tr -d '\r' < "$1" | md5 -q | tr a-f A-F; }
+else
+  checksum() { LC_ALL=C tr -d '\r' < "$1" | md5sum | cut -d' ' -f1 | tr a-f A-F; }
+fi
+KEPT=()
+if [ -f "$PROJECT/ProjectSettings/ArenaKitManifest.txt" ]; then
+  echo "Suche veränderte Kit-Dateien ..."
+  while IFS=$'\t' read -r path hash; do
+    case "$path" in *.cs|*.asmdef|*.asmref|*.dll|*.shader) continue ;; esac
+    [ -f "$PROJECT/$path" ] || continue
+    [ "$(checksum "$PROJECT/$path")" = "${hash%$'\r'}" ] && continue
+    KEPT+=("$path")
+  done < "$PROJECT/ProjectSettings/ArenaKitManifest.txt"
+fi
+if [ ${#KEPT[@]} -gt 0 ]; then
+  echo
+  echo "Diese Kit-Dateien wurden verändert:"
+  printf '  %s
+' "${KEPT[@]}"
+  ask "Änderungen behalten (Enter) oder auf das Original zurücksetzen (z + Enter)? "
+  case "$REPLY" in z|Z) KEPT=() ;; esac
+fi
+for path in "${KEPT[@]}"; do
+  mkdir -p "$KEEP/$(dirname "$path")"
+  cp -p "$PROJECT/$path" "$KEEP/$path"
+done
+restore_kept() {
+  [ ${#KEPT[@]} -gt 0 ] || return 0
+  cp -Rp "$KEEP/." "$PROJECT/"
+  echo "${#KEPT[@]} veränderte Kit-Datei(en) behalten. Beim Exportieren kommen Kopien davon in den eigenen Level-Ordner."
+}
+
 # --- git copy: fetch and reset (untracked student folders stay). ---
 if [ -d "$PROJECT/.git" ] && command -v git >/dev/null 2>&1; then
   cd "$PROJECT" || fail "Ordner nicht erreichbar."
   echo "Lade die neueste Version von GitHub (git) ..."
   git fetch origin "$BRANCH" || fail "Keine Verbindung zu GitHub. Internet prüfen und nochmal versuchen."
-  CHANGED=$(git status --short --untracked-files=no)
-  if [ -n "$CHANGED" ]; then
-    echo
-    echo "Diese Kit-Dateien wurden verändert und werden zurückgesetzt:"
-    echo "$CHANGED"
-  fi
   # Keep the build list: it points to the Teen's own level.
   BUILD_LIST="$(mktemp)"
   cp -p ProjectSettings/EditorBuildSettings.asset "$BUILD_LIST" 2>/dev/null
   git reset --hard "origin/$BRANCH" || fail "Zurücksetzen hat nicht geklappt."
   [ -s "$BUILD_LIST" ] && cp -p "$BUILD_LIST" ProjectSettings/EditorBuildSettings.asset
   rm -f "$BUILD_LIST"
+  restore_kept
   echo
   echo "Fertig! Version: $(git log -1 --format='%h  %s  (%cd)' --date=short)"
   echo "Die Level der Teens in Assets/Levels sind unverändert."
@@ -72,13 +106,12 @@ if [ -d "$PROJECT/.git" ] && command -v git >/dev/null 2>&1; then
 fi
 
 # --- ZIP copy: download the newest ZIP and replace the kit parts with it. ---
-TMP="$(mktemp -d)"
-trap 'rm -rf "$TMP"' EXIT
+DOWNLOAD="$(mktemp -d)"
 echo "Lade die neueste Version von GitHub ..."
-curl -fL --progress-bar "https://github.com/$REPO/archive/refs/heads/$BRANCH.zip" -o "$TMP/kit.zip" \
+curl -fL --progress-bar "https://github.com/$REPO/archive/refs/heads/$BRANCH.zip" -o "$DOWNLOAD/kit.zip" \
   || fail "Keine Verbindung zu GitHub. Internet prüfen und nochmal versuchen."
-unzip -q "$TMP/kit.zip" -d "$TMP/src" || fail "Der Download ist kaputt. Nochmal versuchen."
-SRC="$(find "$TMP/src" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
+unzip -q "$DOWNLOAD/kit.zip" -d "$DOWNLOAD/src" || fail "Der Download ist kaputt. Nochmal versuchen."
+SRC="$(find "$DOWNLOAD/src" -mindepth 1 -maxdepth 1 -type d | head -n 1)"
 [ -d "$SRC/Assets/Kit" ] || fail "Im Download fehlt der Ordner Assets/Kit."
 
 # Makes the destination folder exactly like the source folder.
@@ -143,6 +176,7 @@ for file in "$SRC"/* "$SRC"/.gitattributes "$SRC"/.gitignore "$SRC"/.nojekyll; d
   [ -f "$file" ] && cp -p "$file" "$PROJECT/"
 done
 chmod +x "$PROJECT"/*.command 2>/dev/null
+restore_kept
 
 echo
 echo "Fertig! Das Kit ist auf dem neuesten Stand."

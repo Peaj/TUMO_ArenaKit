@@ -57,7 +57,7 @@ Im Projektordner liegt **`Kit aktualisieren.command`**:
 1. Unity beenden.
 2. `Kit aktualisieren.command` doppelklicken. Ein Terminalfenster zeigt, was passiert.
 
-Das Skript holt die neueste Version von GitHub und ersetzt damit alle Dateien des Baukastens. Damit lassen sich auch Dateien reparieren, die Teens aus Versehen gelöscht oder verändert haben (z.B. „Missing Prefab“ im Level).
+Das Skript holt die neueste Version von GitHub und ersetzt damit die Dateien des Baukastens. Damit lassen sich auch Dateien reparieren, die Teens aus Versehen gelöscht haben (z.B. „Missing Prefab“ im Level). Kit-Dateien, die ein Teen verändert hat (z.B. ein Prefab direkt geändert statt eine Variante gemacht), listet das Skript auf: **Enter** behält die Änderungen (beim Exportieren kommen dann Kopien davon in den Level-Ordner), **z + Enter** stellt die Originale wieder her. Scripts werden immer ersetzt.
 
 Es funktioniert mit einer git-Kopie **und** mit einem entpackten ZIP-Download von GitHub.
 

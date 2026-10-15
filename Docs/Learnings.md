@@ -37,6 +37,13 @@ Small fixes were made during the workshop; the bigger items are for an overhaul 
 - **TUMO > Level reparieren** puts back what every level needs: the CameraRig, Level Rules, the global light and the KillZone. It also straightens a moved, scaled or skewed Grid and its tilemaps, and warns about missing prefabs and spawn points.
 - **The cheat sheet now says:** weapons always go into the level through a pickup. It also points to "Level reparieren".
 
+## Day 2
+- The plan drifted a lot, but the day worked out well anyway.
+- Some Teens wanted to keep their level as it was and start another one. **TUMO > Neues Level erstellen** with the same first name now adds a second scene to the existing folder (`Name_Title.unity`), sharing the player variant. Export and arcade always take every level in the folder.
+- Many Teens (and a learning coach) changed kit prefabs directly instead of making a variant. A level package only contains the student folder, so those changes never reached the teacher. The coach's test package held just the scene and the player variant. A fix on the import side alone is impossible, because the data isn't in the package.
+  - **Export now repairs it:** kit files the level uses that differ from the kit checksums are copied into `Assets/Levels/<Name>/Kit-Kopien` (new GUIDs), along with every kit file between the level and a changed file (e.g. the pickup holding a changed weapon). The level's references are switched to the copies. Teen files inside `Assets/Kit` are moved into the folder. Changed kit *scripts* can't be copied (duplicate class names) and still only get a warning.
+  - **The update script keeps changed kit files** (Enter) instead of resetting them, so the new exporter can still pick them up. `Kit aktualisieren.command` now downloads the newest update script before running it; the old one ran the local copy.
+
 ## Ideas for the next run
 
 **Order of the first day**
