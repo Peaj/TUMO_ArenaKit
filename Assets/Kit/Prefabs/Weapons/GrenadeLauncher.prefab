@@ -84,7 +84,7 @@ SpriteRenderer:
   m_SortingOrder: 10
   m_MaskInteraction: 0
   m_Sprite: {fileID: 21300000, guid: 5860997333368144a954043a219f5ef9, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.8490566, g: 0.27634388, b: 0.3702314, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -106,9 +106,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: ArenaKit::ArenaKit.Weapon
   Projectile: {fileID: 6351865151212440790, guid: c565913171b5bd34db1546986021f95a, type: 3}
-  ProjectileSpeed: 11
-  ProjectilesPerShot: 1
-  Spread: 0
+  ProjectileSpeed: 70
+  ProjectilesPerShot: 60
+  Spread: 72.7
   FireDelay: 1
   Automatic: 0
   Recoil: 3

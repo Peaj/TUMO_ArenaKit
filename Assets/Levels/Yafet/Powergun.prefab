@@ -1,0 +1,83 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &3282630664396328977
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 6488653953276945844, guid: ce364cf42c8e63c489f283cd0aecfd2a, type: 3}
+      propertyPath: m_Name
+      value: Powergun
+      objectReference: {fileID: 0}
+    - target: {fileID: 6622186407980638704, guid: ce364cf42c8e63c489f283cd0aecfd2a, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6622186407980638704, guid: ce364cf42c8e63c489f283cd0aecfd2a, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6622186407980638704, guid: ce364cf42c8e63c489f283cd0aecfd2a, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6622186407980638704, guid: ce364cf42c8e63c489f283cd0aecfd2a, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6622186407980638704, guid: ce364cf42c8e63c489f283cd0aecfd2a, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6622186407980638704, guid: ce364cf42c8e63c489f283cd0aecfd2a, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6622186407980638704, guid: ce364cf42c8e63c489f283cd0aecfd2a, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6622186407980638704, guid: ce364cf42c8e63c489f283cd0aecfd2a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6622186407980638704, guid: ce364cf42c8e63c489f283cd0aecfd2a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6622186407980638704, guid: ce364cf42c8e63c489f283cd0aecfd2a, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8943401582374220424, guid: ce364cf42c8e63c489f283cd0aecfd2a, type: 3}
+      propertyPath: Projectile
+      value: 
+      objectReference: {fileID: 8166112130360194139, guid: 8fde8ec1b330d4bbfb4839f4b41cadc0, type: 3}
+    - target: {fileID: 8943401582374220424, guid: ce364cf42c8e63c489f283cd0aecfd2a, type: 3}
+      propertyPath: ProjectileSpeed
+      value: 15
+      objectReference: {fileID: 0}
+    - target: {fileID: 8943401582374220424, guid: ce364cf42c8e63c489f283cd0aecfd2a, type: 3}
+      propertyPath: ProjectilesPerShot
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8974797074726802499, guid: ce364cf42c8e63c489f283cd0aecfd2a, type: 3}
+      propertyPath: m_Color.b
+      value: 0.9150943
+      objectReference: {fileID: 0}
+    - target: {fileID: 8974797074726802499, guid: ce364cf42c8e63c489f283cd0aecfd2a, type: 3}
+      propertyPath: m_Color.g
+      value: 0.4797787
+      objectReference: {fileID: 0}
+    - target: {fileID: 8974797074726802499, guid: ce364cf42c8e63c489f283cd0aecfd2a, type: 3}
+      propertyPath: m_Color.r
+      value: 0.09064613
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ce364cf42c8e63c489f283cd0aecfd2a, type: 3}

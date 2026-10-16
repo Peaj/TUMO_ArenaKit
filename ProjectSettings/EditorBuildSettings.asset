@@ -6,10 +6,37 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Levels/Demo_Arena/Demo_Arena.unity
-    guid: 3e02c0c3793f6ab4089539609dd45e29
+    path: Assets/Levels/Adrian/Adrian.unity
+    guid: d32f3d9cce790411aab9703d38a05ffa
   - enabled: 1
-    path: Assets/Levels/Demo_RocketVolleyball/Demo_RocketVolleyball.unity
-    guid: 6cfff2e67abaf184b9f38ad6fb40aaf8
+    path: Assets/Levels/Alexandra/Alexandra.unity
+    guid: 22df9cfac6c1e47d890bf21e94ed874a
+  - enabled: 1
+    path: Assets/Levels/Avyanna/Avyanna.unity
+    guid: 214626749051143c9b89a441cd1791b9
+  - enabled: 1
+    path: Assets/Levels/david/david.unity
+    guid: faa8b625b54414b10aa13f0d25a7b8db
+  - enabled: 1
+    path: Assets/Levels/Elena/Elena.unity
+    guid: bacf0dd1ed4c545b38b4628dbdef5fc0
+  - enabled: 1
+    path: Assets/Levels/IALWAYSGOOD/IALWAYSGOOD.unity
+    guid: f4ab76eef6668458da54d08b13278f89
+  - enabled: 1
+    path: Assets/Levels/kayra/kayra.unity
+    guid: 2af1bd16a54184b0289c175bc5d5dc29
+  - enabled: 1
+    path: Assets/Levels/Lucas/Lucas 1.unity
+    guid: 40de18b805a2f4e9d8fc3c0514dfacaf
+  - enabled: 1
+    path: Assets/Levels/NIOSHA/NIOSHA.unity
+    guid: 41aebb66efb4240b195d675deebc98ac
+  - enabled: 1
+    path: Assets/Levels/Pascal/Pascal.unity
+    guid: 5c13fda8f18cf4d84bd35421ad270ec7
+  - enabled: 1
+    path: Assets/Levels/Yafet/Yafet.unity
+    guid: cb6d4993e40164539894e37a22b5ad6b
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0
